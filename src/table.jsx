@@ -23,9 +23,10 @@ window.TableViewer = React.createClass({
         if(this.state.xField && this.state.yField)
             var table = <Table db={this.props.db} filter={this.props.filter} xField={this.state.xField} yField={this.state.yField} handleStatusChange={this.props.handleStatusChange} handleProgress={this.props.handleProgress} />
         return (
-            <div>
-                <FieldSelector field={this.state.xField} otherField={this.state.yField} handleFieldChange={this.handleFieldChange.bind(this, "xField")} />
-                <FieldSelector field={this.state.yField} otherField={this.state.xField} handleFieldChange={this.handleFieldChange.bind(this, "yField")} />
+            <div {...this.props}>
+            	<h2 className="react-grid-item-drag-handle">Table</h2>
+            	<FieldSelector field={this.state.xField} name="x agregate field" otherField={this.state.yField} handleFieldChange={this.handleFieldChange.bind(this, "xField")} />
+            	<FieldSelector field={this.state.yField} name="y agregate field" otherField={this.state.xField} handleFieldChange={this.handleFieldChange.bind(this, "yField")} />
                 {table}
             </div>
         )
@@ -52,6 +53,7 @@ var FieldSelector = React.createClass({
 		return (
 			<BootstrapRow>
 				<div>
+					<h3>Select {this.props.name}</h3>
 		            {otherFields.map(function(f){
 		                return (
 		                        <label key={f.field} className="radio-inline"><input type="radio" checked={this.props.field === f.field} value={f.field} onChange={this.handleChange} />{f.name}</label>
@@ -69,11 +71,13 @@ var Table = React.createClass({
             .select()
             .field(this.props.xField)
             .field(this.props.yField)
-            .field("COUNT('images.id_local')")
-            // .field("AVG('images.rating')")
+            .field("COUNT(images.id_local)")
+            .field("AVG(IFNULL(images.rating, 0))")
             .from("Adobe_images", "images")
             .left_join("AgHarvestedExifMetadata", "exif", "images.id_local = exif.image")
-            .left_join("AgLibraryKeywordImage", "keyword", "images.id_local = keyword.image");
+            .left_join("AgLibraryKeywordImage", "keyword", "images.id_local = keyword.image")
+            .where(this.props.xField + " IS NOT NULL")
+            .where(this.props.yField + " IS NOT NULL")
 
 
         _.forOwn(this.props.filter, function(value, key){
@@ -126,17 +130,35 @@ var TableComponent = React.createClass({
 			.value()
 			.sort(function(a,b) { return a-b; })
 
+		var maxCount = _(this.props.data)
+			.map(function(r) {return r[2]})
+			.max()
+
+		var maxAverage = _(this.props.data)
+			.map(function(r) {return r[3]})
+			.max()
+
 		return {
 			uniqueX : uniqueX,
-			uniqueY : uniqueY
+			uniqueY : uniqueY,
+			maxCount : maxCount,
+			maxAverage : maxAverage
 		}
 	},
-	findByXY(xVal, yVal) {
+	findByXY(xVal, yVal, maxCount, maxAverage) {
 		var row = _.find(this.props.data, function(r){
 			return r[0] === xVal && r[1] === yVal;
 		})
 
-		return row && row[2] || ""
+		var count = row && row[2] ? row[2] : 0
+		var avergeRating = row && row[3] ? row[3] : 0
+
+		return {
+			count: count,
+			rating: avergeRating,
+			relCount: count / maxCount,
+			relRating: avergeRating / maxAverage
+		}
 	},
 	render() {
 		var transformedData = this.transformData()
@@ -156,7 +178,11 @@ var TableComponent = React.createClass({
 							return (<tr key={yVal}>
 								<th>{yVal}</th>
 								{transformedData.uniqueX.map(function(xVal){
-									return (<td key={yVal + "_" + xVal}>{this.findByXY(xVal, yVal)}</td>)
+									var val = this.findByXY(xVal, yVal, transformedData.maxCount, transformedData.maxAverage)
+									var style = {
+									    backgroundColor: "hsla(0, 0%, " + Math.round(val.relCount * 100) + "%, 0.05)"
+									}
+									return (<td key={yVal + "_" + xVal} style={style} title={val.rating}>{val.count}</td>)
 								}.bind(this))}
 							</tr>)
 						}.bind(this))}

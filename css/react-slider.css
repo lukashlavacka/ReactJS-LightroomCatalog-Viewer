@@ -1,15 +1,17 @@
 .slider {
   width: 100%;
   max-width: 500px;
-  height: 50px;
-  border: 1px solid grey;
+  height: 25px;
+  /*border: 1px solid grey;*/
 }
 
 .handle {
   font-size: 0.9em;
   text-align: center;
-  background-color: black;
-  color: white;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid grey;
+  color: black;
   cursor: pointer;
 }
 
@@ -23,21 +25,21 @@
 }
 
 .bar.bar-1 {
-  background: #f00;
+  background: #d99;
 }
 
 .bar.bar-2 {
-  background: #0f0;
+  background: #9d9;
 }
 
 .slider .bar {
-  top: 20px;
-  height: 10px;
+  top: 10px;
+  height: 5px;
 }
 
 .slider .handle {
   top: 1px;
   width: 50px;
-  height: 48px;
-  line-height: 48px;
+  height: 24px;
+  line-height: 24px;
 }

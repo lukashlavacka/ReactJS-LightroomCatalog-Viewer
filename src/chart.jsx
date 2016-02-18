@@ -13,7 +13,8 @@ window.ChartViewer = React.createClass({
         if(this.state.field)
             var chart = <Chart db={this.props.db} filter={this.props.filter} field={this.state.field} handleStatusChange={this.props.handleStatusChange} handleProgress={this.props.handleProgress} />
         return (
-            <div>
+            <div {...this.props}>
+                <h2 className="react-grid-item-drag-handle">Chart</h2>
                 <FieldSelector field={this.state.field} handleFieldChange={this.handleFieldChange} />
                 {chart}
             </div>
@@ -40,6 +41,7 @@ var FieldSelector = React.createClass({
 		return (
 			<BootstrapRow>
 				<div>
+                    <h3>Select agregate field</h3>
 		            {this.agragateFields.map(function(f){
 		                return (
 		                        <label key={f.field} className="radio-inline"><input type="radio" checked={this.props.field === f.field} value={f.field} onChange={this.handleChange} />{f.name}</label>
