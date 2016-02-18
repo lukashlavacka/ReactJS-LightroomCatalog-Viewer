@@ -7,6 +7,10 @@ window.Filter = React.createClass({
 				<FilterFocalLength db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
 				<FilterISORating db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
 				<FilterAperture db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
+                <FilterFlag handleFilterChange={this.props.handleFilterChange} />
+                <FilterRating handleFilterChange={this.props.handleFilterChange} />
+                <FilterFace db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
+                <FilterColor handleFilterChange={this.props.handleFilterChange} />
 			</BootstrapRow>
 		)
 	}
@@ -17,9 +21,13 @@ var FilterFactory = React.createFactory(React.createClass({
 	{
 		var s = squel
             .select()
-            .field("id_local", "value")
-            .field("value", "name")
+            .field(this.props.valueProp || "id_local", "value")
+            .field(this.props.nameProp || "value", "name")
             .from(this.props.table)
+
+        if(this.props.filter)
+            s = s.where(this.props.filter);
+
         var query = s.toString();
         var data = this.props.db.exec(query);
         return data[0].values.map(function(t){ return { value: t[0], name: t[1] } });
@@ -38,10 +46,17 @@ var FilterFactory = React.createFactory(React.createClass({
 			options: []
 		}
 	},
-    componentDidMount() {    	
-    	this.setState({
-    		options: this.getData()
-    	})
+    componentDidMount() {
+        var options = [];
+        if(this.props.table && this.props.db){
+            options = this.getData()
+        }
+        else if(this.props.options) {
+            options = this.props.options
+        }
+        this.setState({
+            options: options
+        })        
     },
     render() {
         return (
@@ -95,6 +110,13 @@ var FilterRangeFactory = React.createFactory(React.createClass({
     		return this.props.transformFromUIValue(value);
     	return value;
     },
+    transformFromUIName(value) {
+        if(_.isFunction(this.props.transformFromUIName))
+            return this.props.transformFromUIName(value);
+        if(_.isFunction(this.props.transformFromUIValue))
+            return this.props.transformFromUIValue(value);
+        return value;
+    },
 	getInitialState() {
 		return {
 			dbMin: undefined,
@@ -106,7 +128,13 @@ var FilterRangeFactory = React.createFactory(React.createClass({
 		}
 	},
     componentDidMount() {
-    	var dbMinMax = this.getData();
+        var dbMinMax = {};
+        if(this.props.field && this.props.db){
+            dbMinMax = this.getData()
+        }
+        else if(this.props.minMax) {
+            dbMinMax = this.props.minMax
+        }
 
     	this.setState({
     		dbMin: dbMinMax.min,
@@ -163,8 +191,8 @@ var FilterRangeFactory = React.createFactory(React.createClass({
             		pearls={true}
             		withBars
         		>
-        			<div>{this.transformFromUIValue(this.state.uiMin)}</div>
-        			<div>{this.transformFromUIValue(this.state.uiMax)}</div>
+        			<div>{this.transformFromUIName(this.state.uiMin)}</div>
+        			<div>{this.transformFromUIName(this.state.uiMax)}</div>
         		</ReactSlider>
             </BootstrapRow>
         );
@@ -256,6 +284,66 @@ var FilterAperture = React.createClass({
 	                </div>
 	            )}.bind(this))}
             </div>
+        );
+    }
+})
+
+var FilterFlag = React.createClass({
+    options: [
+        { value: 0, name: "None"},
+        { value: -1, name: "Rejected"},
+        { value: 1, name: "Selected"}
+    ],
+    render() {
+        return (
+            <FilterFactory typeDisplay="Flag" type="flag" handleFilterChange={this.props.handleFilterChange} options={this.options} />
+        );
+    }
+})
+
+var FilterColor = React.createClass({
+    options: [
+        { value: "", name: "None"},
+        { value: "Red", name: "Red"},
+        { value: "Yellow", name: "Yellow"},
+        { value: "Green", name: "Green"},
+        { value: "Blue", name: "Blue"},
+        { value: "Purple", name: "Purple"}
+    ],
+    render() {
+        return (
+            <FilterFactory typeDisplay="Color label" type="color" handleFilterChange={this.props.handleFilterChange} options={this.options} />
+        );
+    }
+})
+
+var FilterRating = React.createClass({
+    options: [
+        { value: 0, name: "unrated" },
+        { value: 1, name: "1 star" },
+        { value: 2, name: "2 star" },
+        { value: 3, name: "3 star" },
+        { value: 4, name: "4 star" },
+        { value: 5, name: "5 star" }
+    ],
+    minMax: {
+        min: 0,
+        max: 5
+    },
+    transformFromUIName(value) {
+        return _.find(this.options, {value : value}).name
+    },
+    render() {
+        return (
+            <FilterRangeFactory typeDisplay="Rating" type="rating" handleFilterChange={this.props.handleFilterChange} minMax={this.minMax} transformFromUIName={this.transformFromUIName} />
+        );
+    }
+})
+
+var FilterFace = React.createClass({
+    render() {
+        return (
+            <FilterFactory db={this.props.db} typeDisplay="Face" type="face" table="AgLibraryKeyword" handleFilterChange={this.props.handleFilterChange} filter="keywordType = 'person'" nameProp="Name" />
         );
     }
 })

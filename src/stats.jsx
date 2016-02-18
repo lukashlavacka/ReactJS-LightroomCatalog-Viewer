@@ -3,9 +3,11 @@ window.PhotoStats = React.createClass({
     {
     	var s = squel
             .select()
-            .field("COUNT('id_local')")
-            .field("AVG('rating')")
-            .from("AgHarvestedExifMetadata");
+            .field("COUNT('images.id_local')")
+            .field("AVG('exif.rating')")
+            .from("Adobe_images", "images")
+            .left_join("AgHarvestedExifMetadata", "exif", "images.id_local = exif.image")
+            .left_join("AgLibraryKeywordImage", "keyword", "images.id_local = keyword.image");
 
 
         _.forOwn(this.props.filter, function(value, key){

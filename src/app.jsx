@@ -105,6 +105,7 @@ window.Interface = React.createClass({
 		})
     },
     handleStatusChange(status, statusType) {
+        console.log(status)
     	return;
     },
     handleProgress(event, value) {
@@ -142,6 +143,8 @@ window.Interface = React.createClass({
             content = <BootstrapRow>
                 <Filter db={this.state.db} handleFilterChange={this.handleFilterChange} handleStatusChange={this.handleStatusChange} handleProgress={this.handleProgress} />
                 <PhotoStats db={this.state.db} filter={this.state.filter} handleStatusChange={this.handleStatusChange} handleProgress={this.handleProgress} />
+                <ChartViewer db={this.state.db} filter={this.state.filter} handleStatusChange={this.handleStatusChange} handleProgress={this.handleProgress} />
+                <TableViewer db={this.state.db} filter={this.state.filter} handleStatusChange={this.handleStatusChange} handleProgress={this.handleProgress} />
                 </BootstrapRow>;
     	}   
         else {
