@@ -22,6 +22,8 @@ var WindowDimensions = React.createClass({
 
 var HiddenWidgets = React.createClass({
     render() {
+        if(!this.props.widgets.length)
+            return null;
         return (
             <div>
                 <h2>Hidden widgets</h2>
@@ -125,6 +127,15 @@ window.WidgetLayout = React.createClass({
     	// required to recalculate the widths of sliders
     	window.dispatchEvent(new Event('resize'));
     },
+    handleResetUI() {
+        this.props.saveLocalStorage("layout", [])
+        this.props.saveLocalStorage("hiddenWidgets", [])
+        
+        this.setState({
+            layout: [],
+            hiddenWidgets: []
+        });
+    },
     getInitialState() {
         var ls = this.props.getLocalStorage();
 
@@ -141,11 +152,11 @@ window.WidgetLayout = React.createClass({
                 { key: "FilterFocalLength"  , title: "Focal Length" , filter: "focalLength" , _grid: { x: 6, y:  4, w:  6, h: 2 }},
                 { key: "FilterISORating"    , title: "ISO"          , filter: "iso"         , _grid: { x: 0, y:  6, w:  6, h: 2 }},
                 { key: "FilterAperture"     , title: "Aperture"     , filter: "aperture"    , _grid: { x: 6, y:  6, w:  6, h: 2 }},
-                { key: "FilterRating"       , title: "Rating"       , filter: "rating"      , _grid: { x: 0, y:  8, w:  6, h: 2 }},
-                { key: "FilterDate"         , title: "Date"         , filter: "date"        , _grid: { x: 6, y:  8, w:  6, h: 2 }},
-                { key: "PhotoStats"         , title: "Stats"        , filter: null          , _grid: { x: 6, y: 10, w:  6, h: 2 }},
-                { key: "ChartViewer"        , title: "Chart"        , filter: null          , _grid: { x: 0, y: 12, w: 12, h: 4 }},
-                { key: "TableViewer"        , title: "Table"        , filter: null          , _grid: { x: 0, y: 12, w: 12, h: 4 }}
+                { key: "FilterRating"       , title: "Rating"       , filter: "rating"      , _grid: { x: 6, y:  8, w:  6, h: 2 }},
+                { key: "FilterDate"         , title: "Date"         , filter: "date"        , _grid: { x: 6, y: 10, w:  6, h: 2 }},
+                { key: "PhotoStats"         , title: "Stats"        , filter: null          , _grid: { x: 6, y: 12, w:  6, h: 2 }},
+                { key: "ChartViewer"        , title: "Chart"        , filter: null          , _grid: { x: 0, y:  8, w:  6, h: 6 }},
+                { key: "TableViewer"        , title: "Table"        , filter: null          , _grid: { x: 0, y: 14, w: 12, h: 4 }}
             ],
             hiddenWidgets: ls.hiddenWidgets || []
         }
@@ -163,7 +174,8 @@ window.WidgetLayout = React.createClass({
     },
     render() {
     	return (
-    		<div>  		
+    		<div>
+                <button type="button" onClick={this.handleResetUI}>Reset UI</button>
     			<HiddenWidgets widgets={this.state.hiddenWidgets} handleShowWidget={this.handleShowWidget} />
 	            <ReactGridLayout className="layout" layout={this.state.layout} onLayoutChange={this.onLayoutChange} onResize={this.onResize} {...this.props} >
 	                    {this.getVisibleWidgets().map(this.getWidget)}
