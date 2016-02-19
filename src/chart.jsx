@@ -31,7 +31,11 @@ var FieldSelector = React.createClass({
 		{ field: "images.pick", name: "Flag"},
 		{ field: "images.colorLabels", name: "Color label"},
 		{ field: "images.rating", name: "Rating"},
-		{ field: "keyword.tag", name: "Face"}
+		{ field: "keyword.tag", name: "Face"},
+        { field: "strftime('%Y', images.captureTime)", name: "Year" },
+        { field: "strftime('%Y-%m', images.captureTime)", name: "Month" },
+        { field: "strftime('%Y-%W', images.captureTime)", name: "Week" },
+        { field: "strftime('%Y-%m-%d', images.captureTime)", name: "Day" },
 	],
 	handleChange(event) {
 		this.props.handleFieldChange(event.target.value)

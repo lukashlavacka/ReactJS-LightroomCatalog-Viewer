@@ -320,3 +320,67 @@ window.FilterFace = React.createClass({
         );
     }
 })
+
+window.FilterDate = React.createClass({
+    getData() {
+        var s = squel
+            .select()
+            .field("MIN(captureTime)")
+            .field("MAX(captureTime)")
+            .from("Adobe_images")
+
+        var query = s.toString();
+        var data = this.props.db.exec(query);
+        return {
+            min: data[0].values[0][0],
+            max: data[0].values[0][1]
+        };
+    },
+    handleChange(otherDate, isStart, thisDate) {
+        if(isStart){
+            this.setState({ startDate: thisDate})
+        }
+        else {
+            this.setState({ endDate: thisDate})
+        }
+
+        this.props.handleFilterChange("date", isStart ? [ thisDate, otherDate ] : [ otherDate, thisDate ])
+    },
+    getInitialState() {
+        return {
+            min: moment().subtract(1, 'month'),
+            max: moment().add(1, 'month'),
+            startDate: moment().subtract(1, 'month'),
+            endDate: moment().add(1, 'month')
+        }
+    },
+    componentDidMount() {
+        var data = this.getData()
+        this.setState({
+            min: moment(data.min),
+            max: moment(data.max),
+            startDate: moment(data.min),
+            endDate: moment(data.max)
+        })        
+    },
+    render() {
+        return (
+            <div>
+                <DatePicker
+                  selected={this.state.startDate}
+                  startDate={this.state.startDate}
+                  endDate={this.state.endDate}
+                  onChange={this.handleChange.bind(null, this.state.endDate, true)}
+                  minDate={this.state.min} 
+                  maxDate={this.state.max} />
+                <DatePicker
+                  selected={this.state.endDate}
+                  startDate={this.state.startDate}
+                  endDate={this.state.endDate}
+                  onChange={this.handleChange.bind(null, this.state.statDate, false)}
+                  minDate={this.state.min} 
+                  maxDate={this.state.max} />
+          </div>
+        );
+    }
+})

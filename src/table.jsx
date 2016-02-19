@@ -34,15 +34,19 @@ window.TableViewer = React.createClass({
 
 var FieldSelector = React.createClass({
 	agragateFields: [
-		{ field: "exif.cameraModelRef", name: "Camera"},
-		{ field: "exif.lensRef", name: "Lens"},
-		{ field: "exif.focalLength", name: "Focal length"},
-		{ field: "exif.isoSpeedRating", name: "ISO"},
-		{ field: "exif.aperture", name: "Aperture"},
-		{ field: "images.pick", name: "Flag"},
-		{ field: "images.colorLabels", name: "Color label"},
-		{ field: "images.rating", name: "Rating"},
-		{ field: "keyword.tag", name: "Face"}
+		{ field: "exif.cameraModelRef", name: "Camera" },
+		{ field: "exif.lensRef", name: "Lens" },
+		{ field: "exif.focalLength", name: "Focal length" },
+		{ field: "exif.isoSpeedRating", name: "ISO" },
+		{ field: "exif.aperture", name: "Aperture" },
+		{ field: "images.pick", name: "Flag" },
+		{ field: "images.colorLabels", name: "Color label" },
+		{ field: "images.rating", name: "Rating" },
+		{ field: "keyword.tag", name: "Face" },
+		{ field: "strftime('%Y', images.captureTime)", name: "Year" },
+		{ field: "strftime('%Y-%m', images.captureTime)", name: "Month" },
+		{ field: "strftime('%Y-%W', images.captureTime)", name: "Week" },
+		{ field: "strftime('%Y-%m-%d', images.captureTime)", name: "Day" },
 	],
 	handleChange(event) {
 		this.props.handleFieldChange(event.target.value)
@@ -110,7 +114,7 @@ var Table = React.createClass({
 		if(!data)
 			return null;
 		return (
-			<TableComponent data={data} />
+			<TableComponent data={data} xField={this.props.xField} yField={this.props.yField}/>
 		);
 	}
 })
@@ -121,13 +125,13 @@ var TableComponent = React.createClass({
 			.map(function(r){ return r[0]})
 			.uniq()
 			.value()
-			.sort(function(a,b) { return a-b; })
+			.sort(this.correctSort(this.props.xField))
 
 		var uniqueY = _(this.props.data)
 			.map(function(r){ return r[1]})
 			.uniq()
 			.value()
-			.sort(function(a,b) { return a-b; })
+			.sort(this.correctSort(this.props.yField))
 
 		var maxCount = _(this.props.data)
 			.map(function(r) {return r[2]})
@@ -142,6 +146,17 @@ var TableComponent = React.createClass({
 			uniqueY : uniqueY,
 			maxCount : maxCount,
 			maxAverage : maxAverage
+		}
+	},
+	correctSort: function(field)
+	{
+		switch(field){
+			case "numeric":
+			case "exif.focalLength":
+			case "exif.isoSpeedRating":
+			case "exif.aperture":
+			case "images.rating":
+				return (function(a,b) { return a-b; });
 		}
 	},
 	findByXY(xVal, yVal, maxCount, maxAverage) {

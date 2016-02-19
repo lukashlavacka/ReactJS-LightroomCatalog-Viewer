@@ -32,6 +32,9 @@ window.Utilities = {
 			case "face":
 				property = "keyword.tag"
 				break;
+			case "date":
+				property = "images.captureTime"
+				break;
 		}
 
 		var expression = squel.expr();
@@ -65,6 +68,11 @@ window.Utilities = {
 						.and(property + " >= " + filterValues[0])
 						.and(property + " <= " + filterValues[1])	
 				}
+				break;
+			case "date":
+				expression = expression
+						.and(property + " >= '" + filterValues[0].format("YYYY-MM-DD") + "'")
+						.and(property + " < '" + filterValues[1].add(1, 'days').format("YYYY-MM-DD") + "'")
 				break;				
 			case "rating":
 				if(filterValues[0] === 0){
