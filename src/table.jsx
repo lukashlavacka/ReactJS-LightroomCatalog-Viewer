@@ -15,8 +15,8 @@ window.TableViewer = React.createClass({
     },
     getInitialState: function() {
         return {
-            xField : "",
-            yField : ""
+            xField : "exif.isoSpeedRating",
+            yField : "images.rating"
         }
     },
     render: function() {

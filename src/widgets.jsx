@@ -130,7 +130,7 @@ window.WidgetLayout = React.createClass({
     handleResetUI() {
         this.props.saveLocalStorage("layout", [])
         this.props.saveLocalStorage("hiddenWidgets", [])
-        
+
         this.setState({
             layout: [],
             hiddenWidgets: []
@@ -156,7 +156,7 @@ window.WidgetLayout = React.createClass({
                 { key: "FilterDate"         , title: "Date"         , filter: "date"        , _grid: { x: 6, y: 10, w:  6, h: 2 }},
                 { key: "PhotoStats"         , title: "Stats"        , filter: null          , _grid: { x: 6, y: 12, w:  6, h: 2 }},
                 { key: "ChartViewer"        , title: "Chart"        , filter: null          , _grid: { x: 0, y:  8, w:  6, h: 6 }},
-                { key: "TableViewer"        , title: "Table"        , filter: null          , _grid: { x: 0, y: 14, w: 12, h: 4 }}
+                { key: "TableViewer"        , title: "Table"        , filter: null          , _grid: { x: 0, y: 14, w: 12, h: 6 }}
             ],
             hiddenWidgets: ls.hiddenWidgets || []
         }

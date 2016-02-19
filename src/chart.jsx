@@ -6,7 +6,7 @@ window.ChartViewer = React.createClass({
     },
     getInitialState: function() {
         return {
-            field : ""
+            field : "images.rating"
         }
     },
     render: function() {

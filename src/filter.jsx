@@ -364,22 +364,32 @@ window.FilterDate = React.createClass({
         })        
     },
     render() {
+        var style = {
+            width: "50%",
+            float: "left"
+        }
         return (
             <div>
-                <DatePicker
-                  selected={this.state.startDate}
-                  startDate={this.state.startDate}
-                  endDate={this.state.endDate}
-                  onChange={this.handleChange.bind(null, this.state.endDate, true)}
-                  minDate={this.state.min} 
-                  maxDate={this.state.max} />
-                <DatePicker
-                  selected={this.state.endDate}
-                  startDate={this.state.startDate}
-                  endDate={this.state.endDate}
-                  onChange={this.handleChange.bind(null, this.state.statDate, false)}
-                  minDate={this.state.min} 
-                  maxDate={this.state.max} />
+                <div style={style}>
+                    <span>From</span>
+                    <DatePicker
+                        selected={this.state.startDate}
+                        startDate={this.state.startDate}
+                        endDate={this.state.endDate}
+                        onChange={this.handleChange.bind(null, this.state.endDate, true)}
+                        minDate={this.state.min} 
+                        maxDate={this.state.max} />
+                </div>
+                <div style={style}>
+                    <span>To</span>
+                    <DatePicker
+                        selected={this.state.endDate}
+                        startDate={this.state.startDate}
+                        endDate={this.state.endDate}
+                        onChange={this.handleChange.bind(null, this.state.statDate, false)}
+                        minDate={this.state.min} 
+                        maxDate={this.state.max} />
+                </div>
           </div>
         );
     }

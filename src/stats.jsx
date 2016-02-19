@@ -45,8 +45,8 @@ window.PhotoStats = React.createClass({
 				<tbody>
 					<tr>
 						<td>{stats.count}</td>
-						<td>{stats.avgRatingAll}</td>
-                        <td>{stats.avgRatingRated}</td>
+						<td>{Math.round(stats.avgRatingAll * 100) / 100}</td>
+                        <td>{Math.round(stats.avgRatingRated * 100) / 100}</td>
 					</tr>
 				</tbody>
 			</table>
