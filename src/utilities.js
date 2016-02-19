@@ -37,6 +37,9 @@ window.Utilities = {
 		var expression = squel.expr();
 		var filterValues = filter || [];
 
+		if(!filterValues.length)
+			return expression;
+
 		switch(type)
 		{
 			case "camera":

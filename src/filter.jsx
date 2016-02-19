@@ -1,25 +1,3 @@
-window.Filter = React.createClass({
-	render() {
-		return(
-            <div>
-    			<BootstrapRow lg="4" md="6">
-    				<FilterCamera db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
-    				<FilterLens db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
-                    <FilterFlag handleFilterChange={this.props.handleFilterChange} />
-                    <FilterFace db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
-                    <FilterColor handleFilterChange={this.props.handleFilterChange} />
-    			</BootstrapRow>
-                <BootstrapRow lg="3" md="4">
-                    <FilterFocalLength db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
-                    <FilterISORating db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
-                    <FilterAperture db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
-                    <FilterRating handleFilterChange={this.props.handleFilterChange} />
-                </BootstrapRow>
-            </div>
-		)
-	}
-})
-
 var FilterFactory = React.createFactory(React.createClass({
 	getData() {
 		var s = squel
@@ -62,16 +40,13 @@ var FilterFactory = React.createFactory(React.createClass({
     },
     render() {
         return (
-            <BootstrapRow  {...this.props}>
-            	<h2 className="react-grid-item-drag-handle">{this.props.typeDisplay}</h2>
-                <form>
-                    <CheckboxGroup name={this.props.type} ref={this.props.type} onChange={this.handleChange} >
-                        {this.state.options.map(function(o){
-                            return <label key={o.value} className="checkbox-inline"><input type="checkbox" value={o.value} />{this.transformName(o.name)}</label>
-                        }.bind(this))}
-                    </CheckboxGroup>
-                </form>
-            </BootstrapRow>
+            <form>
+                <CheckboxGroup name={this.props.type} ref={this.props.type} onChange={this.handleChange} >
+                    {this.state.options.map(function(o){
+                        return <label key={o.value} className="checkbox-inline"><input type="checkbox" value={o.value} />{this.transformName(o.name)}</label>
+                    }.bind(this))}
+                </CheckboxGroup>
+            </form>
         );
     }
 }))
@@ -147,14 +122,14 @@ var FilterRangeFactory = React.createFactory(React.createClass({
     		uiMax: this.transformFromDBValue(dbMinMax.max)
     	})
     },
-    // shouldComponentUpdate(nextProps, nextState) {
-    // 	return this.state.dbMin !== nextState.dbMin
-    // 		|| this.state.dbMax !== nextState.dbMax
-    // 		|| this.state.uiMin !== nextState.uiMin
-    // 		|| this.state.uiMax !== nextState.uiMax
-    // 	 	|| this.props.db !== nextProps.db
-    // 	 	|| this.props.aditionalType !== nextProps.aditionalType;
-    // },
+    shouldComponentUpdate(nextProps, nextState) {
+    	return this.state.dbMin !== nextState.dbMin
+    		|| this.state.dbMax !== nextState.dbMax
+    		|| this.state.uiMin !== nextState.uiMin
+    		|| this.state.uiMax !== nextState.uiMax
+    	 	|| this.props.db !== nextProps.db
+    	 	|| this.props.aditionalType !== nextProps.aditionalType
+    },
     componentWillReceiveProps(nextProps) {
     	if(this.props.aditionalType !== nextProps.aditionalType) {
     		var uiMin = this.transformFromDBValue(Math.max(this.state.dbMinVal, this.state.dbMin), true);
@@ -177,26 +152,22 @@ var FilterRangeFactory = React.createFactory(React.createClass({
     		return null;
     	if(this.state.dbMin === this.state.dbMax)
     		return (
-    			<BootstrapRow {...this.props}>
-            		<h2 className="react-grid-item-drag-handle">{this.props.typeDisplay}</h2>
-    				<span>Only one value available {this.state.dbMin}</span>
-            	</BootstrapRow>
+    			<span>Only one value available {this.state.dbMin}</span>
 			)
         return (
-            <BootstrapRow {...this.props}>
-                <h2 className="react-grid-item-drag-handle">{this.props.typeDisplay}</h2>
-            	<ReactSlider
-            		value={[this.state.uiMin, this.state.uiMax]}
-            		min={this.transformFromDBValue(this.state.dbMin, true)}
-            		max={this.transformFromDBValue(this.state.dbMax)}
-            		onChange={this.handleChange}
-            		pearls={true}
-            		withBars
-        		>
-        			<div>{this.transformFromUIName(this.state.uiMin)}</div>
-        			<div>{this.transformFromUIName(this.state.uiMax)}</div>
-        		</ReactSlider>
-            </BootstrapRow>
+            <div>
+                <ReactSlider
+                    value={[this.state.uiMin, this.state.uiMax]}
+                    min={this.transformFromDBValue(this.state.dbMin, true)}
+                    max={this.transformFromDBValue(this.state.dbMax)}
+                    onChange={this.handleChange}
+                    pearling={true}
+                    withBars
+                >
+                    <div>{this.transformFromUIName(this.state.uiMin)}</div>
+                    <div>{this.transformFromUIName(this.state.uiMax)}</div>
+                </ReactSlider>
+            </div>
         );
     }
 }))
@@ -204,7 +175,7 @@ var FilterRangeFactory = React.createFactory(React.createClass({
 window.FilterCamera = React.createClass({
     render() {
         return (
-            <FilterFactory typeDisplay="Camera" type="camera" table="AgInternedExifCameraModel" {...this.props} />
+            <FilterFactory type="camera" table="AgInternedExifCameraModel" {...this.props} />
         );
     }
 })
@@ -217,7 +188,7 @@ window.FilterLens = React.createClass({
 	},
     render() {
         return (
-            <FilterFactory typeDisplay="Lens" type="lens" table="AgInternedExifLens" transformName={this.transformName} {...this.props} />
+            <FilterFactory type="lens" table="AgInternedExifLens" transformName={this.transformName} {...this.props} />
         );
     }
 })
@@ -225,7 +196,7 @@ window.FilterLens = React.createClass({
 window.FilterFocalLength = React.createClass({
 	render() {
         return (
-            <FilterRangeFactory typeDisplay="Focal Length" type="focalLength" field="focalLength" {...this.props} />
+            <FilterRangeFactory type="focalLength" field="focalLength" {...this.props} />
         );
     }
 })
@@ -239,7 +210,7 @@ window.FilterISORating = React.createClass({
 	},
 	render() {
         return (
-            <FilterRangeFactory typeDisplay="ISO" type="iso" field="isoSpeedRating" transformFromDBValue={this.transformFromDBValue} transformFromUIValue={this.transformFromUIValue}  {...this.props} />
+            <FilterRangeFactory type="iso" field="isoSpeedRating" transformFromDBValue={this.transformFromDBValue} transformFromUIValue={this.transformFromUIValue} {...this.props} />
         );
     }
 })
@@ -277,8 +248,8 @@ window.FilterAperture = React.createClass({
 	},
 	render() {
         return (
-        	<div {...this.props} >
-	            <FilterRangeFactory typeDisplay="Aperture" type="aperture" field="aperture" transformFromDBValue={this.transformFromDBValue} transformFromUIValue={this.transformFromUIValue} aditionalType={this.state.type} db={this.props.db} handleFilterChange={this.props.handleFilterChange} />	            
+        	<div>
+	            <FilterRangeFactory type="aperture" field="aperture" transformFromDBValue={this.transformFromDBValue} transformFromUIValue={this.transformFromUIValue} aditionalType={this.state.type} {...this.props}/>	            
 	        	{_.keys(this.types).map(function(key){
 	            return (
 	                <div key={key} className="radio-inline">
@@ -298,7 +269,7 @@ window.FilterFlag = React.createClass({
     ],
     render() {
         return (
-            <FilterFactory typeDisplay="Flag" type="flag" options={this.options} {...this.props} />
+            <FilterFactory type="flag" options={this.options} {...this.props}/>
         );
     }
 })
@@ -314,7 +285,7 @@ window.FilterColor = React.createClass({
     ],
     render() {
         return (
-            <FilterFactory typeDisplay="Color label" type="color" options={this.options}  {...this.props} />
+            <FilterFactory type="color" options={this.options} {...this.props}/>
         );
     }
 })
@@ -337,7 +308,7 @@ window.FilterRating = React.createClass({
     },
     render() {
         return (
-            <FilterRangeFactory typeDisplay="Rating" type="rating" minMax={this.minMax} transformFromUIName={this.transformFromUIName} {...this.props} />
+            <FilterRangeFactory type="rating" minMax={this.minMax} transformFromUIName={this.transformFromUIName} {...this.props}/>
         );
     }
 })
@@ -345,7 +316,7 @@ window.FilterRating = React.createClass({
 window.FilterFace = React.createClass({
     render() {
         return (
-            <FilterFactory typeDisplay="Face" type="face" table="AgLibraryKeyword" filter="keywordType = 'person'" nameProp="Name" {...this.props} />
+            <FilterFactory type="face" table="AgLibraryKeyword" filter="keywordType = 'person'" nameProp="Name" {...this.props} />
         );
     }
 })

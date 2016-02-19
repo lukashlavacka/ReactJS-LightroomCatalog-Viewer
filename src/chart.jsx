@@ -13,8 +13,7 @@ window.ChartViewer = React.createClass({
         if(this.state.field)
             var chart = <Chart db={this.props.db} filter={this.props.filter} field={this.state.field} handleStatusChange={this.props.handleStatusChange} handleProgress={this.props.handleProgress} />
         return (
-            <div {...this.props}>
-                <h2 className="react-grid-item-drag-handle">Chart</h2>
+            <div>
                 <FieldSelector field={this.state.field} handleFieldChange={this.handleFieldChange} />
                 {chart}
             </div>
@@ -64,7 +63,7 @@ var Chart = React.createClass({
             .left_join("AgLibraryKeywordImage", "keyword", "images.id_local = keyword.image");
 
 
-        _.forOwn(this.props.filter, function(value, key){
+        _.forOwn(_.omitBy(this.props.filter, _.isUndefined), function(value, key){
         	s.where(Utilities.getFilterExpression(key, value))
         })
 

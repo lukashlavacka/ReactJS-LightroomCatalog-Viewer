@@ -23,8 +23,7 @@ window.TableViewer = React.createClass({
         if(this.state.xField && this.state.yField)
             var table = <Table db={this.props.db} filter={this.props.filter} xField={this.state.xField} yField={this.state.yField} handleStatusChange={this.props.handleStatusChange} handleProgress={this.props.handleProgress} />
         return (
-            <div {...this.props}>
-            	<h2 className="react-grid-item-drag-handle">Table</h2>
+            <div>
             	<FieldSelector field={this.state.xField} name="x agregate field" otherField={this.state.yField} handleFieldChange={this.handleFieldChange.bind(this, "xField")} />
             	<FieldSelector field={this.state.yField} name="y agregate field" otherField={this.state.xField} handleFieldChange={this.handleFieldChange.bind(this, "yField")} />
                 {table}
@@ -80,7 +79,7 @@ var Table = React.createClass({
             .where(this.props.yField + " IS NOT NULL")
 
 
-        _.forOwn(this.props.filter, function(value, key){
+        _.forOwn(_.omitBy(this.props.filter, _.isUndefined), function(value, key){
         	s.where(Utilities.getFilterExpression(key, value))
         })
 

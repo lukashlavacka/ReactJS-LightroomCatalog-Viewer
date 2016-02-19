@@ -3,10 +3,14 @@
   transition: height 200ms ease;
 }
 .react-grid-item {
-  border: 1px solid black;
+  border: 1px dashed gray;
+  border-radius: 10px;
   transition: all 200ms ease;
   transition-property: left, top;
-  overflow: scroll;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .react-grid-item.cssTransforms {
   transition-property: transform;
@@ -47,6 +51,6 @@
   cursor: se-resize;
 }
 
-.react-grid-item > .react-grid-item-drag-handle {
+.react-grid-item-drag-handle {
   cursor: move;
 }

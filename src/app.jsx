@@ -1,38 +1,31 @@
-var ReactGridLayout = window.ReactGridLayout.WidthProvider(window.ReactGridLayout)
-
 window.BootstrapRow = React.createClass({
     render() {
-    	// var width = this.props.width || 12
-    	// var widths = {
-    	// 	xs : this.props.xs || width,
-    	// 	sm : this.props.sm || this.props.xs || width,
-    	// 	md : this.props.md || this.props.sm || this.props.xs || width,
-    	// 	lg : this.props.lg || this.props.md || this.props.sm || this.props.xs || width,
-    	// }
-    	// var classes = _(widths)
-    	// 	.mapValues(function(value, key){ return "col-" + key + "-" + value})
-    	// 	.values()
-    	// 	.join(" ");
+    	var width = this.props.width || 12
+    	var widths = {
+    		xs : this.props.xs || width,
+    		sm : this.props.sm || this.props.xs || width,
+    		md : this.props.md || this.props.sm || this.props.xs || width,
+    		lg : this.props.lg || this.props.md || this.props.sm || this.props.xs || width,
+    	}
+    	var classes = _(widths)
+    		.mapValues(function(value, key){ return "col-" + key + "-" + value})
+    		.values()
+    		.join(" ");
 
-     //    var children;
-     //    if(Array.isArray(this.props.children)) {
-     //        children = this.props.children.map(function(c, i){
-     //                return <div key={i} className={classes}>{c}</div>
-     //            }.bind(this));
-     //    }
-     //    else {
-     //        children = <div className={classes}>{this.props.children}</div>
-     //    }
-        // return (
-        //     <div className="row">                
-        //         {children}
-        //     </div>
-        // );
+        var children;
+        if(Array.isArray(this.props.children)) {
+            children = this.props.children.map(function(c, i){
+                    return <div key={i} className={classes}>{c}</div>
+                }.bind(this));
+        }
+        else {
+            children = <div className={classes}>{this.props.children}</div>
+        }
         return (
-            <div {...this.props}>
-                {this.props.children}
+            <div className="row">                
+                {children}
             </div>
-        )
+        );
     }
 })
 
@@ -101,8 +94,7 @@ window.Interface = React.createClass({
         }.bind(this);
 		xhr.send();
     },
-    parseData(data, now)
-    {
+    parseData(data, now) {
 		var Uints = new Uint8Array(data);
 		var db = new SQL.Database(Uints);        
         this.handleProgress("end")
@@ -138,54 +130,41 @@ window.Interface = React.createClass({
             filter: newFilter
         });
     },
-    getDefaultProps() {
-        return {
-            className: "layout",
-            rowHeight: 150,
-            cols: 12,
-            draggableHandle: ".react-grid-item-drag-handle"
-        };
+    saveLocalStorage(field, value) {
+        var ls = {};
+        if (window.localStorage) {
+            try {
+                ls = JSON.parse(window.localStorage.getItem('ReactJs-LightroomCatalog-Viewer')) || {};
+            } catch(e) {/*ignore*/}
+        }
+        ls[field] = value;
+        if (window.localStorage) {
+            window.localStorage.setItem('ReactJs-LightroomCatalog-Viewer', JSON.stringify(ls));
+        }
     },
-    onLayoutChange() {
+    getLocalStorage() {
+        var ls = {};
+        if (window.localStorage) {
+            try {
+                ls = JSON.parse(window.localStorage.getItem('ReactJs-LightroomCatalog-Viewer')) || {};
+            } catch(e) {/*ignore*/}
+        }
+        return ls;
     },
     getInitialState() {
         return {
             db: undefined,
-            filter: {},
-            layout: [
-                { i:"FilterCamera"      , x: 0, y: 1, w:  6, h: 1 },
-                { i:"FilterLens"        , x: 6, y: 1, w:  6, h: 1 },
-                { i:"FilterFlag"        , x: 0, y: 2, w:  6, h: 1 },
-                { i:"FilterFace"        , x: 6, y: 2, w:  6, h: 1 },
-                { i:"FilterColor"       , x: 0, y: 3, w:  6, h: 1 },
-                { i:"FilterFocalLength" , x: 6, y: 3, w:  6, h: 1 },
-                { i:"FilterISORating"   , x: 0, y: 4, w:  6, h: 1 },
-                { i:"FilterAperture"    , x: 6, y: 4, w:  6, h: 1 },
-                { i:"FilterRating"      , x: 0, y: 5, w:  6, h: 1 },
-                { i:"PhotoStats"        , x: 6, y: 5, w:  6, h: 1 },
-                { i:"ChartViewer"       , x: 0, y: 6, w: 12, h: 2 },
-                { i:"TableViewer"       , x: 0, y: 7, w: 12, h: 2 },
-            ]
+            filter: {}
         }
     },
     render() {
         var content;
-    	if(this.state.db) {
+    	if(this.state.db) {     
+            var hiddenWidgetsElement;
             content = 
-                <ReactGridLayout className="layout" layout={this.state.layout} onLayoutChange={this.onLayoutChange}  {...this.props} >
-                    <FilterCamera key="FilterCamera" db={this.state.db} handleFilterChange={this.handleFilterChange} {...this.props} />
-                    <FilterLens key="FilterLens" db={this.state.db} handleFilterChange={this.handleFilterChange} {...this.props} />
-                    <FilterFlag key="FilterFlag" handleFilterChange={this.handleFilterChange} {...this.props} />
-                    <FilterFace key="FilterFace" db={this.state.db} handleFilterChange={this.handleFilterChange} {...this.props} />
-                    <FilterColor key="FilterColor" handleFilterChange={this.handleFilterChange} {...this.props} />
-                    <FilterFocalLength key="FilterFocalLength" db={this.state.db} handleFilterChange={this.handleFilterChange} {...this.props} />
-                    <FilterISORating key="FilterISORating" db={this.state.db} handleFilterChange={this.handleFilterChange} {...this.props} />
-                    <FilterAperture key="FilterAperture" db={this.state.db} handleFilterChange={this.handleFilterChange} {...this.props} />
-                    <FilterRating key="FilterRating" handleFilterChange={this.props.handleFilterChange} {...this.props} />  
-                    <PhotoStats key="PhotoStats" db={this.state.db} filter={this.state.filter} handleStatusChange={this.handleStatusChange} handleProgress={this.handleProgress} {...this.props} />
-                    <ChartViewer key="ChartViewer" db={this.state.db} filter={this.state.filter} handleStatusChange={this.handleStatusChange} handleProgress={this.handleProgress} {...this.props} />
-                    <TableViewer key="TableViewer" db={this.state.db} filter={this.state.filter} handleStatusChange={this.handleStatusChange} handleProgress={this.handleProgress} {...this.props} />
-                </ReactGridLayout>
+            <div>
+                <WidgetLayout db={this.state.db} hiddenWidgets={this.state.hiddenWidgets} filter={this.state.filter} handleStatusChange={this.handleStatusChange} handleProgress={this.handleProgress} handleFilterChange={this.handleFilterChange} saveLocalStorage={this.saveLocalStorage} getLocalStorage={this.getLocalStorage}/>
+            </div>
     	}   
         else {
             content = <BootstrapRow>
