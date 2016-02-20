@@ -34,11 +34,12 @@ window.TableViewer = React.createClass({
 
 var FieldSelector = React.createClass({
 	agragateFields: [
-		{ field: "exif.cameraModelRef", name: "Camera" },
-		{ field: "exif.lensRef", name: "Lens" },
+		{ field: "camera.value", name: "Camera" },
+		{ field: "lens.value", name: "Lens" },
 		{ field: "exif.focalLength", name: "Focal length" },
 		{ field: "exif.isoSpeedRating", name: "ISO" },
 		{ field: "exif.aperture", name: "Aperture" },
+        { field: "exif.shutterSpeed", name: "Shutter Speed" },
 		{ field: "images.pick", name: "Flag" },
 		{ field: "images.colorLabels", name: "Color label" },
 		{ field: "images.rating", name: "Rating" },
@@ -79,6 +80,8 @@ var Table = React.createClass({
             .from("Adobe_images", "images")
             .left_join("AgHarvestedExifMetadata", "exif", "images.id_local = exif.image")
             .left_join("AgLibraryKeywordImage", "keyword", "images.id_local = keyword.image")
+            .left_join("AgInternedExifCameraModel", "camera", "exif.cameraModelRef = camera.id_local")
+            .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local")
             .where(this.props.xField + " IS NOT NULL")
             .where(this.props.yField + " IS NOT NULL")
 

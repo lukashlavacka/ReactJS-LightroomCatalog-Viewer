@@ -35,6 +35,9 @@ window.Utilities = {
 			case "date":
 				property = "images.captureTime"
 				break;
+			case "shutter":
+				property = "images.shutterSpeed"
+				break;
 		}
 
 		var expression = squel.expr();
@@ -60,6 +63,7 @@ window.Utilities = {
 			case "focalLength":
 			case "aperture":
 			case "iso":
+			case "shutterSpeed":
 				if(filterValues[0] === filterValues[1]){
 					expression = expression.and(property + " = " + filterValues[0])
 				}

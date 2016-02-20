@@ -87,9 +87,9 @@ var FilterRangeFactory = React.createFactory(React.createClass({
     		return this.props.transformFromUIValue(value);
     	return value;
     },
-    transformFromUIName(value) {
-        if(_.isFunction(this.props.transformFromUIName))
-            return this.props.transformFromUIName(value);
+    transformToUIName(value) {
+        if(_.isFunction(this.props.transformToUIName))
+            return this.props.transformToUIName(value);
         if(_.isFunction(this.props.transformFromUIValue))
             return this.props.transformFromUIValue(value);
         return value;
@@ -118,8 +118,8 @@ var FilterRangeFactory = React.createFactory(React.createClass({
     		dbMax: dbMinMax.max,
     		dbMinVal: dbMinMax.min,
     		dbMaxVal: dbMinMax.max,
-    		uiMin: this.transformFromDBValue(dbMinMax.min, true),
-    		uiMax: this.transformFromDBValue(dbMinMax.max)
+    		uiMin: this.props.invert ? this.transformFromDBValue(dbMinMax.max) : this.transformFromDBValue(dbMinMax.min, true),
+    		uiMax: this.props.invert ? this.transformFromDBValue(dbMinMax.min, true) : this.transformFromDBValue(dbMinMax.max)
     	})
     },
     shouldComponentUpdate(nextProps, nextState) {
@@ -154,18 +154,20 @@ var FilterRangeFactory = React.createFactory(React.createClass({
     		return (
     			<span>Only one value available {this.state.dbMin}</span>
 			)
+
         return (
             <div>
                 <ReactSlider
                     value={[this.state.uiMin, this.state.uiMax]}
-                    min={this.transformFromDBValue(this.state.dbMin, true)}
-                    max={this.transformFromDBValue(this.state.dbMax)}
+                    min={this.props.invert ? this.transformFromDBValue(this.state.dbMax) : this.transformFromDBValue(this.state.dbMin, true)}
+                    max={this.props.invert ? this.transformFromDBValue(this.state.dbMin, true) : this.transformFromDBValue(this.state.dbMax)}
                     onChange={this.handleChange}
                     pearling={true}
+                    invert={this.props.invert}
                     withBars
                 >
-                    <div>{this.transformFromUIName(this.state.uiMin)}</div>
-                    <div>{this.transformFromUIName(this.state.uiMax)}</div>
+                    <div>{this.transformToUIName(this.state.uiMin)}</div>
+                    <div>{this.transformToUIName(this.state.uiMax)}</div>
                 </ReactSlider>
             </div>
         );
@@ -261,6 +263,26 @@ window.FilterAperture = React.createClass({
     }
 })
 
+window.FilterShutter = React.createClass({
+    transformFromUIValue(value) {
+        return 100 / value
+    },
+    transformFromDBValue(value) {
+        return Math.round(100 / value)
+    },
+    transformToUIName(value) {
+        if(value > 0)
+            return "1/" + Math.round(value)
+        else
+            return (1 / value) + "s"
+    },
+    render() {
+        return (
+            <FilterRangeFactory type="shutter" field="shutterSpeed" invert={true} transformFromDBValue={this.transformFromDBValue} transformFromUIValue={this.transformFromUIValue} transformToUIName={this.transformToUIName} {...this.props} />
+        );
+    }
+})
+
 window.FilterFlag = React.createClass({
     options: [
         { value: 0, name: "None"},
@@ -303,12 +325,12 @@ window.FilterRating = React.createClass({
         min: 0,
         max: 5
     },
-    transformFromUIName(value) {
+    transformToUIName(value) {
         return _.find(this.options, {value : value}).name
     },
     render() {
         return (
-            <FilterRangeFactory type="rating" minMax={this.minMax} transformFromUIName={this.transformFromUIName} {...this.props}/>
+            <FilterRangeFactory type="rating" minMax={this.minMax} transformToUIName={this.transformToUIName} {...this.props}/>
         );
     }
 })

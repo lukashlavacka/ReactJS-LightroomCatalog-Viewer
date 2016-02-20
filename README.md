@@ -1,6 +1,6 @@
-# React.js Lightroom catalogue reader
+# React.js Lightroom catalog reader
 
-Drop Lightroom catalogue file and UI should update.
+Drop Lightroom catalog file and UI should update.
 
 ## Demo
 

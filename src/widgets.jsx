@@ -66,6 +66,9 @@ window.WidgetLayout = React.createClass({
             case "FilterRating":
                 widgetElement = <FilterRating handleFilterChange={this.props.handleFilterChange} /> 
                 break;
+            case "FilterShutter":
+                widgetElement = <FilterShutter db={this.props.db} handleFilterChange={this.props.handleFilterChange} /> 
+                break;
             case "FilterDate":
                 widgetElement = <FilterDate db={this.props.db} handleFilterChange={this.props.handleFilterChange} /> 
                 break;
@@ -123,7 +126,7 @@ window.WidgetLayout = React.createClass({
 
         this.props.saveLocalStorage("hiddenWidgets", updatedHiddenWidgets)
     },
-    onResize() {
+    triggerResize() {
     	// required to recalculate the widths of sliders
     	window.dispatchEvent(new Event('resize'));
     },
@@ -144,19 +147,20 @@ window.WidgetLayout = React.createClass({
             breakpoints: {lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0},
             cols: {lg: 12, md: 10, sm: 6, xs: 4, xxs: 2},
             widgets: [
-                { key: "FilterCamera"       , title: "Camera"       , filter: "camera"      , _grid: { x: 0, y:  0, w:  6, h: 2 }},
-                { key: "FilterLens"         , title: "Lens"         , filter: "lens"        , _grid: { x: 6, y:  0, w:  6, h: 2 }},
-                { key: "FilterFlag"         , title: "Flag"         , filter: "flag"        , _grid: { x: 0, y:  2, w:  6, h: 2 }},
-                { key: "FilterFace"         , title: "Face"         , filter: "face"        , _grid: { x: 6, y:  2, w:  6, h: 2 }},
-                { key: "FilterColor"        , title: "Color"        , filter: "color"       , _grid: { x: 0, y:  4, w:  6, h: 2 }},
-                { key: "FilterFocalLength"  , title: "Focal Length" , filter: "focalLength" , _grid: { x: 6, y:  4, w:  6, h: 2 }},
-                { key: "FilterISORating"    , title: "ISO"          , filter: "iso"         , _grid: { x: 0, y:  6, w:  6, h: 2 }},
-                { key: "FilterAperture"     , title: "Aperture"     , filter: "aperture"    , _grid: { x: 6, y:  6, w:  6, h: 2 }},
-                { key: "FilterRating"       , title: "Rating"       , filter: "rating"      , _grid: { x: 6, y:  8, w:  6, h: 2 }},
-                { key: "FilterDate"         , title: "Date"         , filter: "date"        , _grid: { x: 6, y: 10, w:  6, h: 2 }},
-                { key: "PhotoStats"         , title: "Stats"        , filter: null          , _grid: { x: 6, y: 12, w:  6, h: 2 }},
-                { key: "ChartViewer"        , title: "Chart"        , filter: null          , _grid: { x: 0, y:  8, w:  6, h: 6 }},
-                { key: "TableViewer"        , title: "Table"        , filter: null          , _grid: { x: 0, y: 14, w: 12, h: 6 }}
+                { key: "FilterCamera"       , title: "Camera"        , filter: "camera"      , _grid: { x: 0, y:  0, w:  6, h: 2 }},
+                { key: "FilterLens"         , title: "Lens"          , filter: "lens"        , _grid: { x: 6, y:  0, w:  6, h: 2 }},
+                { key: "FilterFlag"         , title: "Flag"          , filter: "flag"        , _grid: { x: 0, y:  2, w:  6, h: 2 }},
+                { key: "FilterFace"         , title: "Face"          , filter: "face"        , _grid: { x: 6, y:  2, w:  6, h: 2 }},
+                { key: "FilterColor"        , title: "Color"         , filter: "color"       , _grid: { x: 0, y:  4, w:  6, h: 2 }},
+                { key: "FilterFocalLength"  , title: "Focal Length"  , filter: "focalLength" , _grid: { x: 6, y:  4, w:  6, h: 2 }},
+                { key: "FilterISORating"    , title: "ISO"           , filter: "iso"         , _grid: { x: 0, y:  6, w:  6, h: 2 }},
+                { key: "FilterAperture"     , title: "Aperture"      , filter: "aperture"    , _grid: { x: 6, y:  6, w:  6, h: 2 }},
+                { key: "FilterRating"       , title: "Rating"        , filter: "rating"      , _grid: { x: 6, y:  8, w:  6, h: 2 }},
+                { key: "ChartViewer"        , title: "Chart"         , filter: null          , _grid: { x: 0, y:  8, w:  6, h: 6 }},
+                { key: "FilterShutter"      , title: "Shutter Speed" , filter: "shuter"      , _grid: { x: 6, y:  8, w:  6, h: 2 }},
+                { key: "FilterDate"         , title: "Date"          , filter: "date"        , _grid: { x: 6, y: 10, w:  6, h: 2 }},
+                { key: "PhotoStats"         , title: "Most Popular"  , filter: null          , _grid: { x: 0, y: 12, w: 12, h: 2 }},
+                { key: "TableViewer"        , title: "Table"         , filter: null          , _grid: { x: 0, y: 14, w: 12, h: 6 }}
             ],
             hiddenWidgets: ls.hiddenWidgets || []
         }
@@ -177,7 +181,7 @@ window.WidgetLayout = React.createClass({
     		<div>
                 <button type="button" onClick={this.handleResetUI}>Reset UI</button>
     			<HiddenWidgets widgets={this.state.hiddenWidgets} handleShowWidget={this.handleShowWidget} />
-	            <ReactGridLayout className="layout" layout={this.state.layout} onLayoutChange={this.onLayoutChange} onResize={this.onResize} {...this.props} >
+	            <ReactGridLayout className="layout" layout={this.state.layout} onLayoutChange={this.onLayoutChange} onResizeStop={this.triggerResize} onDragStop={this.triggerResize} {...this.props} >
 	                    {this.getVisibleWidgets().map(this.getWidget)}
 	            </ReactGridLayout>
             </div>

@@ -79,7 +79,7 @@ window.Interface = React.createClass({
         sqlReader.readAsArrayBuffer(file);
     },
     handleLoadDefaultFile(event) {
-    	this.handleStatusChange("Requesting catalogue");        
+    	this.handleStatusChange("Requesting catalog");        
         this.handleProgress("start")
         var now = new Date();
     	var xhr = new XMLHttpRequest();
@@ -168,12 +168,12 @@ window.Interface = React.createClass({
     	}   
         else {
             content = <BootstrapRow>
-                    <p>Click this button to load <button className="btn btn-default" type="button" onClick={this.handleLoadDefaultFile}>test catalogue</button> or drop anywhere on the page a Lightroom catalogue file.</p>
+                    <p>Click this button to load <button className="btn btn-default" type="button" onClick={this.handleLoadDefaultFile}>test catalog</button> or drop anywhere on the page a Lightroom catalog file.</p>
                 </BootstrapRow>;
         } 
         return (
             <FileDropWrapper handleFileChange={this.handleFileChange} handleStatusChange={this.handleStatusChange} >
-            	<h1>Welcome to Lightroom Catalogue Reader</h1>
+            	<h1>Welcome to Lightroom Catalog Reader</h1>
                 {content}
             </FileDropWrapper>
         );
