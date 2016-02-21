@@ -125,7 +125,10 @@ var Table = React.createClass({
     },
     componentWillReceiveProps(nextProps) {
         this.getData(nextProps).then(function(data){
-            this.setState({data : data})
+            this.setState({
+            	data : data,
+                loading: false
+            })
         }.bind(this))
     },
 	render() {
