@@ -86,7 +86,7 @@ var Chart = React.createClass({
         return properties.worker.exec(query).then(function(data){
             properties.handleStatusChange("Last query (" + query + ") took " + (new Date() - now) + " miliseconds.", "none")
 
-            return Q(data[0]);
+            return Q(data[0] || {columns: [], values: []});
         }.bind(this))
     },
     getInitialState() {
@@ -126,7 +126,9 @@ var BarChartComponent = React.createClass({
     {
         return {
             options : {
-                responsive: true
+                responsive: true,
+                animationEasing : "easeInOutCubic",
+                animationSteps: 30
             }
         }
     },
@@ -168,7 +170,9 @@ var PieChartComponent = React.createClass({
     {
         return {
             options : {
-                responsive: true
+                responsive: true,
+                animationEasing : "easeInOutCubic",
+                animationSteps: 30
             }
         }
     },

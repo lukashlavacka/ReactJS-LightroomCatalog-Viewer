@@ -102,3 +102,44 @@ window.Utilities = {
 		return expression;
 	},
 }
+
+
+
+window.WorkerWrapper = function(worker) {
+    this.id = 0;
+    this.promises = {}
+    this.worker = worker;
+
+    this.open = function(buffer) {
+        this.id++;
+        var deferred = Q.defer();
+        this.promises[this.id] = deferred;
+
+        this.worker.postMessage({
+            id: this.id,
+            action: "open",
+            buffer: buffer
+        })
+
+        return deferred.promise
+    }.bind(this)
+
+    this.exec = function(query) {
+        this.id++;
+        var deferred = Q.defer();
+        this.promises[this.id] = deferred;
+
+        this.worker.postMessage({
+            id: this.id,
+            action: "exec",
+            sql: query
+        })
+
+        return deferred.promise
+    }.bind(this)
+
+    this.worker.onmessage = function(event) {
+        this.promises[event.data.id].resolve(event.data.results)
+        delete this.promises[event.data.id];
+    }.bind(this)
+}

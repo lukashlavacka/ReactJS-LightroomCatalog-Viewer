@@ -6,7 +6,7 @@ var FilterFactory = React.createFactory(React.createClass({
             .select()
             .field(properties.valueProp || "id_local", "value")
             .field(properties.nameProp || "value", "name")
-            .from(this.props.table)
+            .from(properties.table)
 
         if(properties.filter)
             s = s.where(properties.filter);
@@ -14,7 +14,8 @@ var FilterFactory = React.createFactory(React.createClass({
         var query = s.toString();
 
         return properties.worker.exec(query).then(function(data){
-            return Q(data[0].values.map(function(t){ return { value: t[0], name: t[1] } }))
+            var dataset = data && data[0] || { values: []}
+            return Q(dataset.values.map(function(t){ return { value: t[0], name: t[1] } }))
         }.bind(this))
     },
     handleChange(event) {
@@ -60,6 +61,13 @@ var FilterFactory = React.createFactory(React.createClass({
             }) 
         }
     },
+    shouldComponentUpdate: function(nextProps, nextState) {
+        return !_.isEqual(this.state.options, nextState.options) ||
+                this.props.valueProp != nextProps.valueProp ||
+                this.props.nameProp != nextProps.nameProp ||
+                this.props.table != nextProps.table || 
+                this.props.filter != nextProps.filter
+    },
     render() {
         return (
             <LoadingWrapper loading={this.state.loading}>
@@ -88,9 +96,11 @@ var FilterRangeFactory = React.createFactory(React.createClass({
         var query = s.toString();
 
         return properties.worker.exec(query).then(function(data){
+            var min = data && data[0] && data[0].values && data[0].values[0] && data[0].values[0][0] || undefined
+            var max = data && data[0] && data[0].values && data[0].values[0] && data[0].values[0][1] || undefined
             return Q({
-                min: data[0].values[0][0],
-                max: data[0].values[0][1]
+                min: min,
+                max: max
             })
         }.bind(this));
     },
@@ -380,7 +390,8 @@ window.FilterFace = React.createClass({
 })
 
 window.FilterDate = React.createClass({
-    getData() {
+    getData(properties) {
+        properties = properties || this.props;
         this.setState({loading: true})
         var s = squel
             .select()
@@ -389,10 +400,12 @@ window.FilterDate = React.createClass({
             .from("Adobe_images")
 
         var query = s.toString();
-        return this.props.worker.exec(query).then(function(data){
+        return properties.worker.exec(query).then(function(data){
+            var min = data && data[0] && data[0].values && data[0].values[0] && data[0].values[0][0] || undefined
+            var max = data && data[0] && data[0].values && data[0].values[0] && data[0].values[0][1] || undefined
             return Q({
-                min: data[0].values[0][0],
-                max: data[0].values[0][1]
+                min: min,
+                max: max
             })
         })
     },

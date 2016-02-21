@@ -105,8 +105,8 @@ var Table = React.createClass({
 
         return properties.worker.exec(query).then(function(data){
 	        properties.handleStatusChange("Last query (" + query + ") took " + (new Date() - now) + " miliseconds.", "none")
-
-	        return Q(data[0] && data[0].values);
+	        var dataset = data && data[0] && data[0].values || []
+	        return Q(dataset);
         }.bind(this))
 
     },

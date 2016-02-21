@@ -50,8 +50,9 @@ window.PhotoStats = React.createClass({
         var now = new Date();
 
         return properties.worker.exec(query).then(function(data){
+            var dataset = data || [];
             properties.handleStatusChange("Last query (" + query + ") took " + (new Date() - now) + " miliseconds.", "none")
-            return Q(data.map(function(d, i){
+            return Q(dataset.map(function(d, i){
                 var stat = this.popularStats[i];
                 return { key: stat.key, name: stat.name, value: _.isFunction(stat.transform) ? stat.transform(d.values[0][0]) : d.values[0][0], count: d.values[0][1] }
             }.bind(this)));
