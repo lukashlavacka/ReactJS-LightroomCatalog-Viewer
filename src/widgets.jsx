@@ -40,46 +40,46 @@ window.WidgetLayout = React.createClass({
         var widgetElement;
         switch(widget.key){
             case "FilterCamera":
-                widgetElement = <FilterCamera db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
+                widgetElement = <FilterCamera worker={this.props.worker} handleFilterChange={this.props.handleFilterChange} />
                 break;
             case "FilterLens":
-                widgetElement = <FilterLens db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
+                widgetElement = <FilterLens worker={this.props.worker} handleFilterChange={this.props.handleFilterChange} />
                 break;
             case "FilterFlag":
                 widgetElement = <FilterFlag handleFilterChange={this.props.handleFilterChange}/>
                 break;
             case "FilterFace":
-                widgetElement = <FilterFace db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
+                widgetElement = <FilterFace worker={this.props.worker} handleFilterChange={this.props.handleFilterChange} />
                 break;
             case "FilterColor":
                 widgetElement = <FilterColor handleFilterChange={this.props.handleFilterChange} />
                 break;
             case "FilterFocalLength":
-                widgetElement = <FilterFocalLength db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
+                widgetElement = <FilterFocalLength worker={this.props.worker} handleFilterChange={this.props.handleFilterChange} />
                 break;
             case "FilterISORating":
-                widgetElement = <FilterISORating db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
+                widgetElement = <FilterISORating worker={this.props.worker} handleFilterChange={this.props.handleFilterChange} />
                 break;
             case "FilterAperture":
-                widgetElement = <FilterAperture db={this.props.db} handleFilterChange={this.props.handleFilterChange} />
+                widgetElement = <FilterAperture worker={this.props.worker} handleFilterChange={this.props.handleFilterChange} />
                 break;
             case "FilterRating":
                 widgetElement = <FilterRating handleFilterChange={this.props.handleFilterChange} /> 
                 break;
             case "FilterShutter":
-                widgetElement = <FilterShutter db={this.props.db} handleFilterChange={this.props.handleFilterChange} /> 
+                widgetElement = <FilterShutter worker={this.props.worker} handleFilterChange={this.props.handleFilterChange} /> 
                 break;
             case "FilterDate":
-                widgetElement = <FilterDate db={this.props.db} handleFilterChange={this.props.handleFilterChange} /> 
+                widgetElement = <FilterDate worker={this.props.worker} handleFilterChange={this.props.handleFilterChange} /> 
                 break;
             case "PhotoStats":
-                widgetElement = <PhotoStats db={this.props.db} filter={this.props.filter} handleStatusChange={this.props.handleStatusChange} handleProgress={this.props.handleProgress} />
+                widgetElement = <PhotoStats worker={this.props.worker} filter={this.props.filter} handleStatusChange={this.props.handleStatusChange} />
                 break;
             case "ChartViewer":
-                widgetElement = <ChartViewer db={this.props.db} filter={this.props.filter} handleStatusChange={this.props.handleStatusChange} handleProgress={this.props.handleProgress} />
+                widgetElement = <ChartViewer worker={this.props.worker} filter={this.props.filter} handleStatusChange={this.props.handleStatusChange} />
                 break;
             case "TableViewer":
-                widgetElement = <TableViewer db={this.props.db} filter={this.props.filter} handleStatusChange={this.props.handleStatusChange} handleProgress={this.props.handleProgress} />
+                widgetElement = <TableViewer worker={this.props.worker} filter={this.props.filter} handleStatusChange={this.props.handleStatusChange} />
                 break;
         }
 

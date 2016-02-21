@@ -29,6 +29,15 @@ window.BootstrapRow = React.createClass({
     }
 })
 
+window.LoadingWrapper = React.createClass({
+    render() {
+        var className = this.props.loading ? "loading" : null
+        return (
+            <div className={className}>{this.props.children}</div>
+        );
+    }
+})
+
 var FileDropWrapper = React.createClass({
     onDragEnter (event) {
         event.stopPropagation();
@@ -96,12 +105,13 @@ window.Interface = React.createClass({
     },
     parseData(data, now) {
 		var Uints = new Uint8Array(data);
-		var db = new SQL.Database(Uints);        
-        this.handleProgress("end")
-		this.handleStatusChange("Loaded in " + (new Date() - now) + " miliseconds.", "success");
-		this.setState({
-			db: db
-		})
+        this.state.worker.open(Uints).then(function() {            
+            this.handleProgress("end")
+            this.handleStatusChange("Loaded in " + (new Date() - now) + " miliseconds.", "success");
+            this.setState({
+                dbReady: true
+            })
+        }.bind(this))
     },
     handleStatusChange(status, statusType) {
         console.log(status)
@@ -153,17 +163,24 @@ window.Interface = React.createClass({
     },
     getInitialState() {
         return {
-            db: undefined,
+            worker: undefined,
+            dbReady: false,
             filter: {}
         }
     },
+    componentWillMount() {
+        var worker = new WorkerWrapper(new Worker("lib/worker.sql.js"))
+        this.setState({worker: worker})
+    },
+    componentWillUnmount() {
+        this.state.worker.terminate();
+    },
     render() {
         var content;
-    	if(this.state.db) {     
-            var hiddenWidgetsElement;
+    	if(this.state.dbReady) {
             content = 
             <div>
-                <WidgetLayout db={this.state.db} hiddenWidgets={this.state.hiddenWidgets} filter={this.state.filter} handleStatusChange={this.handleStatusChange} handleProgress={this.handleProgress} handleFilterChange={this.handleFilterChange} saveLocalStorage={this.saveLocalStorage} getLocalStorage={this.getLocalStorage}/>
+                <WidgetLayout worker={this.state.worker} hiddenWidgets={this.state.hiddenWidgets} filter={this.state.filter} handleStatusChange={this.handleStatusChange} handleFilterChange={this.handleFilterChange} saveLocalStorage={this.saveLocalStorage} getLocalStorage={this.getLocalStorage}/>
             </div>
     	}   
         else {
@@ -184,3 +201,42 @@ ReactDOM.render(
     <Interface />,
     document.getElementById('content')
 );
+
+function WorkerWrapper(worker) {
+    this.id = 0;
+    this.promises = {}
+    this.worker = worker;
+
+    this.open = function(buffer) {
+        this.id++;
+        var deferred = Q.defer();
+        this.promises[this.id] = deferred;
+
+        this.worker.postMessage({
+            id: this.id,
+            action: "open",
+            buffer: buffer
+        })
+
+        return deferred.promise
+    }.bind(this)
+
+    this.exec = function(query) {
+        this.id++;
+        var deferred = Q.defer();
+        this.promises[this.id] = deferred;
+
+        this.worker.postMessage({
+            id: this.id,
+            action: "exec",
+            sql: query
+        })
+
+        return deferred.promise
+    }.bind(this)
+
+    this.worker.onmessage = function(event) {
+        this.promises[event.data.id].resolve(event.data.results)
+        delete this.promises[event.data.id];
+    }.bind(this)
+}

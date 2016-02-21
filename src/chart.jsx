@@ -27,7 +27,7 @@ window.ChartViewer = React.createClass({
     },
     render: function() {
         if(this.state.field)
-            var chart = <Chart db={this.props.db} filter={this.props.filter} field={this.state.field} handleStatusChange={this.props.handleStatusChange} handleProgress={this.props.handleProgress} />
+            var chart = <Chart worker={this.props.worker} filter={this.props.filter} field={this.state.field} handleStatusChange={this.props.handleStatusChange} />
         return (
             <div>
                 <FieldSelector agragateFields={this.agragateFields} field={this.state.field} handleFieldChange={this.handleFieldChange} />
@@ -58,10 +58,11 @@ var FieldSelector = React.createClass({
 });
 
 var Chart = React.createClass({
-    getData() {
+    getData(properties) {
+        properties = properties || this.props;
         var s = squel
             .select()
-            .field(this.props.field.field)
+            .field(properties.field.field)
             .field("COUNT('images.id_local')")
             .from("Adobe_images", "images")
             .left_join("AgHarvestedExifMetadata", "exif", "images.id_local = exif.image")
@@ -70,37 +71,49 @@ var Chart = React.createClass({
             .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local");
 
 
-        _.forOwn(_.omitBy(this.props.filter, _.isUndefined), function(value, key){
+        _.forOwn(_.omitBy(properties.filter, _.isUndefined), function(value, key){
         	s.where(Utilities.getFilterExpression(key, value))
         })
 
         s = s
-            .order(this.props.field.field)
-        	.group(this.props.field.field)
+            .order(properties.field.field)
+        	.group(properties.field.field)
 
         var query = s.toString();
 
         var now = new Date();
-        this.props.handleProgress("start");
-        var data = this.props.db.exec(query);
-        this.props.handleProgress("end");
-        this.props.handleStatusChange("Last query (" + query + ") took " + (new Date() - now) + " miliseconds.", "none")
-        
-        var rawData = data[0];
-        return rawData;
 
+        return properties.worker.exec(query).then(function(data){
+            properties.handleStatusChange("Last query (" + query + ") took " + (new Date() - now) + " miliseconds.", "none")
+
+            return Q(data[0]);
+        }.bind(this))
+    },
+    getInitialState() {
+        return {
+            data: undefined
+        };
+    },
+    componentDidMount() {        
+        this.getData().then(function(data){
+            this.setState({data : data})
+        }.bind(this))
+    },
+    componentWillReceiveProps(nextProps) {
+        this.getData(nextProps).then(function(data){
+            this.setState({data : data})
+        }.bind(this))
     },
 	render() {
-		var rawData = this.getData()
-		if(!rawData)
+		if(!this.state.data)
 			return null;
         var chartElement;
         switch(this.props.field.type) {
             case "pie":
-                chartElement = <PieChartComponent rawData={rawData} />
+                chartElement = <PieChartComponent rawData={this.state.data} />
                 break;
             case "bar":
-                chartElement = <BarChartComponent rawData={rawData} />
+                chartElement = <BarChartComponent rawData={this.state.data} />
                 break;
         }
 		return chartElement

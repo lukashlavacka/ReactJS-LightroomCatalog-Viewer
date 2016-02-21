@@ -21,7 +21,7 @@ window.TableViewer = React.createClass({
     },
     render: function() {
         if(this.state.xField && this.state.yField)
-            var table = <Table db={this.props.db} filter={this.props.filter} xField={this.state.xField} yField={this.state.yField} handleStatusChange={this.props.handleStatusChange} handleProgress={this.props.handleProgress} />
+            var table = <Table worker={this.props.worker} filter={this.props.filter} xField={this.state.xField} yField={this.state.yField} handleStatusChange={this.props.handleStatusChange} />
         return (
             <div>
             	<FieldSelector field={this.state.xField} name="x agregate field" otherField={this.state.yField} handleFieldChange={this.handleFieldChange.bind(this, "xField")} />
@@ -70,11 +70,14 @@ var FieldSelector = React.createClass({
 });
 
 var Table = React.createClass({
-	getData() {
+	getData(properties) {
+        this.setState({loading: true})
+		properties = properties || this.props;
+
         var s = squel
             .select()
-            .field(this.props.xField)
-            .field(this.props.yField)
+            .field(properties.xField)
+            .field(properties.yField)
             .field("COUNT(images.id_local)")
             .field("AVG(IFNULL(images.rating, 0))")
             .from("Adobe_images", "images")
@@ -82,42 +85,54 @@ var Table = React.createClass({
             .left_join("AgLibraryKeywordImage", "keyword", "images.id_local = keyword.image")
             .left_join("AgInternedExifCameraModel", "camera", "exif.cameraModelRef = camera.id_local")
             .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local")
-            .where(this.props.xField + " IS NOT NULL")
-            .where(this.props.yField + " IS NOT NULL")
+            .where(properties.xField + " IS NOT NULL")
+            .where(properties.yField + " IS NOT NULL")
 
 
-        _.forOwn(_.omitBy(this.props.filter, _.isUndefined), function(value, key){
+        _.forOwn(_.omitBy(properties.filter, _.isUndefined), function(value, key){
         	s.where(Utilities.getFilterExpression(key, value))
         })
 
         s = s
-            .order(this.props.xField)
-            .order(this.props.yField)
-        	.group(this.props.xField)
-        	.group(this.props.yField)
+            .order(properties.xField)
+            .order(properties.yField)
+        	.group(properties.xField)
+        	.group(properties.yField)
 
         var query = s.toString();
 
         var now = new Date();
-        this.props.handleProgress("start");
-        var data = this.props.db.exec(query);
-        this.props.handleProgress("end");
-        this.props.handleStatusChange("Last query (" + query + ") took " + (new Date() - now) + " miliseconds.", "none")
-        
-        var rawData = data[0];
 
-        if(!rawData)
-        	return        
+        return properties.worker.exec(query).then(function(data){
+	        properties.handleStatusChange("Last query (" + query + ") took " + (new Date() - now) + " miliseconds.", "none")
 
-        return rawData.values;
+	        return Q(data[0] && data[0].values);
+        }.bind(this))
 
     },
+    getInitialState() {
+    	return {
+    		data: undefined
+    	};
+    },
+    componentDidMount() {        
+        this.getData().then(function(data){
+            this.setState({
+            	loading: false,
+            	data : data
+            })
+        }.bind(this))
+    },
+    componentWillReceiveProps(nextProps) {
+        this.getData(nextProps).then(function(data){
+            this.setState({data : data})
+        }.bind(this))
+    },
 	render() {
-		var data = this.getData()
-		if(!data)
-			return null;
 		return (
-			<TableComponent data={data} xField={this.props.xField} yField={this.props.yField}/>
+			<LoadingWrapper loading={this.state.loading}>
+				<TableComponent data={this.state.data} xField={this.props.xField} yField={this.props.yField}/>
+			</LoadingWrapper>
 		);
 	}
 })
@@ -177,7 +192,9 @@ var TableComponent = React.createClass({
 			relRating: avergeRating / maxAverage
 		}
 	},
-	render() {
+	render() {		
+		if(!this.props.data)
+			return null;
 		var transformedData = this.transformData()
 		return (
 			<div className="table-responsive">
