@@ -43,22 +43,21 @@ var FieldSelector = React.createClass({
 	},
 	render: function() {
 		return (
-			<BootstrapRow>
-				<div>
-                    <h3>Select agregate field</h3>
-		            {this.props.agragateFields.map(function(f){
-		                return (
-		                        <label key={f.field} className="radio-inline"><input type="radio" checked={this.props.field.field === f.field} value={f.field} onChange={this.handleChange} />{f.name}</label>
-		                )
-		            }.bind(this))}
-	            </div>
-	        </BootstrapRow>
+			<div>
+                <h3>Select agregate field</h3>
+	            {this.props.agragateFields.map(function(f){
+	                return (
+	                        <label key={f.field} className="radio-inline"><input type="radio" checked={this.props.field.field === f.field} value={f.field} onChange={this.handleChange} />{f.name}</label>
+	                )
+	            }.bind(this))}
+            </div>
 		);
 	}
 });
 
 var Chart = React.createClass({
     getData(properties) {
+        this.setState({loading: true})
         properties = properties || this.props;
         var s = squel
             .select()
@@ -91,38 +90,53 @@ var Chart = React.createClass({
     },
     getInitialState() {
         return {
-            data: undefined
+            data: {columns: [], values: []}
         };
     },
     componentDidMount() {        
         this.getData().then(function(data){
-            this.setState({data : data})
+            this.setState({
+                data : data,
+                loading: false
+            })
         }.bind(this))
     },
     componentWillReceiveProps(nextProps) {
+        var noRedraw = this.props.field.field === nextProps.field.field;
         this.getData(nextProps).then(function(data){
-            this.setState({data : data})
+            var oldValues = this.state.data.values.map(function(v){return v[0]});
+            var newValues = data.values.map(function(v){return v[0]});
+            this.setState({
+                data : data,
+                loading: false,
+                noRedraw: noRedraw && _.isEqual(oldValues, newValues)
+            })
         }.bind(this))
     },
+    shouldComponentUpdate(nextProps, nextState) {
+        return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
+    },
 	render() {
-		if(!this.state.data)
-			return null;
         var chartElement;
         switch(this.props.field.type) {
             case "pie":
-                chartElement = <PieChartComponent rawData={this.state.data} />
+                chartElement = <PieChartComponent rawData={this.state.data} noRedraw={this.state.noRedraw} />
                 break;
             case "bar":
-                chartElement = <BarChartComponent rawData={this.state.data} />
+                chartElement = <BarChartComponent rawData={this.state.data} noRedraw={this.state.noRedraw} />
                 break;
         }
-		return chartElement
+		return (
+            <LoadingWrapper loading={this.state.loading}>
+                {chartElement}
+            </LoadingWrapper>
+        )
 	}
 })
 
-var BarChart = window.Chart.React.Bar;
+var BarChart = window["react-chartjs"].Bar;
 var BarChartComponent = React.createClass({
-    getInitialState: function()
+    getDefaultProps: function()
     {
         return {
             options : {
@@ -156,18 +170,20 @@ var BarChartComponent = React.createClass({
     },
     render: function() {
         var data = this.expandDataset(this.props.rawData)
-        return (
-            <BootstrapRow>
-                <BarChart data={data} options={this.state.options}/>
-            </BootstrapRow>
-        )
+
+        var chart
+        if(this.props.noRedraw)
+            chart = <BarChart data={data} options={this.props.options} ref="pieChart" />
+        else
+            chart = <BarChart data={data} options={this.props.options} ref="pieChart" redraw />
+
+        return chart;
     }
 });
 
-var PieChart = window.Chart.React.Pie;
+var PieChart = window["react-chartjs"].Pie;
 var PieChartComponent = React.createClass({
-    getInitialState: function()
-    {
+    getDefaultProps() {
         return {
             options : {
                 responsive: true,
@@ -177,7 +193,7 @@ var PieChartComponent = React.createClass({
         }
     },
     expandDataset: function(rawData) {
-        var data = rawData.values.map(function(v, i){
+        var data = _.sortBy(rawData.values, 'v[0]').map(function(v, i){
             var hue = i * (360 / rawData.values.length)
 
             return {
@@ -190,12 +206,35 @@ var PieChartComponent = React.createClass({
 
         return data;
     },
+    getInitialState() {
+        return {
+            legendHTML: ""
+        };
+    },
+    componentDidMount() {
+        this.setState({legendHTML : this.refs.pieChart.generateLegend()})
+    },
+    componentDidUpdate(prevProps, prevState) {
+        if(!_.isEqual(prevProps.rawData, this.props.rawData))
+            this.setState({legendHTML : this.refs.pieChart.generateLegend()})
+    },
+    shouldComponentUpdate(nextProps, nextState) {
+        return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
+    },
     render: function() {
         var data = this.expandDataset(this.props.rawData)
+
+        var chart
+        if(this.props.noRedraw)
+            chart = <PieChart data={data} options={this.props.options} ref="pieChart" />
+        else
+            chart = <PieChart data={data} options={this.props.options} ref="pieChart" redraw />
+
         return (
-            <BootstrapRow>
-                <PieChart data={data} options={this.state.options}/>
-            </BootstrapRow>
+            <div>
+                {chart}
+                <div className="chart-legend" dangerouslySetInnerHTML={{ __html: this.state.legendHTML }} />
+            </div>
         )
     }
 });
