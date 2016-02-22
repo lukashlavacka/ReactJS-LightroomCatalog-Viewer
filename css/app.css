@@ -72,3 +72,14 @@ h1, .h1, h2, .h2, h3, .h3 {
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+.chart-legend li {
+    float: left;
+    list-style-type: none;
+    padding-left: 3px;
+}
+
+.chart-legend li span{
+    padding-left: 3px;
+    padding-right: 3px;
+}
