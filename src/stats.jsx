@@ -23,7 +23,6 @@ window.PhotoStats = React.createClass({
     getData(properties)
     {
         this.setState({loading: true})
-        properties = properties || this.props;
         var queries = this.popularStats.map(function(s){
             var statQuery = squel
                 .select()
@@ -47,17 +46,15 @@ window.PhotoStats = React.createClass({
 
         var query = queries.join(";");
 
-        var now = new Date();
-
-        return properties.worker.exec(query).then(function(data){
-            var dataset = data || [];
-            properties.handleStatusChange("Last query (" + query + ") took " + (new Date() - now) + " miliseconds.", "none")
-            return Q(dataset.map(function(d, i){
-                var stat = this.popularStats[i];
-                return { key: stat.key, name: stat.name, value: _.isFunction(stat.transform) ? stat.transform(d.values[0][0]) : d.values[0][0], count: d.values[0][1] }
-            }.bind(this)));
-        }.bind(this))
+        return properties.worker.exec(query)
         
+    },
+    transformData(properties, rawData){
+        var dataset = rawData || [];
+        return Q(dataset.map(function(d, i){
+            var stat = this.popularStats[i];
+            return { key: stat.key, name: stat.name, value: _.isFunction(stat.transform) ? stat.transform(d.values[0][0]) : d.values[0][0], count: d.values[0][1] }
+        }.bind(this)));
     },
     getInitialState() {
         return {
@@ -65,7 +62,9 @@ window.PhotoStats = React.createClass({
         };
     },
     componentDidMount() {        
-        this.getData().then(function(data){            
+        this.getData(this.props)
+        .then(this.transformData.bind(this, this.props))
+        .then(function(data){            
             this.setState({
                 data : data,
                 loading: false
@@ -73,7 +72,9 @@ window.PhotoStats = React.createClass({
         }.bind(this))
     },
     componentWillReceiveProps(nextProps) {
-        this.getData(nextProps).then(function(data){
+        this.getData(nextProps)
+        .then(this.transformData.bind(this, nextProps))
+        .then(function(data){
             this.setState({
                 data : data,
                 loading: false

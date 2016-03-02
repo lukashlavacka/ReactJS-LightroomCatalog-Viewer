@@ -20,21 +20,6 @@ var WindowDimensions = React.createClass({
     }
 });
 
-var HiddenWidgets = React.createClass({
-    render() {
-        if(!this.props.widgets.length)
-            return null;
-        return (
-            <div>
-                <h2>Hidden widgets</h2>
-                {this.props.widgets.map(function(w){
-                    return <button key={w.key} type="button" onClick={this.props.handleShowWidget.bind(null, w)}>{w.title}</button>
-                }.bind(this))}            
-            </div>
-        );
-    }
-})
-
 window.WidgetLayout = React.createClass({
     getWidget(widget) {
         var widgetElement;
@@ -73,58 +58,67 @@ window.WidgetLayout = React.createClass({
                 widgetElement = <FilterDate worker={this.props.worker} handleFilterChange={this.props.handleFilterChange} /> 
                 break;
             case "PhotoStats":
-                widgetElement = <PhotoStats worker={this.props.worker} filter={this.props.filter} handleStatusChange={this.props.handleStatusChange} />
+                widgetElement = <PhotoStats worker={this.props.worker} filter={this.props.filter} />
                 break;
             case "ChartViewer":
-                widgetElement = <ChartViewer worker={this.props.worker} filter={this.props.filter} handleStatusChange={this.props.handleStatusChange} />
+                widgetElement = <ChartViewer worker={this.props.worker} filter={this.props.filter} />
                 break;
             case "TableViewer":
-                widgetElement = <TableViewer worker={this.props.worker} filter={this.props.filter} handleStatusChange={this.props.handleStatusChange} />
+                widgetElement = <TableViewer worker={this.props.worker} filter={this.props.filter} />
                 break;
         }
 
-        var removeStyle = {
-            position: 'absolute',
-            right: '2px',
-            top: 0,
-            cursor: 'pointer'
-        };
-
+        var minified = (_.find(this.state.layout, { i : widget.key }) || { }).h == 1;
         return (
             <div key={widget.key} _grid={widget._grid}>
-                <div>
-                    <h2 className="react-grid-item-drag-handle">{widget.title}</h2>
+                <WidgetWrapper title={widget.title} minified={minified} handleMinifyWidget={this.handleMinifyWidget.bind(this, widget)} >
                     {widgetElement}
-                </div>
-                <span className="remove" style={removeStyle} onClick={this.handleHideWidget.bind(null, widget)}>x</span>
+                </WidgetWrapper>
             </div>
         )
     },
-    onLayoutChange(layout) {
-        this.props.saveLocalStorage("layout", layout)
-    },
-    getVisibleWidgets(){
-        return _.differenceBy(this.state.widgets, this.state.hiddenWidgets, "key");
-    },
-    handleHideWidget(widget) {
-        var updatedHiddenWidgets = this.state.hiddenWidgets.slice().concat([widget]);
+    onLayoutChange(layout, layouts) {
         this.setState({
-            hiddenWidgets: updatedHiddenWidgets
-        });        
+            layout: layout,
+            layouts: layouts
+        })
+        this.props.saveLocalStorage("layout", layout)
+        this.props.saveLocalStorage("layouts", layouts)
+    },
+    handleMinifyWidget(widget) {
+        var layout = this.state.layout;
+        var widgetLayoutIndex = _.findIndex(layout, {i: widget.key})   
+        var minified = layout[widgetLayoutIndex].h > 1     
+        var newHeight = minified ? 1 : layout[widgetLayoutIndex].oldH
+
+        var updateObject;
+        if(minified) {
+            updateObject = { 
+                h : { $set: 1 },
+                w : { $set: 2 },
+                // x : { $set: 0 },
+                // y : { $set: 0 },
+                isResizable: { $set: true },
+                prevLayout: { $set: layout[widgetLayoutIndex] }
+            }
+        }
+        else {
+            updateObject = {
+                h : { $set: layout[widgetLayoutIndex].prevLayout.h },
+                w : { $set: layout[widgetLayoutIndex].prevLayout.w },
+                // x : { $set: layout[widgetLayoutIndex].prevLayout.x },
+                // y : { $set: layout[widgetLayoutIndex].prevLayout.y },
+                isResizable: { $set: false }
+            }            
+        }
+
         if(widget.filter)
             this.props.handleFilterChange(widget.filter, undefined)
 
-        this.props.saveLocalStorage("hiddenWidgets", updatedHiddenWidgets)
-    },
-    handleShowWidget(widget) {
-        var updatedHiddenWidgets = this.state.hiddenWidgets.slice()
-        updatedHiddenWidgets.splice(this.state.hiddenWidgets.indexOf(widget), 1);
-
-        this.setState({
-            hiddenWidgets: updatedHiddenWidgets
-        });
-
-        this.props.saveLocalStorage("hiddenWidgets", updatedHiddenWidgets)
+        var updatedWidgetLayout = React.addons.update(layout[widgetLayoutIndex], updateObject)
+        var newLayout = React.addons.update(layout, { $splice: [[widgetLayoutIndex, 1, updatedWidgetLayout ]] });
+        this.setState({ layout: newLayout });        
+        this.props.saveLocalStorage("layout", newLayout)
     },
     triggerResize() {
     	// required to recalculate the widths of sliders
@@ -132,45 +126,43 @@ window.WidgetLayout = React.createClass({
     },
     handleResetUI() {
         this.props.saveLocalStorage("layout", [])
-        this.props.saveLocalStorage("hiddenWidgets", [])
+        this.props.saveLocalStorage("layouts", {})
 
         this.setState({
             layout: [],
-            hiddenWidgets: []
+            layouts: {}
         });
     },
     getInitialState() {
         var ls = this.props.getLocalStorage();
-
         return {
             layout: ls.layout || [],
-            breakpoints: {lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0},
-            cols: {lg: 12, md: 10, sm: 6, xs: 4, xxs: 2},
+            layouts: ls.layouts || {},
             widgets: [
-                { key: "FilterCamera"       , title: "Camera"        , filter: "camera"      , _grid: { x: 0, y:  0, w:  6, h: 2 }},
-                { key: "FilterLens"         , title: "Lens"          , filter: "lens"        , _grid: { x: 6, y:  0, w:  6, h: 2 }},
-                { key: "FilterFlag"         , title: "Flag"          , filter: "flag"        , _grid: { x: 0, y:  2, w:  6, h: 2 }},
-                { key: "FilterFace"         , title: "Face"          , filter: "face"        , _grid: { x: 6, y:  2, w:  6, h: 2 }},
+                { key: "FilterCamera"       , title: "Camera"        , filter: "camera"      , _grid: { x: 0, y:  1, w:  6, h: 2 }},
+                { key: "FilterLens"         , title: "Lens"          , filter: "lens"        , _grid: { x: 6, y:  1, w:  6, h: 2 }},
+                { key: "FilterFlag"         , title: "Flag"          , filter: "flag"        , _grid: { x: 0, y:  3, w:  6, h: 2 }},
+                { key: "FilterFace"         , title: "Face"          , filter: "face"        , _grid: { x: 6, y:  4, w:  6, h: 2 }},
                 { key: "FilterColor"        , title: "Color"         , filter: "color"       , _grid: { x: 0, y:  4, w:  6, h: 2 }},
                 { key: "FilterFocalLength"  , title: "Focal Length"  , filter: "focalLength" , _grid: { x: 6, y:  4, w:  6, h: 2 }},
-                { key: "FilterISORating"    , title: "ISO"           , filter: "iso"         , _grid: { x: 0, y:  6, w:  6, h: 2 }},
-                { key: "FilterAperture"     , title: "Aperture"      , filter: "aperture"    , _grid: { x: 6, y:  6, w:  6, h: 2 }},
-                { key: "FilterRating"       , title: "Rating"        , filter: "rating"      , _grid: { x: 6, y:  8, w:  6, h: 2 }},
-                { key: "ChartViewer"        , title: "Chart"         , filter: null          , _grid: { x: 0, y:  8, w:  6, h: 6 }},
-                { key: "FilterShutter"      , title: "Shutter Speed" , filter: "shuter"      , _grid: { x: 6, y:  8, w:  6, h: 2 }},
-                { key: "FilterDate"         , title: "Date"          , filter: "date"        , _grid: { x: 6, y: 10, w:  6, h: 2 }},
-                { key: "PhotoStats"         , title: "Most Popular"  , filter: null          , _grid: { x: 0, y: 12, w: 12, h: 2 }},
-                { key: "TableViewer"        , title: "Table"         , filter: null          , _grid: { x: 0, y: 14, w: 12, h: 6 }}
-            ],
-            hiddenWidgets: ls.hiddenWidgets || []
+                { key: "FilterISORating"    , title: "ISO"           , filter: "iso"         , _grid: { x: 0, y:  7, w:  6, h: 2 }},
+                { key: "FilterAperture"     , title: "Aperture"      , filter: "aperture"    , _grid: { x: 6, y:  7, w:  6, h: 2 }},
+                { key: "FilterRating"       , title: "Rating"        , filter: "rating"      , _grid: { x: 6, y:  9, w:  6, h: 2 }},
+                { key: "ChartViewer"        , title: "Chart"         , filter: null          , _grid: { x: 0, y:  9, w:  6, h: 6 }},
+                { key: "FilterShutter"      , title: "Shutter Speed" , filter: "shuter"      , _grid: { x: 6, y:  9, w:  6, h: 2 }},
+                { key: "FilterDate"         , title: "Date"          , filter: "date"        , _grid: { x: 6, y: 11, w:  6, h: 2 }},
+                { key: "PhotoStats"         , title: "Most Popular"  , filter: null          , _grid: { x: 0, y: 13, w: 12, h: 2 }},
+                { key: "TableViewer"        , title: "Table"         , filter: null          , _grid: { x: 0, y: 15, w: 12, h: 6 }}
+            ]
         }
     },
     getDefaultProps() {
         return {
             className: "layout",
+            breakpoints: {lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0},
+            cols: 12, //cols: {lg: 12, md: 12, sm: 6, xs: 4, xxs: 2},
             rowHeight: 70,
-            cols: 12,
-            draggableHandle: ".react-grid-item-drag-handle"
+            draggableHandle: ".react-grid-item-drag-handle, .react-grid-item-drag-handle h4"
         };
     },
     shouldComponentUpdate(nextProps, nextState) {
@@ -180,11 +172,31 @@ window.WidgetLayout = React.createClass({
     	return (
     		<div>
                 <button type="button" onClick={this.handleResetUI}>Reset UI</button>
-    			<HiddenWidgets widgets={this.state.hiddenWidgets} handleShowWidget={this.handleShowWidget} />
-	            <ReactGridLayout className="layout" layout={this.state.layout} onLayoutChange={this.onLayoutChange} onResizeStop={this.triggerResize} onDragStop={this.triggerResize} {...this.props} >
-	                    {this.getVisibleWidgets().map(this.getWidget)}
+	            <ReactGridLayout className="layout" layout={this.state.layout} layouts={this.state.layouts} onLayoutChange={this.onLayoutChange} onResizeStop={this.triggerResize} onDragStop={this.triggerResize} {...this.props} >
+	                    {this.state.widgets.map(this.getWidget)}
 	            </ReactGridLayout>
             </div>
     	);
+    }
+})
+
+var WidgetWrapper = React.createClass({
+    render() {
+        var body = this.props.minified ? null : <div className="panel-body">{this.props.children}</div>
+        var glyphiconClass = this.props.minified ? "glyphicon glyphicon-plus" : "glyphicon glyphicon-minus";
+
+        return (
+            <div className="panel panel-default panel-react-grid">
+                <div className="panel-heading react-grid-item-drag-handle">                        
+                    <div className="btn-group pull-right">
+                        <button className="btn btn-default btn-sm" onClick={this.props.handleMinifyWidget}>
+                            <span className={glyphiconClass} aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    <h4>{this.props.title}</h4>
+                </div>
+                {body}
+            </div>    
+        )
     }
 })

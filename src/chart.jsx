@@ -27,7 +27,7 @@ window.ChartViewer = React.createClass({
     },
     render: function() {
         if(this.state.field)
-            var chart = <Chart worker={this.props.worker} filter={this.props.filter} field={this.state.field} handleStatusChange={this.props.handleStatusChange} />
+            var chart = <Chart worker={this.props.worker} filter={this.props.filter} field={this.state.field} />
         return (
             <div>
                 <FieldSelector agragateFields={this.agragateFields} field={this.state.field} handleFieldChange={this.handleFieldChange} />
@@ -58,7 +58,6 @@ var FieldSelector = React.createClass({
 var Chart = React.createClass({
     getData(properties) {
         this.setState({loading: true})
-        properties = properties || this.props;
         var s = squel
             .select()
             .field(properties.field.field)
@@ -80,21 +79,20 @@ var Chart = React.createClass({
 
         var query = s.toString();
 
-        var now = new Date();
-
-        return properties.worker.exec(query).then(function(data){
-            properties.handleStatusChange("Last query (" + query + ") took " + (new Date() - now) + " miliseconds.", "none")
-
-            return Q(data[0] || {columns: [], values: []});
-        }.bind(this))
+        return properties.worker.exec(query)
     },
     getInitialState() {
         return {
             data: {columns: [], values: []}
         };
     },
+    transformData(properties, rawData) {
+        return Q(rawData[0] || {columns: [], values: []});
+    },
     componentDidMount() {        
-        this.getData().then(function(data){
+        this.getData(this.props)
+        .then(this.transformData.bind(this, this.props))
+        .then(function(data){
             this.setState({
                 data : data,
                 loading: false
@@ -103,7 +101,9 @@ var Chart = React.createClass({
     },
     componentWillReceiveProps(nextProps) {
         var noRedraw = this.props.field.field === nextProps.field.field;
-        this.getData(nextProps).then(function(data){
+        this.getData(nextProps)
+        .then(this.transformData.bind(this, nextProps))
+        .then(function(data){
             var oldValues = this.state.data.values.map(function(v){return v[0]});
             var newValues = data.values.map(function(v){return v[0]});
             this.setState({
