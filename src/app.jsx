@@ -169,7 +169,7 @@ window.Interface = React.createClass({
         }
     },
     componentWillMount() {
-        var worker = new WorkerWrapper(new Worker("lib/worker.sql.js"))
+        var worker = new WorkerWrapper("lib/worker.sql.js")
         this.setState({worker: worker})
     },
     componentWillUnmount() {
@@ -180,7 +180,7 @@ window.Interface = React.createClass({
     	if(this.state.dbReady) {
             content = 
             <div>
-                <WidgetLayout worker={this.state.worker} hiddenWidgets={this.state.hiddenWidgets} filter={this.state.filter} handleStatusChange={this.handleStatusChange} handleFilterChange={this.handleFilterChange} saveLocalStorage={this.saveLocalStorage} getLocalStorage={this.getLocalStorage}/>
+                <WidgetLayout worker={this.state.worker} filter={this.state.filter} handleFilterChange={this.handleFilterChange} saveLocalStorage={this.saveLocalStorage} getLocalStorage={this.getLocalStorage}/>
             </div>
     	}   
         else {

@@ -21,7 +21,7 @@ window.TableViewer = React.createClass({
     },
     render: function() {
         if(this.state.xField && this.state.yField)
-            var table = <Table worker={this.props.worker} filter={this.props.filter} xField={this.state.xField} yField={this.state.yField} handleStatusChange={this.props.handleStatusChange} />
+            var table = <Table worker={this.props.worker} filter={this.props.filter} xField={this.state.xField} yField={this.state.yField} />
         return (
             <div>
             	<FieldSelector field={this.state.xField} name="x agregate field" otherField={this.state.yField} handleFieldChange={this.handleFieldChange.bind(this, "xField")} />
@@ -72,7 +72,6 @@ var FieldSelector = React.createClass({
 var Table = React.createClass({
 	getData(properties) {
         this.setState({loading: true})
-		properties = properties || this.props;
 
         var s = squel
             .select()
@@ -101,14 +100,11 @@ var Table = React.createClass({
 
         var query = s.toString();
 
-        var now = new Date();
-
-        return properties.worker.exec(query).then(function(data){
-	        properties.handleStatusChange("Last query (" + query + ") took " + (new Date() - now) + " miliseconds.", "none")
-	        var dataset = data && data[0] && data[0].values || []
-	        return Q(dataset);
-        }.bind(this))
-
+        return properties.worker.exec(query)
+    },
+    transformData(properties, rawData) {
+		var dataset = rawData && rawData[0] && rawData[0].values || []
+        return Q(dataset);
     },
     getInitialState() {
     	return {
@@ -116,7 +112,9 @@ var Table = React.createClass({
     	};
     },
     componentDidMount() {        
-        this.getData().then(function(data){
+        this.getData(this.props)
+        .then(this.transformData.bind(this, this.props))
+        .then(function(data){
             this.setState({
             	loading: false,
             	data : data
@@ -124,7 +122,9 @@ var Table = React.createClass({
         }.bind(this))
     },
     componentWillReceiveProps(nextProps) {
-        this.getData(nextProps).then(function(data){
+        this.getData(nextProps)
+        .then(this.transformData.bind(this, nextProps))
+        .then(function(data){
             this.setState({
             	data : data,
                 loading: false

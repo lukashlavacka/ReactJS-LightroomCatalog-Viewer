@@ -1,7 +1,6 @@
 var FilterFactory = React.createFactory(React.createClass({
     getData(properties) {
         this.setState({loading: true})
-        properties = properties || this.props;
         var s = squel
             .select()
             .field(properties.valueProp || "id_local", "value")
@@ -13,10 +12,12 @@ var FilterFactory = React.createFactory(React.createClass({
 
         var query = s.toString();
 
-        return properties.worker.exec(query).then(function(data){
-            var dataset = data && data[0] || { values: []}
-            return Q(dataset.values.map(function(t){ return { value: t[0], name: t[1] } }))
-        }.bind(this))
+        return properties.worker.exec(query)
+    },
+    transformData(properties, rawData) {
+        properties = properties || this.props;
+        var dataset = rawData && rawData[0] || { values: []}
+        return Q(dataset.values.map(function(t){ return { value: t[0], name: t[1] } }))
     },
     handleChange(event) {
         this.props.handleFilterChange(this.props.type, this.refs[this.props.type].getCheckedValues())
@@ -33,7 +34,9 @@ var FilterFactory = React.createFactory(React.createClass({
     },
     componentDidMount() {
         if(this.props.table){
-            this.getData().then(function(data){
+            this.getData(this.props)
+            .then(this.transformData.bind(this, this.props))
+            .then(function(data){
                 this.setState({
                     options : data,
                     loading: false
@@ -48,7 +51,9 @@ var FilterFactory = React.createFactory(React.createClass({
     },
     componentWillReceiveProps(nextProps) {
         if(nextProps.table){
-            this.getData(nextProps).then(function(data){
+            this.getData(nextProps)
+            .then(this.transformData.bind(this, nextProps))
+            .then(function(data){
                 this.setState({
                     options : data,
                     loading: false
@@ -86,7 +91,6 @@ var FilterFactory = React.createFactory(React.createClass({
 var FilterRangeFactory = React.createFactory(React.createClass({
     getData(properties) {
         this.setState({loading: true})
-        properties = properties || this.props
         var s = squel
             .select()
             .field("MIN(" + properties.field + ")")
@@ -95,14 +99,15 @@ var FilterRangeFactory = React.createFactory(React.createClass({
             .where(this.props.field + " > 0")
         var query = s.toString();
 
-        return properties.worker.exec(query).then(function(data){
-            var min = data && data[0] && data[0].values && data[0].values[0] && data[0].values[0][0] || undefined
-            var max = data && data[0] && data[0].values && data[0].values[0] && data[0].values[0][1] || undefined
-            return Q({
-                min: min,
-                max: max
-            })
-        }.bind(this));
+        return properties.worker.exec(query);
+    },
+    transformData(properties, rawData){
+        var min = rawData && rawData[0] && rawData[0].values && rawData[0].values[0] && rawData[0].values[0][0] || undefined
+        var max = rawData && rawData[0] && rawData[0].values && rawData[0].values[0] && rawData[0].values[0][1] || undefined
+        return Q({
+            min: min,
+            max: max
+        });
     },
     handleChange(value) {
         var dbVal = value.map(this.transformFromUIValue);
@@ -143,18 +148,20 @@ var FilterRangeFactory = React.createFactory(React.createClass({
     },
     componentDidMount() {
         if(this.props.field){
-            this.getData().then(function(data){
-                var minMax = data;
-                this.setState({
-                    loading: false,
-                    dbMin: minMax.min,
-                    dbMax: minMax.max,
-                    dbMinVal: minMax.min,
-                    dbMaxVal: minMax.max,
-                    uiMin: this.props.invert ? this.transformFromDBValue(minMax.max) : this.transformFromDBValue(minMax.min, true),
-                    uiMax: this.props.invert ? this.transformFromDBValue(minMax.min, true) : this.transformFromDBValue(minMax.max)
-                })
-            }.bind(this))
+            this.getData(this.props)
+                .then(this.transformData.bind(this, this.props))
+                .then(function(data){
+                    var minMax = data;
+                    this.setState({
+                        loading: false,
+                        dbMin: minMax.min,
+                        dbMax: minMax.max,
+                        dbMinVal: minMax.min,
+                        dbMaxVal: minMax.max,
+                        uiMin: this.props.invert ? this.transformFromDBValue(minMax.max) : this.transformFromDBValue(minMax.min, true),
+                        uiMax: this.props.invert ? this.transformFromDBValue(minMax.min, true) : this.transformFromDBValue(minMax.max)
+                    })
+                }.bind(this))
         }
         else if(this.props.minMax) {
             this.setState({
@@ -391,7 +398,6 @@ window.FilterFace = React.createClass({
 
 window.FilterDate = React.createClass({
     getData(properties) {
-        properties = properties || this.props;
         this.setState({loading: true})
         var s = squel
             .select()
@@ -400,13 +406,14 @@ window.FilterDate = React.createClass({
             .from("Adobe_images")
 
         var query = s.toString();
-        return properties.worker.exec(query).then(function(data){
-            var min = data && data[0] && data[0].values && data[0].values[0] && data[0].values[0][0] || undefined
-            var max = data && data[0] && data[0].values && data[0].values[0] && data[0].values[0][1] || undefined
-            return Q({
-                min: min,
-                max: max
-            })
+        return properties.worker.exec(query);
+    },
+    transformData(properties, rawData) {
+        var min = rawData && rawData[0] && rawData[0].values && rawData[0].values[0] && rawData[0].values[0][0] || undefined
+        var max = rawData && rawData[0] && rawData[0].values && rawData[0].values[0] && rawData[0].values[0][1] || undefined
+        return Q({
+            min: min,
+            max: max
         })
     },
     handleChange(otherDate, isStart, thisDate) {
@@ -428,15 +435,17 @@ window.FilterDate = React.createClass({
         }
     },
     componentDidMount() {
-        this.getData().then(function(data) {        
-            this.setState({
-                loading: false,
-                min: moment(data.min),
-                max: moment(data.max),
-                startDate: moment(data.min),
-                endDate: moment(data.max)
-            })   
-        }.bind(this))     
+        this.getData(this.props)
+            .then(this.transformData.bind(this, this.props))
+            .then(function(data) {        
+                this.setState({
+                    loading: false,
+                    min: moment(data.min),
+                    max: moment(data.max),
+                    startDate: moment(data.min),
+                    endDate: moment(data.max)
+                })   
+            }.bind(this))     
     },
     render() {
         var style = {

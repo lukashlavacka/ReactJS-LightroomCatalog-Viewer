@@ -105,15 +105,18 @@ window.Utilities = {
 
 
 
-window.WorkerWrapper = function(worker) {
+window.WorkerWrapper = function(workerPath) {
     this.id = 0;
     this.promises = {}
-    this.worker = worker;
+    this.worker = new Worker(workerPath);
 
     this.open = function(buffer) {
         this.id++;
         var deferred = Q.defer();
-        this.promises[this.id] = deferred;
+        this.promises[this.id] = {
+        	deferred: deferred,
+        	timestamp: new Date()
+        };
 
         this.worker.postMessage({
             id: this.id,
@@ -127,7 +130,11 @@ window.WorkerWrapper = function(worker) {
     this.exec = function(query) {
         this.id++;
         var deferred = Q.defer();
-        this.promises[this.id] = deferred;
+        this.promises[this.id] = {
+        	deferred: deferred,
+        	query: query,
+        	timestamp: new Date()
+        };
 
         this.worker.postMessage({
             id: this.id,
@@ -139,7 +146,10 @@ window.WorkerWrapper = function(worker) {
     }.bind(this)
 
     this.worker.onmessage = function(event) {
-        this.promises[event.data.id].resolve(event.data.results)
+    	var promise = this.promises[event.data.id]
+    	console.log("Last query '" + promise.query + "' took " + (new Date() - promise.timestamp) + "ms");
+
+    	promise.deferred.resolve(event.data.results)
         delete this.promises[event.data.id];
     }.bind(this)
 }
