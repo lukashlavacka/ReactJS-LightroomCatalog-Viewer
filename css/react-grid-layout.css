@@ -5,13 +5,20 @@
 .react-grid-item {
   transition: all 200ms ease;
   transition-property: left, top;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .panel-react-grid{
   height: 100%;
   margin-bottom: 0;
+}
+
+.panel-body-react-grid {
+  position: absolute;
+  top: 59px;
+  bottom: 15px;
+  left: 0;
+  right: 0;
+  overflow-y: auto;
 }
 
 .react-grid-item.cssTransforms {
@@ -55,5 +62,5 @@
 
 .react-grid-item-drag-handle {
   cursor: move;
-  height: 69px;
+  height: 59px;
 }

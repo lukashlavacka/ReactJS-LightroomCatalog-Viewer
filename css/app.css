@@ -34,16 +34,24 @@ table.table-col-hover .col:hover::after {
     width: 100%;
     z-index: -1;        
 }
+div.loading {
+    overflow: hidden;
+    position: absolute;
+    width: 100%;
+    padding: 15px 15px 0 15px;
+    height: 100%;
+    margin: -15px -15px 0 -15px;
+}
 
 div.loading:after {
     /* with no content, nothing is rendered */
     content: "";
-    position: fixed;
+    position: absolute;
     /* element stretched to cover during rotation an aspect ratio up to 1/10 */
-    top: -500%;
-    left: -500%;
-    right: -500%;
-    bottom: -500%;
+    top: -1000%;
+    left: -1000%;
+    right: -1000%;
+    bottom: -1000%;
     z-index: 9999;
     pointer-events: none;
     /* background */
