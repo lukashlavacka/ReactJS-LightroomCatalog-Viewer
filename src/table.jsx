@@ -1,5 +1,11 @@
-window.TableViewer = React.createClass({
-    handleFieldChange: function(type, field) {
+import React from 'react'
+import squel from "squel"
+import Q from 'q'
+import { LoadingWrapper, BootstrapRow } from './shared'
+import { GetFilterExpression } from './utilities'
+
+export default class TableViewer extends React.Component {
+    handleFieldChange(type, field) {
     	switch(type) {
     		case "xField":    		
 	        this.setState({
@@ -12,14 +18,14 @@ window.TableViewer = React.createClass({
 	        })
 	        break;
     	}
-    },
-    getInitialState: function() {
-        return {
-            xField : "exif.isoSpeedRating",
-            yField : "images.rating"
-        }
-    },
-    render: function() {
+    }
+
+    state = {
+        xField : "exif.isoSpeedRating",
+        yField : "images.rating"
+    }
+
+    render() {
         if(this.state.xField && this.state.yField)
             var table = <Table worker={this.props.worker} filter={this.props.filter} xField={this.state.xField} yField={this.state.yField} />
         return (
@@ -30,46 +36,50 @@ window.TableViewer = React.createClass({
             </div>
         )
     }
-})
+}
 
-var FieldSelector = React.createClass({
-	agragateFields: [
-		{ field: "camera.value", name: "Camera" },
-		{ field: "lens.value", name: "Lens" },
-		{ field: "exif.focalLength", name: "Focal length" },
-		{ field: "exif.isoSpeedRating", name: "ISO" },
-		{ field: "exif.aperture", name: "Aperture" },
-        { field: "exif.shutterSpeed", name: "Shutter Speed" },
-		{ field: "images.pick", name: "Flag" },
-		{ field: "images.colorLabels", name: "Color label" },
-		{ field: "images.rating", name: "Rating" },
-		{ field: "keyword.tag", name: "Face" },
-		{ field: "strftime('%Y', images.captureTime)", name: "Year" },
-		{ field: "strftime('%Y-%m', images.captureTime)", name: "Month" },
-		{ field: "strftime('%Y-%W', images.captureTime)", name: "Week" },
-		{ field: "strftime('%Y-%m-%d', images.captureTime)", name: "Day" },
-	],
+class FieldSelector extends React.Component {
+	static defaultProps = {		
+		agragateFields: [
+			{ field: "camera.value", name: "Camera" },
+			{ field: "lens.value", name: "Lens" },
+			{ field: "exif.focalLength", name: "Focal length" },
+			{ field: "exif.isoSpeedRating", name: "ISO" },
+			{ field: "exif.aperture", name: "Aperture" },
+	        { field: "exif.shutterSpeed", name: "Shutter Speed" },
+			{ field: "images.pick", name: "Flag" },
+			{ field: "images.colorLabels", name: "Color label" },
+			{ field: "images.rating", name: "Rating" },
+			{ field: "keyword.tag", name: "Face" },
+			{ field: "strftime('%Y', images.captureTime)", name: "Year" },
+			{ field: "strftime('%Y-%m', images.captureTime)", name: "Month" },
+			{ field: "strftime('%Y-%W', images.captureTime)", name: "Week" },
+			{ field: "strftime('%Y-%m-%d', images.captureTime)", name: "Day" },
+		]
+	}
+
 	handleChange(event) {
 		this.props.handleFieldChange(event.target.value)
-	},
-	render: function() {
-		var otherFields = _.reject(this.agragateFields, { field : this.props.otherField })
+	}
+
+	render() {
+		var otherFields = _.reject(this.props.agragateFields, { field : this.props.otherField })
 		return (
 			<BootstrapRow>
 				<div>
 					<h3>Select {this.props.name}</h3>
-		            {otherFields.map(function(f){
+		            {otherFields.map((f) => {
 		                return (
 		                        <label key={f.field} className="radio-inline"><input type="radio" checked={this.props.field === f.field} value={f.field} onChange={this.handleChange} />{f.name}</label>
 		                )
-		            }.bind(this))}
+		            })}
 	            </div>
 	        </BootstrapRow>
 		);
 	}
-});
+}
 
-var Table = React.createClass({
+class Table extends React.Component {
 	getData(properties) {
         this.setState({loading: true})
 
@@ -88,8 +98,8 @@ var Table = React.createClass({
             .where(properties.yField + " IS NOT NULL")
 
 
-        _.forOwn(_.omitBy(properties.filter, _.isUndefined), function(value, key){
-        	s.where(Utilities.getFilterExpression(key, value))
+        _.forOwn(_.omitBy(properties.filter, _.isUndefined), (value, key) => {
+        	s.where(GetFilterExpression(key, value))
         })
 
         s = s
@@ -101,36 +111,39 @@ var Table = React.createClass({
         var query = s.toString();
 
         return properties.worker.exec(query)
-    },
+    }
+
     transformData(properties, rawData) {
 		var dataset = rawData && rawData[0] && rawData[0].values || []
         return Q(dataset);
-    },
-    getInitialState() {
-    	return {
-    		data: undefined
-    	};
-    },
+    }
+
+    state = {
+		data: undefined
+	}
+
     componentDidMount() {        
         this.getData(this.props)
         .then(this.transformData.bind(this, this.props))
-        .then(function(data){
+        .then((data) => {
             this.setState({
             	loading: false,
             	data : data
             })
-        }.bind(this))
-    },
+        })
+    }
+
     componentWillReceiveProps(nextProps) {
         this.getData(nextProps)
         .then(this.transformData.bind(this, nextProps))
-        .then(function(data){
+        .then((data) => {
             this.setState({
             	data : data,
                 loading: false
             })
-        }.bind(this))
-    },
+        })
+    }
+
 	render() {
 		return (
 			<LoadingWrapper loading={this.state.loading}>
@@ -138,28 +151,28 @@ var Table = React.createClass({
 			</LoadingWrapper>
 		);
 	}
-})
+}
 
-var TableComponent = React.createClass({
+class TableComponent extends React.Component {
 	transformData() {
 		var uniqueX = _(this.props.data)
-			.map(function(r){ return r[0]})
+			.map((r) => { return r[0]})
 			.uniq()
 			.value()
 			.sort(this.correctSort(this.props.xField))
 
 		var uniqueY = _(this.props.data)
-			.map(function(r){ return r[1]})
+			.map((r) => { return r[1]})
 			.uniq()
 			.value()
 			.sort(this.correctSort(this.props.yField))
 
 		var maxCount = _(this.props.data)
-			.map(function(r) {return r[2]})
+			.map((r) =>  {return r[2]})
 			.max()
 
 		var maxAverage = _(this.props.data)
-			.map(function(r) {return r[3]})
+			.map((r) =>  {return r[3]})
 			.max()
 
 		return {
@@ -168,20 +181,21 @@ var TableComponent = React.createClass({
 			maxCount : maxCount,
 			maxAverage : maxAverage
 		}
-	},
-	correctSort: function(field)
-	{
+	}
+
+	correctSort(field) {
 		switch(field){
 			case "numeric":
 			case "exif.focalLength":
 			case "exif.isoSpeedRating":
 			case "exif.aperture":
 			case "images.rating":
-				return (function(a,b) { return a-b; });
+				return ((a,b) =>  { return a-b; });
 		}
-	},
+	}
+
 	findByXY(xVal, yVal, maxCount, maxAverage) {
-		var row = _.find(this.props.data, function(r){
+		var row = _.find(this.props.data, (r) => {
 			return r[0] === xVal && r[1] === yVal;
 		})
 
@@ -194,7 +208,8 @@ var TableComponent = React.createClass({
 			relCount: count / maxCount,
 			relRating: avergeRating / maxAverage
 		}
-	},
+	}
+
 	render() {		
 		if(!this.props.data)
 			return null;
@@ -205,27 +220,27 @@ var TableComponent = React.createClass({
 					<thead>
 						<tr>				
 							<th></th>		
-							{transformedData.uniqueX.map(function(xVal){
+							{transformedData.uniqueX.map((xVal) => {
 								return (<th key={xVal}>{xVal}</th>)
-							}.bind(this))}
+							})}
 						</tr>
 					</thead>
 					<tbody>
-						{transformedData.uniqueY.map(function(yVal){
+						{transformedData.uniqueY.map((yVal) => {
 							return (<tr key={yVal}>
 								<th>{yVal}</th>
-								{transformedData.uniqueX.map(function(xVal){
+								{transformedData.uniqueX.map((xVal) => {
 									var val = this.findByXY(xVal, yVal, transformedData.maxCount, transformedData.maxAverage)
 									var style = {
 									    backgroundColor: "hsla(0, 0%, " + Math.round(val.relCount * 100) + "%, 0.05)"
 									}
 									return (<td key={yVal + "_" + xVal} style={style} title={val.rating}>{val.count}</td>)
-								}.bind(this))}
+								})}
 							</tr>)
-						}.bind(this))}
+						})}
 					</tbody>
 				</table>
 			</div>
 		);
 	}
-})
+}

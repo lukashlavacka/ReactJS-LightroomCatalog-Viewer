@@ -1,3 +1,5 @@
+/* Table hover highlight both row and column */
+
 table.table-col-hover {
     overflow: hidden;
     z-index: 1;
@@ -34,6 +36,8 @@ table.table-col-hover .col:hover::after {
     width: 100%;
     z-index: -1;        
 }
+
+/* Loading overlay */
 div.loading {
     overflow: hidden;
     position: absolute;
@@ -76,10 +80,14 @@ div.loading:after {
     }
 }
 
+/* Smaller margins for headers */
+
 h1, .h1, h2, .h2, h3, .h3 {
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+/* Chart legend style */
 
 .chart-legend li {
     float: left;
@@ -90,4 +98,67 @@ h1, .h1, h2, .h2, h3, .h3 {
 .chart-legend li span{
     padding-left: 3px;
     padding-right: 3px;
+}
+
+/* Bootstrap panel styling for react-grid-layout */
+
+.panel-react-grid {
+  height: 100%;
+  margin-bottom: 0;
+}
+
+.panel-body-react-grid {
+  position: absolute;
+  top: 59px;
+  bottom: 15px;
+  left: 0;
+  right: 0;
+  overflow-y: auto;
+}
+
+.slider {
+  width: 100%;
+  max-width: 500px;
+  height: 25px;
+  /*border: 1px solid grey;*/
+}
+
+/* Slide styles */
+.handle {
+  font-size: 0.9em;
+  text-align: center;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid grey;
+  color: black;
+  cursor: pointer;
+}
+
+.handle.active {
+  background-color: grey;
+}
+
+.bar {
+  position: relative;
+  background: #ddd;
+}
+
+.bar.bar-1 {
+  background: #d99;
+}
+
+.bar.bar-2 {
+  background: #9d9;
+}
+
+.slider .bar {
+  top: 10px;
+  height: 5px;
+}
+
+.slider .handle {
+  top: 1px;
+  width: 50px;
+  height: 24px;
+  line-height: 24px;
 }

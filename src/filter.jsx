@@ -1,4 +1,13 @@
-var FilterFactory = React.createFactory(React.createClass({
+import React from 'react'
+import CheckboxGroup from 'react-checkbox-group'
+import DatePicker from 'react-datepicker'
+import ReactSlider from 'react-slider'
+import moment from 'moment'
+import squel from "squel"
+import Q from 'q'
+import { LoadingWrapper } from './shared'
+
+class FilterFactory extends React.Component {
     getData(properties) {
         this.setState({loading: true})
         var s = squel
@@ -13,83 +22,89 @@ var FilterFactory = React.createFactory(React.createClass({
         var query = s.toString();
 
         return properties.worker.exec(query)
-    },
+    }
+
     transformData(properties, rawData) {
         properties = properties || this.props;
         var dataset = rawData && rawData[0] || { values: []}
-        return Q(dataset.values.map(function(t){ return { value: t[0], name: t[1] } }))
-    },
+        return Q(dataset.values.map((t) => { return { value: t[0], name: t[1] } }))
+    }
+
     handleChange(event) {
         this.props.handleFilterChange(this.props.type, this.refs[this.props.type].getCheckedValues())
-    },
+    }
+
     transformName(name){
         if(_.isFunction(this.props.transformName))
             return this.props.transformName(name);
         return name;
-    },
-    getInitialState() {
-        return {
-            options: []
-        }
-    },
+    }
+
+    state = {
+        options: []
+    }
+
     componentDidMount() {
         if(this.props.table){
             this.getData(this.props)
             .then(this.transformData.bind(this, this.props))
-            .then(function(data){
+            .then((data) => {
                 this.setState({
                     options : data,
                     loading: false
                 })
-            }.bind(this))
+            })
         }
         else if(this.props.options) {      
             this.setState({
                 options: this.props.options
             }) 
         }       
-    },
+    }
+
     componentWillReceiveProps(nextProps) {
         if(nextProps.table){
             this.getData(nextProps)
             .then(this.transformData.bind(this, nextProps))
-            .then(function(data){
+            .then((data) => {
                 this.setState({
                     options : data,
                     loading: false
                 })
-            }.bind(this))
+            })
         }
         else if(nextProps.options) {      
             this.setState({
                 options: nextProps.options
             }) 
         }
-    },
-    shouldComponentUpdate: function(nextProps, nextState) {
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
         return !_.isEqual(this.state.options, nextState.options) ||
                 this.props.valueProp != nextProps.valueProp ||
                 this.props.nameProp != nextProps.nameProp ||
                 this.props.table != nextProps.table || 
                 this.props.filter != nextProps.filter
-    },
+    }
+
     render() {
         return (
             <LoadingWrapper loading={this.state.loading}>
                 <form>
                     <CheckboxGroup name={this.props.type} ref={this.props.type} onChange={this.handleChange} >
-                        {this.state.options.map(function(o){
+                        {this.state.options.map((o) => {
                             return <label key={o.value} className="checkbox-inline"><input type="checkbox" value={o.value} />{this.transformName(o.name)}</label>
-                        }.bind(this))}
+                        })}
                     </CheckboxGroup>
                 </form>
             </LoadingWrapper>
         );
     }
-}))
+}
 
-var FilterRangeFactory = React.createFactory(React.createClass({
-    getData(properties) {
+class FilterRangeFactory extends React.Component {
+    getData = (properties) => {
         this.setState({loading: true})
         var s = squel
             .select()
@@ -100,16 +115,18 @@ var FilterRangeFactory = React.createFactory(React.createClass({
         var query = s.toString();
 
         return properties.worker.exec(query);
-    },
-    transformData(properties, rawData){
+    }
+
+    transformData = (properties, rawData) => {
         var min = rawData && rawData[0] && rawData[0].values && rawData[0].values[0] && rawData[0].values[0][0] || undefined
         var max = rawData && rawData[0] && rawData[0].values && rawData[0].values[0] && rawData[0].values[0][1] || undefined
         return Q({
             min: min,
             max: max
         });
-    },
-    handleChange(value) {
+    }
+
+    handleChange = (value) => {
         var dbVal = value.map(this.transformFromUIValue);
         this.setState({
             dbMinVal: dbVal[0],
@@ -118,39 +135,42 @@ var FilterRangeFactory = React.createFactory(React.createClass({
             uiMax: value[1]
         })
         this.props.handleFilterChange(this.props.type, dbVal)
-    },
-    transformFromDBValue(value, isMin) {
+    }
+
+    transformFromDBValue = (value, isMin) => {
         if(_.isFunction(this.props.transformFromDBValue))
             return this.props.transformFromDBValue(value, isMin);
         return value;
-    },
-    transformFromUIValue(value) {
+    }
+
+    transformFromUIValue = (value) => {
         if(_.isFunction(this.props.transformFromUIValue))
             return this.props.transformFromUIValue(value);
         return value;
-    },
-    transformToUIName(value) {
+    }
+
+    transformToUIName = (value) => {
         if(_.isFunction(this.props.transformToUIName))
             return this.props.transformToUIName(value);
         if(_.isFunction(this.props.transformFromUIValue))
             return this.props.transformFromUIValue(value);
         return value;
-    },
-    getInitialState() {
-        return {
-            dbMin: undefined,
-            dbMax: undefined,
-            uiMin: undefined,
-            uiMax: undefined,
-            dbMinVal: undefined,
-            dbMaxVal: undefined
-        }
-    },
+    }
+
+    state = {
+        dbMin: undefined,
+        dbMax: undefined,
+        uiMin: undefined,
+        uiMax: undefined,
+        dbMinVal: undefined,
+        dbMaxVal: undefined
+    }
+
     componentDidMount() {
         if(this.props.field){
             this.getData(this.props)
                 .then(this.transformData.bind(this, this.props))
-                .then(function(data){
+                .then((data) => {
                     var minMax = data;
                     this.setState({
                         loading: false,
@@ -161,7 +181,7 @@ var FilterRangeFactory = React.createFactory(React.createClass({
                         uiMin: this.props.invert ? this.transformFromDBValue(minMax.max) : this.transformFromDBValue(minMax.min, true),
                         uiMax: this.props.invert ? this.transformFromDBValue(minMax.min, true) : this.transformFromDBValue(minMax.max)
                     })
-                }.bind(this))
+                })
         }
         else if(this.props.minMax) {
             this.setState({
@@ -173,14 +193,16 @@ var FilterRangeFactory = React.createFactory(React.createClass({
                 uiMax: this.props.invert ? this.transformFromDBValue(this.props.minMax.min, true) : this.transformFromDBValue(this.props.minMax.max)
             })
         }
-    },
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
         return this.state.dbMin !== nextState.dbMin
             || this.state.dbMax !== nextState.dbMax
             || this.state.uiMin !== nextState.uiMin
             || this.state.uiMax !== nextState.uiMax
             || this.props.aditionalType !== nextProps.aditionalType
-    },
+    }
+
     componentWillReceiveProps(nextProps) {
         if(this.props.aditionalType !== nextProps.aditionalType) {
             var uiMin = this.transformFromDBValue(Math.max(this.state.dbMinVal, this.state.dbMin), true);
@@ -197,7 +219,8 @@ var FilterRangeFactory = React.createFactory(React.createClass({
             })
             this.props.handleFilterChange(nextProps.type, [uiDbMin, uiDbMax])
         }
-    },
+    }
+
     render() {
         if(typeof(this.state.dbMin) === "undefined" || this.state.loading)
             return <LoadingWrapper loading={true} />
@@ -225,178 +248,199 @@ var FilterRangeFactory = React.createFactory(React.createClass({
             </LoadingWrapper>
         );
     }
-}))
+}
 
-window.FilterCamera = React.createClass({
+export class FilterCamera extends React.Component {
     render() {
         return (
             <FilterFactory type="camera" table="AgInternedExifCameraModel" {...this.props} />
         );
     }
-})
+}
 
-window.FilterLens = React.createClass({
-    transformName(name){
+export class FilterLens extends React.Component {
+    transformName = (name) => {
         if(name === "DT 0mm F0 SAM")
             return "Unknown"
         return name;
-    },
+    }
+
     render() {
         return (
             <FilterFactory type="lens" table="AgInternedExifLens" transformName={this.transformName} {...this.props} />
         );
     }
-})
+}
 
-window.FilterFocalLength = React.createClass({
+export class FilterFocalLength extends React.Component {
     render() {
         return (
             <FilterRangeFactory type="focalLength" field="focalLength" {...this.props} />
         );
     }
-})
+}
 
-window.FilterISORating = React.createClass({
-    transformFromUIValue(value) {
+export class FilterISORating extends React.Component {
+    transformFromUIValue = (value) => {
         return Math.pow(2, value) * 100;
-    },
-    transformFromDBValue(value) {
+    }
+
+    transformFromDBValue = (value) => {
         return Math.log((value / 100)) / Math.log(2)
-    },
+    }
+
     render() {
         return (
             <FilterRangeFactory type="iso" field="isoSpeedRating" transformFromDBValue={this.transformFromDBValue} transformFromUIValue={this.transformFromUIValue} {...this.props} />
         );
     }
-})
+}
 
-window.FilterAperture = React.createClass({
-    transformFromUIValue(value) {
+export class FilterAperture extends React.Component {
+    transformFromUIValue = (value) => {
         if(this.state.type === "Continuous")
             return value / 10;
         
         return this.types[this.state.type][value]
-    },
-    transformFromDBValue(value, isFirst) {
+    }
+
+    transformFromDBValue = (value, isFirst) => {
         if(this.state.type === "Continuous")
             return isFirst ? Math.floor(value * 10) : Math.ceil(value * 10);
 
-        return _.findIndex(this.types[this.state.type], function(v){
+        return _.findIndex(this.types[this.state.type], (v) => {
             return value < v;
         }) - (isFirst ? 1 : 0);
-    },
-    handleChange(event) {
+    }
+
+    handleChange = (event) => {
         this.setState({
             type: event.target.value
         })
-    },
-    types: {
-        Full: [0.5, 0.7, 1.0, 1.4, 2, 2.8, 4, 5.6, 8, 11, 16, 22, 32],
-        Half: [0.7, 0.8, 1.0, 1.2, 1.4, 1.7, 2, 2.4, 2.8, 3.3, 4, 4.8, 5.6, 6.7, 8, 9.5, 11, 13, 16, 19, 22, 27, 32],
-        Third: [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2, 2.2, 2.5, 2.8, 3.2, 3.5, 4, 4.5, 5.0, 5.6, 6.3, 7.1, 8, 9, 10, 11, 13, 14, 16, 18, 20, 22, 25, 29, 32],
-        Continuous: []
-    },
-    getInitialState() {
-        return {
-            type: "Continuous"
-        }
-    },
+    }
+
+    static props = {
+         types: {
+            Full: [0.5, 0.7, 1.0, 1.4, 2, 2.8, 4, 5.6, 8, 11, 16, 22, 32],
+            Half: [0.7, 0.8, 1.0, 1.2, 1.4, 1.7, 2, 2.4, 2.8, 3.3, 4, 4.8, 5.6, 6.7, 8, 9.5, 11, 13, 16, 19, 22, 27, 32],
+            Third: [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2, 2.2, 2.5, 2.8, 3.2, 3.5, 4, 4.5, 5.0, 5.6, 6.3, 7.1, 8, 9, 10, 11, 13, 14, 16, 18, 20, 22, 25, 29, 32],
+            Continuous: []
+        }       
+    }
+
+    state = {
+        type: "Continuous"
+    }
+
     render() {
         return (
             <div>
                 <FilterRangeFactory type="aperture" field="aperture" transformFromDBValue={this.transformFromDBValue} transformFromUIValue={this.transformFromUIValue} aditionalType={this.state.type} {...this.props}/>                
-                {_.keys(this.types).map(function(key){
+                {_.keys(this.props.types).map((key) => {
                 return (
                     <div key={key} className="radio-inline">
                         <label><input type="radio" checked={this.state.type === key} value={key} onChange={this.handleChange} />{key}</label>
                     </div>
-                )}.bind(this))}
+                )})}
             </div>
         );
     }
-})
+}
 
-window.FilterShutter = React.createClass({
-    transformFromUIValue(value) {
+export class FilterShutter extends React.Component {
+    transformFromUIValue = (value) => {
         return 100 / value
-    },
-    transformFromDBValue(value) {
+    }
+
+    transformFromDBValue = (value) => {
         return Math.round(100 / value)
-    },
-    transformToUIName(value) {
+    }
+
+    transformToUIName = (value) => {
         if(value > 0)
             return "1/" + Math.round(value)
         else
             return (1 / value) + "s"
-    },
+    }
+
     render() {
         return (
             <FilterRangeFactory type="shutter" field="shutterSpeed" invert={true} transformFromDBValue={this.transformFromDBValue} transformFromUIValue={this.transformFromUIValue} transformToUIName={this.transformToUIName} {...this.props} />
         );
     }
-})
+}
 
-window.FilterFlag = React.createClass({
-    options: [
-        { value: 0, name: "None"},
-        { value: -1, name: "Rejected"},
-        { value: 1, name: "Selected"}
-    ],
+export class FilterFlag extends React.Component {
+    static defaultProps = {
+        options: [
+            { value: 0, name: "None"},
+            { value: -1, name: "Rejected"},
+            { value: 1, name: "Selected"}
+        ]
+    }
+
     render() {
         return (
-            <FilterFactory type="flag" options={this.options} {...this.props}/>
+            <FilterFactory type="flag" options={this.props.options} {...this.props}/>
         );
     }
-})
+}
 
-window.FilterColor = React.createClass({
-    options: [
-        { value: "", name: "None"},
-        { value: "Red", name: "Red"},
-        { value: "Yellow", name: "Yellow"},
-        { value: "Green", name: "Green"},
-        { value: "Blue", name: "Blue"},
-        { value: "Purple", name: "Purple"}
-    ],
+export class FilterColor extends React.Component {
+    static defaultProps = {       
+        options: [
+            { value: "", name: "None"},
+            { value: "Red", name: "Red"},
+            { value: "Yellow", name: "Yellow"},
+            { value: "Green", name: "Green"},
+            { value: "Blue", name: "Blue"},
+            { value: "Purple", name: "Purple"}
+        ]
+    }
+
     render() {
         return (
-            <FilterFactory type="color" options={this.options} {...this.props}/>
+            <FilterFactory type="color" options={this.props.options} {...this.props}/>
         );
     }
-})
+}
 
-window.FilterRating = React.createClass({
-    options: [
-        { value: 0, name: "unrated" },
-        { value: 1, name: "1 star" },
-        { value: 2, name: "2 star" },
-        { value: 3, name: "3 star" },
-        { value: 4, name: "4 star" },
-        { value: 5, name: "5 star" }
-    ],
-    minMax: {
-        min: 0,
-        max: 5
-    },
-    transformToUIName(value) {
-        return _.find(this.options, {value : value}).name
-    },
+export class FilterRating extends React.Component {
+    static defaultProps = {   
+        options: [
+            { value: 0, name: "unrated" },
+            { value: 1, name: "1 star" },
+            { value: 2, name: "2 star" },
+            { value: 3, name: "3 star" },
+            { value: 4, name: "4 star" },
+            { value: 5, name: "5 star" }
+        ],
+        minMax: {
+            min: 0,
+            max: 5
+        }
+    }
+
+    transformToUIName = (value) => {
+        return _.find(this.props.options, {value : value}).name
+    }
+
     render() {
         return (
-            <FilterRangeFactory type="rating" minMax={this.minMax} transformToUIName={this.transformToUIName} {...this.props}/>
+            <FilterRangeFactory type="rating" minMax={this.props.minMax} transformToUIName={this.transformToUIName} {...this.props}/>
         );
     }
-})
+}
 
-window.FilterFace = React.createClass({
+export class FilterFace extends React.Component {
     render() {
         return (
             <FilterFactory type="face" table="AgLibraryKeyword" filter="keywordType = 'person'" nameProp="Name" {...this.props} />
         );
     }
-})
+}
 
-window.FilterDate = React.createClass({
+export class FilterDate extends React.Component {
     getData(properties) {
         this.setState({loading: true})
         var s = squel
@@ -407,16 +451,18 @@ window.FilterDate = React.createClass({
 
         var query = s.toString();
         return properties.worker.exec(query);
-    },
-    transformData(properties, rawData) {
+    }
+
+    transformData = (properties, rawData) => {
         var min = rawData && rawData[0] && rawData[0].values && rawData[0].values[0] && rawData[0].values[0][0] || undefined
         var max = rawData && rawData[0] && rawData[0].values && rawData[0].values[0] && rawData[0].values[0][1] || undefined
         return Q({
             min: min,
             max: max
         })
-    },
-    handleChange(otherDate, isStart, thisDate) {
+    }
+
+    handleChange = (otherDate, isStart, thisDate) => {
         if(isStart){
             this.setState({ startDate: thisDate})
         }
@@ -425,19 +471,19 @@ window.FilterDate = React.createClass({
         }
 
         this.props.handleFilterChange("date", isStart ? [ thisDate, otherDate ] : [ otherDate, thisDate ])
-    },
-    getInitialState() {
-        return {
-            min: moment().subtract(1, 'month'),
-            max: moment().add(1, 'month'),
-            startDate: moment().subtract(1, 'month'),
-            endDate: moment().add(1, 'month')
-        }
-    },
+    }
+
+    state = {
+        min: moment().subtract(1, 'month'),
+        max: moment().add(1, 'month'),
+        startDate: moment().subtract(1, 'month'),
+        endDate: moment().add(1, 'month')
+    }
+
     componentDidMount() {
         this.getData(this.props)
             .then(this.transformData.bind(this, this.props))
-            .then(function(data) {        
+            .then((data) =>  {        
                 this.setState({
                     loading: false,
                     min: moment(data.min),
@@ -445,8 +491,9 @@ window.FilterDate = React.createClass({
                     startDate: moment(data.min),
                     endDate: moment(data.max)
                 })   
-            }.bind(this))     
-    },
+            })     
+    }
+
     render() {
         var style = {
             width: "50%",
@@ -477,4 +524,4 @@ window.FilterDate = React.createClass({
           </LoadingWrapper>
         );
     }
-})
+}
