@@ -71,7 +71,7 @@ class FieldSelector extends React.Component {
         handleFieldChange: React.PropTypes.func.isRequired
     }
 
-    handleChange(event) {
+    handleChange = (event) => {
         this.props.handleFieldChange(event.target.value);
     }
 

@@ -89,7 +89,7 @@ class FieldSelector extends React.Component {
         ]
     }
 
-    handleChange(event) {
+    handleChange = (event) => {
         this.props.handleFieldChange(event.target.value);
     }
 

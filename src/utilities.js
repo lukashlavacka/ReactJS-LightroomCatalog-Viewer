@@ -32,6 +32,9 @@ export function GetFilterExpression(type, filter) {
     case 'face':
         property = 'keyword.tag';
         break;
+    case 'map':
+        property = 'images.id_local';
+        break;
     case 'date':
         property = 'images.captureTime';
         break;
@@ -97,6 +100,9 @@ export function GetFilterExpression(type, filter) {
                 .and(`${property} >= ${filterValues[0]}`)
                 .and(`${property} <= ${filterValues[1]}`);
         }
+        break;
+    case 'map':
+        expression = expression.and(`${property} IN (${filterValues.join(', ')})`);
         break;
     default:
         break;

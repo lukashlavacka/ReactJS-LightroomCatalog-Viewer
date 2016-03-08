@@ -1,6 +1,6 @@
 import React from 'react';
 import ScriptjsLoader from "react-google-maps/lib/async/ScriptjsLoader";
-import {GoogleMap, Marker} from 'react-google-maps';
+import {GoogleMap, Marker, OverlayView} from 'react-google-maps';
 import MarkerClusterer from 'react-google-maps/lib/addons/MarkerClusterer';
 import {triggerEvent} from 'react-google-maps/lib/utils';
 import squel from 'squel';
@@ -15,7 +15,16 @@ export default class MapViewer extends React.Component {
 
     static propTypes = {
         worker: React.PropTypes.instanceOf(WorkerWrapper).isRequired,
-        filter: React.PropTypes.object
+        filter: React.PropTypes.object,
+        types: React.PropTypes.array.isRequired,
+        handleFilterChange: React.PropTypes.func.isRequired
+    }
+
+    static defaultProps = {
+        types: [
+            { key: '1', name: 'Zoom to cluster' },
+            { key: '2', name: 'Filter to cluster' }
+        ]
     }
 
     getData(properties) {
@@ -58,7 +67,28 @@ export default class MapViewer extends React.Component {
 
     state = {
         loading: false,
-        data: []
+        data: [],
+        type: '2'
+    }
+
+    handleChange = (event) => {
+        this.setState({
+            type: event.target.value
+        });
+    }
+
+    onMarkerClick = (markerCluster) => {
+        if (this.state.type === '2') {
+            debugger;
+            const imageIDs = markerCluster.markers_.map(m => parseInt(m.title));
+            this.props.handleFilterChange("map", imageIDs);
+            this.setState({filterBounds: markerCluster.bounds_});
+        }
+    }
+
+    onClearFilter = () => {
+        this.props.handleFilterChange("map");
+        this.setState({filterBounds: undefined});
     }
 
     componentDidMount() {
@@ -98,8 +128,42 @@ export default class MapViewer extends React.Component {
     }
 
     render() {
+        let overlayView;
+        if(this.state.filterBounds) {
+            overlayView = (
+                <OverlayView
+                    bounds={this.state.filterBounds}
+                    mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
+                    <div style={{
+                        opacity: 0.1,
+                        background: 'black',
+                        width: '100%',
+                        height: '100%'
+                    }} id="overlay">
+                        <button
+                            style={{position: 'absolute', top: '0', right: '0'}}
+                            type="button"
+                            onClick={this.onClearFilter}>
+                            x
+                        </button>
+                    </div>
+                </OverlayView>                
+            );
+        }
         return (
             <LoadingWrapper loading={this.state.loading}>
+                {this.props.types.map((type) => {
+                    return (
+                        <div key={type.key} className="radio-inline">
+                            <label><input
+                                type="radio"
+                                checked={this.state.type === type.key}
+                                value={type.key}
+                                onChange={this.handleChange} />{type.name}
+                            </label>
+                        </div>
+                    );
+                })}
                 <ScriptjsLoader
                     hostname={"maps.googleapis.com"}
                     pathname={"/maps/api/js"}
@@ -113,17 +177,24 @@ export default class MapViewer extends React.Component {
                     googleMapElement={
                         <GoogleMap
                             ref={it => this._googleMapComponent = it}
+                            containerProps={{ ...this.props, style: {height: '100%'} }}
                             defaultZoom={1}
                             defaultCenter={{lat: 0, lng: 0}}
                         >
+                            {overlayView}
                             <MarkerClusterer
                                 averageCenter
                                 enableRetinaIcons
                                 gridSize={ 60 }
+                                onClick={this.onMarkerClick}
+                                zoomOnClick={!this.state.filterBounds}
                             >
                                 {this.state.data.map(d => (
                                     <Marker
                                     key={d.id}
+                                    clickable={false}
+                                    optimized={true}
+                                    title={`${d.id}`}
                                     position={d}/>
                                 ))}
                             </MarkerClusterer>
