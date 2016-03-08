@@ -8,7 +8,7 @@ module.exports = {
     output: {
         filename: path.resolve(__dirname, './dist/js/bundle.js')
     },
-    devtool: 'source-map',
+    devtool: 'eval-cheap-module-source-map',
     module: {
         noParse: [
             /sql.js$/
@@ -24,14 +24,14 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                loader: ExtractTextPlugin.extract("style-loader", "css-loader")
+                loader: 'style-loader!css-loader'
             },
             {
                 test: /\.(eot|woff|woff2|ttf|svg|png|jpg)$/,
                 loader: 'url-loader',
                 query: {
                     limit: 30000,
-                    name: 'dist/resources/[name]-[hash].[ext]'
+                    name: './dist/resources/[name]-[hash].[ext]'
                 }
             }
         ]
@@ -39,25 +39,18 @@ module.exports = {
     plugins: [
         new webpack.DefinePlugin({
             'process.env': {
-                NODE_ENV: JSON.stringify('production')
+                NODE_ENV: JSON.stringify('development')
             }
-        }),
-        new ExtractTextPlugin('./dist/css/bundle.css', {
-            allChunks: true
-        }),
-        new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.optimize.DedupePlugin(),
-        new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})
+        })
     ],
     resolve: {
-        extensions: ['', '.webpack.js', '.web.js', '.js', '.jsx']
-    },
-    eslintConfig: {
-        env: {
-            browser: true
-        }
-    },
-    scripts: {
-        lint: 'eslint src'
+        extensions: [
+            '',
+            '.webpack.js',
+            '.web.js',
+            '.js',
+            '.jsx'
+        ],
+        unsafeCache: true
     }
 };
