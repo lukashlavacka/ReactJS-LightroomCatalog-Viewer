@@ -174,8 +174,8 @@ class FilterRangeFactory extends React.Component {
         this.setState({loading: true});
         const s = squel
             .select()
-            .field('MIN(' + properties.field + ')')
-            .field('MAX(' + properties.field + ')')
+            .field(`MIN(${properties.field})`)
+            .field(`MAX(${properties.field})`)
             .from('AgHarvestedExifMetadata')
             .where(properties.field + ' > 0');
         const query = s.toString();
@@ -466,9 +466,9 @@ export class FilterShutter extends React.Component {
     transformToUIName = (value) => {
         let transformed;
         if (value > 0) {
-            transformed = '1/' + Math.round(value);
+            transformed = `1/${Math.round(value)}`;
         } else {
-            transformed = (1 / value) + 's';
+            transformed = `${1/value}s`;
         }
 
         return transformed;

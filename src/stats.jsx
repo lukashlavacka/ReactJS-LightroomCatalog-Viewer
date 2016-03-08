@@ -25,9 +25,9 @@ export default class PhotoStats extends React.Component {
                 transform(val) {
                     let transformed;
                     if (val > 0) {
-                        transformed = '1/' + Math.round(100 / val) + 's';
+                        transformed = `1/${Math.round(100 / val)}s`;
                     } else {
-                        transformed = (1 / Math.round(100 / val)) + 's';
+                        transformed = `${1 / Math.round(100 / val)}s`;
                     }
                     return transformed;
                 }

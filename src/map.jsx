@@ -103,7 +103,7 @@ export default class MapViewer extends React.Component {
                 <ScriptjsLoader
                     hostname={"maps.googleapis.com"}
                     pathname={"/maps/api/js"}
-                    query={{v: '3.${MapViewer.version}', libraries: "geometry, drawing, places"}}
+                    query={{v: `3.${MapViewer.version}`, libraries: "geometry, drawing, places"}}
                     loadingElement={
                         <LoadingWrapper loading={true} />
                     }

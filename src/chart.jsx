@@ -231,10 +231,10 @@ class BarChartComponent extends React.Component {
         data.dataset = data.datasets.map((d, i) => {
             const hue = i * (360 / data.datasets.length);
 
-            d.fillColor = 'hsla(' + hue + ',90%,50%,0.5)';
-            d.strokeColor = 'hsla(' + hue + ',90%,50%,0.8)';
-            d.highlightFill = 'hsla(' + hue + ',90%,50%,0.75)';
-            d.highlightStroke = 'hsla(' + hue + ',90%,50%,1.0)';
+            d.fillColor = `hsla(${hue},90%,50%,0.5)`;
+            d.strokeColor = `hsla(${hue},90%,50%,0.8)`;
+            d.highlightFill = `hsla(${hue},90%,50%,0.75)`;
+            d.highlightStroke = `hsla(${hue},90%,50%,1.0)`;
             return d;
         });
         return data;
@@ -276,8 +276,8 @@ class PieChartComponent extends React.Component {
             return {
                 label: v[0] || 'Undefined',
                 value: v[1],
-                color: 'hsl(' + hue + ',80%,50%)',
-                highlight: 'hsl(' + hue + ',90%,60%)'
+                color: `hsl(${hue},80%,50%)`,
+                highlight: `hsl(${hue},,90%,60%)`
             };
         });
 

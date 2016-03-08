@@ -49,7 +49,6 @@ export function GetFilterExpression(type, filter) {
     }
 
     switch (type) {
-    default:
     case 'camera':
     case 'lens':
     case 'flag':
@@ -57,12 +56,11 @@ export function GetFilterExpression(type, filter) {
     case 'color':
         for (let i = 0; i < filterValues.length; i++) {
             if (filterValues[i] === null) {
-                expression = expression.or(property + ' IS NULL');
+                expression = expression.or(`${property} IS NULL`);
+            } else if (isString === true) {
+                expression = expression.or(`${property} = "${filterValues[i]}"`);
             } else {
-                expression = expression.or(property + ' = ' +
-                    (isString ? '"' : '') +
-                    filterValues[i] +
-                    (isString ? '"' : ''));
+                expression = expression.or(`${property} = ${filterValues[i]}`);
             }
         }
         break;
@@ -71,34 +69,36 @@ export function GetFilterExpression(type, filter) {
     case 'iso':
     case 'shutterSpeed':
         if (filterValues[0] === filterValues[1]) {
-            expression = expression.and(property + ' = ' + filterValues[0]);
+            expression = expression.and(`${property} = ${filterValues[0]}`);
         } else {
             expression = expression
-                .and(property + ' >= ' + filterValues[0])
-                .and(property + ' <= ' + filterValues[1]);
+                .and(`${property} >= ${filterValues[0]}`)
+                .and(`${property} <= ${filterValues[1]}`);
         }
         break;
     case 'date':
         expression = expression
-            .and(property + ' >= "' + filterValues[0].format('YYYY-MM-DD') + '"')
-            .and(property + ' < "' + filterValues[1].add(1, 'days').format('YYYY-MM-DD') + '"');
+            .and(`${property} >= "${filterValues[0].format('YYYY-MM-DD')}"`)
+            .and(`${property} < "${filterValues[1].add(1, 'days').format('YYYY-MM-DD')}"`);
         break;
     case 'rating':
         if (filterValues[0] === 0) {
             expression = expression.and(property + ' IS NULL');
             if (filterValues[1] !== 0) {
                 expression = expression
-                    .or(property + ' >= 0')
-                    .and(property + ' <= ' + filterValues[1]);
+                    .or(`${property} >= 0`)
+                    .and(`${property} <= ${filterValues[1]}`);
             }
         } else if (filterValues[0] === filterValues[1]) {
             expression = expression
-                .and(property + ' = ' + filterValues[0]);
+                .and(`${property} = ${filterValues[0]}`);
         } else {
             expression = expression
-                .and(property + ' >= ' + filterValues[0])
-                .and(property + ' <= ' + filterValues[1]);
+                .and(`${property} >= ${filterValues[0]}`)
+                .and(`${property} <= ${filterValues[1]}`);
         }
+        break;
+    default:
         break;
     }
 

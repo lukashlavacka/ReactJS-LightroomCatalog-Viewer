@@ -24,7 +24,7 @@ export class BootstrapRow extends React.Component {
         };
         const classes = _(widths)
             .mapValues((value, key) => {
-                return 'col-' + key + '-' + value;
+                return `col-${key}-value`;
             })
             .values()
             .join(' ');
@@ -54,7 +54,7 @@ export class LoadingWrapper extends React.Component {
         ])
     }
     render() {
-        const className = 'loading-wrapper' + (this.props.loading === true ? ' loading' : '');
+        const className = `loading-wrapper ${this.props.loading === true ? ' loading' : ''}`;
         return (
             <div className={className}>{this.props.children}</div>
         );

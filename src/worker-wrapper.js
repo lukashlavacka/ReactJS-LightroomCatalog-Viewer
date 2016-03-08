@@ -40,8 +40,8 @@ export class AsyncWorkerWrapper extends AbstractWorkerWrapper {
 
         this.worker.onmessage = (event) => {
             const promise = this.promises[event.data.id];
-            window.console.log('Last query "' + promise.query +
-                '" took ' + (new Date() - promise.timestamp) + 'ms'
+            window.console.log(
+                `Last query "${promise.query}" took ${new Date() - promise.timestamp}ms`
             );
 
             promise.deferred.resolve(event.data.results);

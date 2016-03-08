@@ -106,7 +106,7 @@ export default class Interface extends React.Component {
         const Uints = new Uint8Array(data);
         this.state.worker.open(Uints).then(() => {
             this.handleProgress('end');
-            this.handleStatusChange('Loaded in ' + (new Date() - now) + ' miliseconds.', 'success');
+            this.handleStatusChange(`Loaded in ${new Date() - now} miliseconds.`, 'success');
             this.setState({
                 dbReady: true
             });
