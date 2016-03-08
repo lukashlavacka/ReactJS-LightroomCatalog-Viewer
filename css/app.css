@@ -38,6 +38,10 @@ table.table-col-hover .col:hover::after {
 }
 
 /* Loading overlay */
+div.loading-wrapper {
+  height: 100%;
+}
+
 div.loading {
     overflow: hidden;
     position: absolute;
@@ -131,7 +135,7 @@ h1, .h1, h2, .h2, h3, .h3 {
   border-radius: 5px;
   border: 1px solid grey;
   color: black;
-  cursor: pointer;
+  cursor: e-resize;
 }
 
 .handle.active {
@@ -161,4 +165,8 @@ h1, .h1, h2, .h2, h3, .h3 {
   width: 50px;
   height: 24px;
   line-height: 24px;
+}
+
+.react-grid-item-drag-handle {
+  cursor: move;
 }

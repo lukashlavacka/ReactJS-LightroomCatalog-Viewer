@@ -5,6 +5,7 @@ import * as FilterWidgets from './filter';
 import PhotoStats from './stats';
 import ChartViewer from './chart';
 import TableViewer from './table';
+import MapViewer from './map';
 import WorkerWrapper from './worker-wrapper';
 
 const ReactGridLayout = WidthProvider(ReactGridLayoutWithoutProvider);
@@ -73,7 +74,8 @@ export default class WidgetLayout extends React.Component {
                 {key: 'FilterShutter'      , title: 'Shutter Speed' , filter: 'shuter'      , grid: {x: 6, y:  9, w: 3, h: 2, minH: 2}},
                 {key: 'FilterDate'         , title: 'Date'          , filter: 'date'        , grid: {x: 6, y: 11, w: 3, h: 2, minH: 2}},
                 {key: 'PhotoStats'         , title: 'Most Popular'  , filter: null          , grid: {x: 0, y: 13, w: 6, h: 2, minH: 2}},
-                {key: 'TableViewer'        , title: 'Table'         , filter: null          , grid: {x: 0, y: 15, w: 6, h: 6, minH: 2}}
+                {key: 'TableViewer'        , title: 'Table'         , filter: null          , grid: {x: 0, y: 15, w: 6, h: 6, minH: 2}},
+                {key: 'MapViewer'          , title: 'Map'           , filter: null          , grid: {x: 0, y: 21, w: 6, h: 6, minH: 2}},
             /*eslint-enable*/
             ]
         };
@@ -83,7 +85,7 @@ export default class WidgetLayout extends React.Component {
         const allWidgets = _.extend(
             {},
             FilterWidgets,
-            {PhotoStats: PhotoStats, ChartViewer: ChartViewer, TableViewer: TableViewer}
+            {PhotoStats: PhotoStats, ChartViewer: ChartViewer, TableViewer: TableViewer, MapViewer: MapViewer}
         );
         const widgetElement = React.createElement(allWidgets[widget.key], this.props);
         const minified = (_.find(this.state.layout, {i: widget.key}) || { }).h === 1;

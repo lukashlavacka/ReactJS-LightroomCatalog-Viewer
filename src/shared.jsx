@@ -54,7 +54,7 @@ export class LoadingWrapper extends React.Component {
         ])
     }
     render() {
-        const className = this.props.loading === true ? 'loading' : null;
+        const className = 'loading-wrapper' + (this.props.loading === true ? ' loading' : '');
         return (
             <div className={className}>{this.props.children}</div>
         );

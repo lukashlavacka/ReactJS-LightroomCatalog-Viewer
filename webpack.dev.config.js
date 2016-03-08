@@ -6,7 +6,9 @@ module.exports = {
     context: __dirname,
     entry: path.resolve(__dirname, './src/app.jsx'),
     output: {
-        filename: path.resolve(__dirname, './dist/js/bundle.js')
+        path: path.resolve(__dirname, 'dist'),
+        publicPath: '/js/',
+        filename: 'bundle.js'
     },
     devtool: 'eval-cheap-module-source-map',
     module: {
@@ -31,7 +33,7 @@ module.exports = {
                 loader: 'url-loader',
                 query: {
                     limit: 30000,
-                    name: './dist/resources/[name]-[hash].[ext]'
+                    name: './resources/[name]-[hash].[ext]'
                 }
             }
         ]
@@ -41,7 +43,8 @@ module.exports = {
             'process.env': {
                 NODE_ENV: JSON.stringify('development')
             }
-        })
+        }),
+        new webpack.IgnorePlugin(/^\.\/locale$/, [/moment$/])
     ],
     resolve: {
         extensions: [
@@ -51,6 +54,8 @@ module.exports = {
             '.js',
             '.jsx'
         ],
-        unsafeCache: true
+        alias: {
+            'moment$': path.resolve(__dirname, './node_modules/moment/min/moment-with-locales.min.js')
+        }
     }
 };
