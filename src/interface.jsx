@@ -63,7 +63,11 @@ class FileDropWrapper extends React.Component {
 export default class Interface extends React.Component {
     constructor(props) {
         super(props);
-        let worker = new WorkerWrapper("production" === process.env.NODE_ENV ? 'js/worker.sql.js': './node_modules/sql.js/js/worker.sql.js');
+        let worker = new WorkerWrapper(
+            process.env.NODE_ENV === 'production' ?
+            'js/worker.sql.js' :
+            './node_modules/sql.js/js/worker.sql.js'
+        );
         this.state = {
             worker: worker,
             filter: {}
@@ -184,6 +188,12 @@ export default class Interface extends React.Component {
         this.state.worker.terminate();
     }
 
+    componentDidMount() {
+        if (process.env.NODE_ENV === 'development') {
+            this.handleLoadDefaultFile();
+        }
+    }
+
     render() {
         let content;
         if (this.state.dbReady) {
@@ -200,14 +210,7 @@ export default class Interface extends React.Component {
         } else {
             content = (
                 <BootstrapRow>
-                    <p>Click this button to load&nbsp;
-                    <button
-                        className="btn btn-default"
-                        type="button"
-                        onClick={this.handleLoadDefaultFile}>
-                        test catalog
-                    </button>
-                    &nbsp;or drop anywhere on the page a Lightroom catalog file.</p>
+                    <p>Drop anywhere on the page a Lightroom catalog file.</p>
                 </BootstrapRow>
             );
         }

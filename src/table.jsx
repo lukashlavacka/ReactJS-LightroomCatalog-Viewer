@@ -306,7 +306,8 @@ class TableComponent extends React.Component {
                                         transformedData.maxAverage
                                     );
                                     const style = {
-                                        backgroundColor: `hsla(0,0%,${Math.round(val.relCount * 100)}%,0.05)`
+                                        backgroundColor:
+                                            `hsla(0,0%,${Math.round(val.relCount * 100)}%,0.05)`
                                     };
                                     return (
                                         <td

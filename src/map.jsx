@@ -1,10 +1,11 @@
 import React from 'react';
-import ScriptjsLoader from "react-google-maps/lib/async/ScriptjsLoader";
+import ScriptjsLoader from 'react-google-maps/lib/async/ScriptjsLoader';
 import {GoogleMap, Marker, OverlayView} from 'react-google-maps';
 import MarkerClusterer from 'react-google-maps/lib/addons/MarkerClusterer';
 import {triggerEvent} from 'react-google-maps/lib/utils';
 import squel from 'squel';
 import Q from 'q';
+import _ from 'lodash';
 import {LoadingWrapper} from './shared';
 import * as Utilities from './utilities';
 import WorkerWrapper from './worker-wrapper';
@@ -22,8 +23,8 @@ export default class MapViewer extends React.Component {
 
     static defaultProps = {
         types: [
-            { key: '1', name: 'Zoom to cluster' },
-            { key: '2', name: 'Filter to cluster' }
+            {key: '1', name: 'Zoom to cluster'},
+            {key: '2', name: 'Filter to cluster'}
         ]
     }
 
@@ -79,15 +80,14 @@ export default class MapViewer extends React.Component {
 
     onMarkerClick = (markerCluster) => {
         if (this.state.type === '2') {
-            debugger;
-            const imageIDs = markerCluster.markers_.map(m => parseInt(m.title));
-            this.props.handleFilterChange("map", imageIDs);
+            const imageIDs = markerCluster.markers_.map(m => parseInt(m.title, 10));
+            this.props.handleFilterChange('map', imageIDs);
             this.setState({filterBounds: markerCluster.bounds_});
         }
     }
 
     onClearFilter = () => {
-        this.props.handleFilterChange("map");
+        this.props.handleFilterChange('map');
         this.setState({filterBounds: undefined});
     }
 
@@ -100,8 +100,8 @@ export default class MapViewer extends React.Component {
     }
 
     handleUpdateDimensions = () => {
-        if(this._googleMapComponent){
-            triggerEvent(this._googleMapComponent, "resize")
+        if (this.googleMapComponent) {
+            triggerEvent(this.googleMapComponent, 'resize');
         }
     }
 
@@ -129,7 +129,7 @@ export default class MapViewer extends React.Component {
 
     render() {
         let overlayView;
-        if(this.state.filterBounds) {
+        if (this.state.filterBounds) {
             overlayView = (
                 <OverlayView
                     bounds={this.state.filterBounds}
@@ -147,7 +147,7 @@ export default class MapViewer extends React.Component {
                             x
                         </button>
                     </div>
-                </OverlayView>                
+                </OverlayView>
             );
         }
         return (
@@ -167,17 +167,17 @@ export default class MapViewer extends React.Component {
                 <ScriptjsLoader
                     hostname={"maps.googleapis.com"}
                     pathname={"/maps/api/js"}
-                    query={{v: `3.${MapViewer.version}`, libraries: "geometry, drawing, places"}}
+                    query={{v: `3.${MapViewer.version}`, libraries: 'geometry, drawing, places'}}
                     loadingElement={
                         <LoadingWrapper loading={true} />
                     }
                     containerElement={
-                        <div {...this.props} style={{ height: "100%" }} />
+                        <div {...this.props} style={{height: '100%'}} />
                     }
                     googleMapElement={
                         <GoogleMap
-                            ref={it => this._googleMapComponent = it}
-                            containerProps={{ ...this.props, style: {height: '100%'} }}
+                            ref={it => this.googleMapComponent = it}
+                            containerProps={{...this.props, style: {height: '100%'}}}
                             defaultZoom={1}
                             defaultCenter={{lat: 0, lng: 0}}
                         >

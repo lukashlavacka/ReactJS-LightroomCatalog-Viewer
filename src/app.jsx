@@ -11,4 +11,4 @@ import '../css/app.css';
 ReactDOM.render(
     <Interface />,
     document.getElementById('content')
-)
+);

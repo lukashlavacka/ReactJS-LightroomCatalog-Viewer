@@ -138,7 +138,7 @@ class FilterRangeFactory extends React.Component {
     constructor(props) {
         super(props);
 
-        if(props.minMax) {
+        if (props.minMax) {
             this.state = {
                 dbMin: props.minMax.min,
                 dbMax: props.minMax.max,
@@ -150,7 +150,7 @@ class FilterRangeFactory extends React.Component {
                 uiMax: props.invert ?
                     this.transformFromDBValue(props.minMax.min, true) :
                     this.transformFromDBValue(props.minMax.max)
-            }
+            };
         }
     }
 
@@ -468,7 +468,7 @@ export class FilterShutter extends React.Component {
         if (value > 0) {
             transformed = `1/${Math.round(value)}`;
         } else {
-            transformed = `${1/value}s`;
+            transformed = `${1 / value}s`;
         }
 
         return transformed;
@@ -495,9 +495,9 @@ export class FilterFlag extends React.Component {
 
     static defaultProps = {
         options: [
-            { value: 0, name: "None"},
-            { value: -1, name: "Rejected"},
-            { value: 1, name: "Selected"}
+            {value: 0, name: 'None'},
+            {value: -1, name: 'Rejected'},
+            {value: 1, name: 'Selected'}
         ]
     }
 
