@@ -380,7 +380,7 @@ export class FilterISORating extends React.Component {
 
 export class FilterAperture extends React.Component {
     static propTypes = {
-        types: React.PropTypes.array
+        types: React.PropTypes.object
     }
 
     transformFromUIValue = (value) => {
@@ -407,7 +407,7 @@ export class FilterAperture extends React.Component {
         });
     }
 
-    static props = {
+    static defaultProps = {
         types: {
             Full: [0.5, 0.7, 1.0, 1.4, 2, 2.8, 4, 5.6, 8, 11, 16, 22, 32],
             Half: [
