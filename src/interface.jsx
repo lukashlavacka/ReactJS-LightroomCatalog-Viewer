@@ -63,8 +63,7 @@ class FileDropWrapper extends React.Component {
 export default class Interface extends React.Component {
     constructor(props) {
         super(props);
-
-        let worker = new WorkerWrapper('./node_modules/sql.js/js/worker.sql.js');
+        let worker = new WorkerWrapper("production" === process.env.NODE_ENV ? 'js/worker.sql.js': './node_modules/sql.js/js/worker.sql.js');
         this.state = {
             worker: worker,
             filter: {}
