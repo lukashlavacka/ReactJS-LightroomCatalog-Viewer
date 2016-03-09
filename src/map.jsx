@@ -127,7 +127,12 @@ export default class MapViewer extends React.Component {
         });
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        return !(_.isEqual(this.props, nextProps) && _.isEqual(this.state, nextState));
+    }
+
     render() {
+        window.console.log(`Map rendered: `);
         let overlayView;
         if (this.state.filterBounds) {
             overlayView = (
@@ -135,8 +140,7 @@ export default class MapViewer extends React.Component {
                     bounds={this.state.filterBounds}
                     mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
                     <div style={{
-                        opacity: 0.1,
-                        background: 'black',
+                        background: 'rgba(50,50,50,0.1)',
                         width: '100%',
                         height: '100%'
                     }} id="overlay">

@@ -19,7 +19,8 @@ module.exports = {
                 loader: 'babel-loader',
                 include: path.resolve(__dirname, './src'),
                 query: {
-                    presets: ['es2015', 'stage-0', 'react']
+                    presets: ['es2015', 'stage-0', 'react'],
+                    optional: ['es7.decorators', 'es7.classProperties']
                 }
             },
             {
