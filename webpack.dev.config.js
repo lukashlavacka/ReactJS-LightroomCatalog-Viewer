@@ -14,14 +14,20 @@ module.exports = {
         noParse: [
             /sql.js$/
         ],
+        preLoaders: [
+            {
+                test: /\.jsx?$/,
+                loader: 'eslint-loader',
+                include: path.resolve(__dirname, './src')
+            }
+        ],
         loaders: [
             {
                 test: /.jsx?$/,
                 loader: 'babel-loader',
                 include: path.resolve(__dirname, './src'),
                 query: {
-                    presets: ['es2015', 'stage-0', 'react'],
-                    optional: ['es7.decorators', 'es7.classProperties']
+                    presets: ['react', 'es2015', 'stage-0' ]
                 }
             },
             {
