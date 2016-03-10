@@ -2,18 +2,16 @@ import React from 'react';
 import update from 'react-addons-update';
 import NProgress from 'nprogress';
 import WidgetLayout from './widgets';
-import {AsyncWorkerWrapper as WorkerWrapper} from './worker-wrapper';
-import {BootstrapRow} from './shared';
+import { AsyncWorkerWrapper as WorkerWrapper } from './worker-wrapper';
+import { BootstrapRow } from './shared';
 
 
+// eslint-disable-next-line react/prefer-stateless-function
 class FileDropWrapper extends React.Component {
     static propTypes = {
         handleStatusChange: React.PropTypes.func.isRequired,
         handleFileChange: React.PropTypes.func.isRequired,
-        children: React.PropTypes.oneOfType([
-            React.PropTypes.object,
-            React.PropTypes.array
-        ])
+        children: React.PropTypes.node,
     }
 
     onDragEnter = (event) => {
@@ -49,12 +47,13 @@ class FileDropWrapper extends React.Component {
     render() {
         return (
             <div
-                style={{height: '100%'}}
+                style={{ height: '100%' }}
                 onDrop={this.onDrop}
                 onDragEnter={this.onDragEnter}
                 onDragOver={this.onDragOver}
-                onDragLeave={this.onDragLeave}>
-                    {this.props.children}
+                onDragLeave={this.onDragLeave}
+            >
+                {this.props.children}
             </div>
         );
     }
@@ -63,15 +62,59 @@ class FileDropWrapper extends React.Component {
 export default class Interface extends React.Component {
     constructor(props) {
         super(props);
-        let worker = new WorkerWrapper(
+        const worker = new WorkerWrapper(
             process.env.NODE_ENV === 'production' ?
             'js/worker.sql.js' :
             './node_modules/sql.js/js/worker.sql.js'
         );
         this.state = {
-            worker: worker,
-            filter: {}
+            worker,
+            filter: {},
         };
+    }
+
+    state = {
+        dbReady: false,
+        filter: {},
+    }
+
+    componentDidMount() {
+        if (process.env.NODE_ENV === 'development') {
+            this.handleLoadDefaultFile();
+        }
+    }
+
+    componentWillUnmount() {
+        this.state.worker.terminate();
+    }
+
+    getLocalStorage() {
+        let ls = {};
+        if (window.localStorage) {
+            try {
+                ls = JSON.parse(window.localStorage.getItem('ReactJs-LightroomCatalog-Viewer'))
+                    || {};
+            } catch (e) {
+                /* ignore */
+            }
+        }
+        return ls;
+    }
+
+    saveLocalStorage(field, value) {
+        let ls = {};
+        if (window.localStorage) {
+            try {
+                ls = JSON.parse(window.localStorage.getItem('ReactJs-LightroomCatalog-Viewer'))
+                    || {};
+            } catch (e) {
+                /* ignore */
+            }
+        }
+        ls[field] = value;
+        if (window.localStorage) {
+            window.localStorage.setItem('ReactJs-LightroomCatalog-Viewer', JSON.stringify(ls));
+        }
     }
 
     handleFileChange = (file) => {
@@ -107,13 +150,15 @@ export default class Interface extends React.Component {
 
     parseData(data, now) {
         const Uints = new Uint8Array(data);
-        this.state.worker.open(Uints).then(() => {
-            this.handleProgress('end');
-            this.handleStatusChange(`Loaded in ${new Date() - now} miliseconds.`, 'success');
-            this.setState({
-                dbReady: true
-            });
-        });
+        this.state.worker.open(Uints)
+            .then(() => {
+                this.handleProgress('end');
+                this.handleStatusChange(`Loaded in ${new Date() - now} miliseconds.`, 'success');
+                this.setState({
+                    dbReady: true,
+                });
+            })
+            .done();
     }
 
     handleStatusChange = (status) => {
@@ -123,75 +168,31 @@ export default class Interface extends React.Component {
 
     handleProgress = (event, value) => {
         switch (event) {
-        default:
-        case 'start':
-            NProgress.start();
-            break;
-        case 'progress':
-            if (value) {
-                NProgress.set(value);
-            } else {
-                NProgress.inc();
-            }
-            break;
-        case 'end':
-            NProgress.done();
-            break;
+            default:
+            case 'start':
+                NProgress.start();
+                break;
+            case 'progress':
+                if (value) {
+                    NProgress.set(value);
+                } else {
+                    NProgress.inc();
+                }
+                break;
+            case 'end':
+                NProgress.done();
+                break;
         }
     }
 
     handleFilterChange = (filterType, value) => {
         const temp = {};
-        temp[filterType] = {$set: value};
+        temp[filterType] = { $set: value };
         const newFilter = update(this.state.filter, temp);
 
         this.setState({
-            filter: newFilter
+            filter: newFilter,
         });
-    }
-
-    saveLocalStorage(field, value) {
-        let ls = {};
-        if (window.localStorage) {
-            try {
-                ls = JSON.parse(window.localStorage.getItem('ReactJs-LightroomCatalog-Viewer'))
-                    || {};
-            } catch (e) {
-                /* ignore */
-            }
-        }
-        ls[field] = value;
-        if (window.localStorage) {
-            window.localStorage.setItem('ReactJs-LightroomCatalog-Viewer', JSON.stringify(ls));
-        }
-    }
-
-    getLocalStorage() {
-        let ls = {};
-        if (window.localStorage) {
-            try {
-                ls = JSON.parse(window.localStorage.getItem('ReactJs-LightroomCatalog-Viewer'))
-                    || {};
-            } catch (e) {
-                /* ignore */
-            }
-        }
-        return ls;
-    }
-
-    state = {
-        dbReady: false,
-        filter: {}
-    }
-
-    componentWillUnmount() {
-        this.state.worker.terminate();
-    }
-
-    componentDidMount() {
-        if (process.env.NODE_ENV === 'development') {
-            this.handleLoadDefaultFile();
-        }
     }
 
     render() {
@@ -204,7 +205,8 @@ export default class Interface extends React.Component {
                         filter={this.state.filter}
                         handleFilterChange={this.handleFilterChange}
                         saveLocalStorage={this.saveLocalStorage}
-                        getLocalStorage={this.getLocalStorage}/>
+                        getLocalStorage={this.getLocalStorage}
+                    />
                 </div>
             );
         } else {
@@ -217,9 +219,10 @@ export default class Interface extends React.Component {
         return (
             <FileDropWrapper
                 handleFileChange={this.handleFileChange}
-                handleStatusChange={this.handleStatusChange}>
-                    <h1>Welcome to Lightroom Catalog Reader</h1>
-                    {content}
+                handleStatusChange={this.handleStatusChange}
+            >
+                <h1>Welcome to Lightroom Catalog Reader</h1>
+                {content}
             </FileDropWrapper>
         );
     }

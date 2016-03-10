@@ -1,12 +1,12 @@
 import React from 'react';
 import ScriptjsLoader from 'react-google-maps/lib/async/ScriptjsLoader';
-import {GoogleMap, Marker, OverlayView} from 'react-google-maps';
+import { GoogleMap, Marker, OverlayView } from 'react-google-maps';
 import MarkerClusterer from 'react-google-maps/lib/addons/MarkerClusterer';
-import {triggerEvent} from 'react-google-maps/lib/utils';
+import { triggerEvent } from 'react-google-maps/lib/utils';
 import squel from 'squel';
-import Q from 'q';
+import q from 'q';
 import _ from 'lodash';
-import {LoadingWrapper} from './shared';
+import { LoadingWrapper } from './shared';
 import * as Utilities from './utilities';
 import WorkerWrapper from './worker-wrapper';
 
@@ -18,18 +18,71 @@ export default class MapViewer extends React.Component {
         worker: React.PropTypes.instanceOf(WorkerWrapper).isRequired,
         filter: React.PropTypes.object,
         types: React.PropTypes.array.isRequired,
-        handleFilterChange: React.PropTypes.func.isRequired
+        handleFilterChange: React.PropTypes.func.isRequired,
     }
 
     static defaultProps = {
         types: [
-            {key: '1', name: 'Zoom to cluster'},
-            {key: '2', name: 'Filter to cluster'}
-        ]
+            { key: '1', name: 'Zoom to cluster' },
+            { key: '2', name: 'Filter to cluster' },
+        ],
+    }
+
+    state = {
+        loading: false,
+        data: [],
+        type: '2',
+    }
+
+    componentDidMount() {
+        window.addEventListener('resize', this.handleUpdateDimensions);
+
+        this.getData(this.props)
+        .then(this.transformData.bind(this, this.props))
+        .then((data) => {
+            this.setState({
+                data,
+                loading: false,
+            });
+        })
+        .done();
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.getData(nextProps)
+        .then(this.transformData.bind(this, nextProps))
+        .then((data) => {
+            this.setState({
+                data,
+                loading: false,
+            });
+        })
+        .done();
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return !(_.isEqual(this.props, nextProps) && _.isEqual(this.state, nextState));
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.handleUpdateDimensions);
+    }
+
+    onMarkerClick = (markerCluster) => {
+        if (this.state.type === '2') {
+            const imageIDs = markerCluster.markers_.map(m => parseInt(m.title, 10));
+            this.props.handleFilterChange('map', imageIDs);
+            this.setState({ filterBounds: markerCluster.bounds_ });
+        }
+    }
+
+    onClearFilter = () => {
+        this.props.handleFilterChange('map');
+        this.setState({ filterBounds: undefined });
     }
 
     getData(properties) {
-        this.setState({loading: true});
+        this.setState({ loading: true });
         let s = squel
             .select()
             .field('images.id_local')
@@ -47,7 +100,7 @@ export default class MapViewer extends React.Component {
             .where('exif.hasGPS = 1');
 
         _.forOwn(_.omitBy(properties.filter, _.isUndefined), (value, key) => {
-            s = s.where(Utilities.GetFilterExpression(key, value));
+            s = s.where(Utilities.getFilterExpression(key, value));
         });
 
         const query = s.toString();
@@ -57,46 +110,17 @@ export default class MapViewer extends React.Component {
 
     transformData(properties, rawData) {
         const dataset = rawData && rawData[0] && rawData[0].values || [];
-        return Q(dataset.map((d) => {
-            return {
-                id: d[0],
-                lat: d[1],
-                lng: d[2]
-            };
-        }));
-    }
-
-    state = {
-        loading: false,
-        data: [],
-        type: '2'
+        return q(dataset.map((d) => ({
+            id: d[0],
+            lat: d[1],
+            lng: d[2],
+        })));
     }
 
     handleChange = (event) => {
         this.setState({
-            type: event.target.value
+            type: event.target.value,
         });
-    }
-
-    onMarkerClick = (markerCluster) => {
-        if (this.state.type === '2') {
-            const imageIDs = markerCluster.markers_.map(m => parseInt(m.title, 10));
-            this.props.handleFilterChange('map', imageIDs);
-            this.setState({filterBounds: markerCluster.bounds_});
-        }
-    }
-
-    onClearFilter = () => {
-        this.props.handleFilterChange('map');
-        this.setState({filterBounds: undefined});
-    }
-
-    componentDidMount() {
-        window.addEventListener('resize', this.handleUpdateDimensions);
-    }
-
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.handleUpdateDimensions);
     }
 
     handleUpdateDimensions = () => {
@@ -105,49 +129,28 @@ export default class MapViewer extends React.Component {
         }
     }
 
-    componentDidMount() {
-        this.getData(this.props)
-        .then(this.transformData.bind(this, this.props))
-        .then((data) => {
-            this.setState({
-                data: data,
-                loading: false
-            });
-        });
-    }
-
-    componentWillReceiveProps(nextProps) {
-        this.getData(nextProps)
-        .then(this.transformData.bind(this, nextProps))
-        .then((data) => {
-            this.setState({
-                data: data,
-                loading: false
-            });
-        });
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        return !(_.isEqual(this.props, nextProps) && _.isEqual(this.state, nextState));
-    }
-
     render() {
-        window.console.log(`Map rendered: `);
+        window.console.log('Map rendered: ');
         let overlayView;
         if (this.state.filterBounds) {
             overlayView = (
                 <OverlayView
                     bounds={this.state.filterBounds}
-                    mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
-                    <div style={{
-                        background: 'rgba(50,50,50,0.1)',
-                        width: '100%',
-                        height: '100%'
-                    }} id="overlay">
+                    mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                >
+                    <div
+                        style={{
+                            background: 'rgba(50,50,50,0.1)',
+                            width: '100%',
+                            height: '100%',
+                        }}
+                        id="overlay"
+                    >
                         <button
-                            style={{position: 'absolute', top: '0', right: '0'}}
+                            style={{ position: 'absolute', top: '0', right: '0' }}
                             type="button"
-                            onClick={this.onClearFilter}>
+                            onClick={this.onClearFilter}
+                        >
                             x
                         </button>
                     </div>
@@ -156,34 +159,35 @@ export default class MapViewer extends React.Component {
         }
         return (
             <LoadingWrapper loading={this.state.loading}>
-                {this.props.types.map((type) => {
-                    return (
-                        <div key={type.key} className="radio-inline">
-                            <label><input
+                {this.props.types.map((type) =>
+                    <div key={type.key} className="radio-inline">
+                        <label>
+                            <input
                                 type="radio"
                                 checked={this.state.type === type.key}
                                 value={type.key}
-                                onChange={this.handleChange} />{type.name}
-                            </label>
-                        </div>
-                    );
-                })}
+                                onChange={this.handleChange}
+                            />
+                            {type.name}
+                        </label>
+                    </div>
+                )}
                 <ScriptjsLoader
                     hostname={"maps.googleapis.com"}
                     pathname={"/maps/api/js"}
-                    query={{v: `3.${MapViewer.version}`, libraries: 'geometry, drawing, places'}}
+                    query={{ v: `3.${MapViewer.version}`, libraries: 'geometry, drawing, places' }}
                     loadingElement={
-                        <LoadingWrapper loading={true} />
+                        <LoadingWrapper loading />
                     }
                     containerElement={
-                        <div {...this.props} style={{height: '100%'}} />
+                        <div {...this.props} style={{ height: '100%' }} />
                     }
                     googleMapElement={
                         <GoogleMap
-                            ref={it => this.googleMapComponent = it}
-                            containerProps={{...this.props, style: {height: '100%'}}}
+                            ref={it => { this.googleMapComponent = it; }}
+                            containerProps={{ ...this.props, style: { height: '100%' } }}
                             defaultZoom={1}
-                            defaultCenter={{lat: 0, lng: 0}}
+                            defaultCenter={{ lat: 0, lng: 0 }}
                         >
                             {overlayView}
                             <MarkerClusterer
@@ -195,11 +199,12 @@ export default class MapViewer extends React.Component {
                             >
                                 {this.state.data.map(d => (
                                     <Marker
-                                    key={d.id}
-                                    clickable={false}
-                                    optimized={true}
-                                    title={`${d.id}`}
-                                    position={d}/>
+                                        key={d.id}
+                                        clickable={false}
+                                        optimized
+                                        title={`${d.id}`}
+                                        position={d}
+                                    />
                                 ))}
                             </MarkerClusterer>
                         </GoogleMap>

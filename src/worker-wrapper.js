@@ -1,9 +1,7 @@
-import {defer} from 'q';
+import { defer } from 'q';
 import SQL from 'sql.js';
 
 export default class AbstractWorkerWrapper {
-    open = function () {}
-    exec = function () {}
 }
 
 export class SyncWorkerWrapper extends AbstractWorkerWrapper {
@@ -53,14 +51,14 @@ export class AsyncWorkerWrapper extends AbstractWorkerWrapper {
         this.id = this.id + 1;
         const deferred = defer();
         this.promises[this.id] = {
-            deferred: deferred,
-            timestamp: new Date()
+            deferred,
+            timestamp: new Date(),
         };
 
         this.worker.postMessage({
             id: this.id,
             action: 'open',
-            buffer: buffer
+            buffer,
         });
 
         return deferred.promise;
@@ -70,15 +68,15 @@ export class AsyncWorkerWrapper extends AbstractWorkerWrapper {
         this.id = this.id + 1;
         const deferred = defer();
         this.promises[this.id] = {
-            deferred: deferred,
-            query: query,
-            timestamp: new Date()
+            deferred,
+            query,
+            timestamp: new Date(),
         };
 
         this.worker.postMessage({
             id: this.id,
             action: 'exec',
-            sql: query
+            sql: query,
         });
 
         return deferred.promise;

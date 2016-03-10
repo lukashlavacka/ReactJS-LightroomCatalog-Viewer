@@ -1,36 +1,28 @@
 import React from 'react';
 import squel from 'squel';
-import Q from 'q';
+import q from 'q';
 import _ from 'lodash';
-import {LoadingWrapper, BootstrapRow} from './shared';
+import { LoadingWrapper, BootstrapRow, Checkbox } from './shared';
 import * as Utilities from './utilities';
 import WorkerWrapper from './worker-wrapper';
 
 export default class TableViewer extends React.Component {
     static propTypes = {
         worker: React.PropTypes.instanceOf(WorkerWrapper).isRequired,
-        filter: React.PropTypes.object
-    }
-
-    handleFieldChange(type, field) {
-        switch (type) {
-        default:
-        case 'xField':
-            this.setState({
-                xField: field
-            });
-            break;
-        case 'yField':
-            this.setState({
-                yField: field
-            });
-            break;
-        }
+        filter: React.PropTypes.object,
     }
 
     state = {
         xField: 'exif.isoSpeedRating',
-        yField: 'images.rating'
+        yField: 'images.rating',
+    }
+
+    handleXFieldChange(field) {
+        this.setState({ xField: field });
+    }
+
+    handleYFieldChange(field) {
+        this.setState({ yField: field });
     }
 
     render() {
@@ -40,7 +32,8 @@ export default class TableViewer extends React.Component {
                 <Table worker={this.props.worker}
                     filter={this.props.filter}
                     xField={this.state.xField}
-                    yField={this.state.yField} />
+                    yField={this.state.yField}
+                />
             );
         }
         return (
@@ -49,88 +42,95 @@ export default class TableViewer extends React.Component {
                     field={this.state.xField}
                     name="x agregate field"
                     otherField={this.state.yField}
-                    handleFieldChange={this.handleFieldChange.bind(this, 'xField')} />
+                    handleFieldChange={this.handleXFieldChange}
+                />
                 <FieldSelector
                     field={this.state.yField}
                     name="y agregate field"
                     otherField={this.state.xField}
-                    handleFieldChange={this.handleFieldChange.bind(this, 'yField')} />
+                    handleFieldChange={this.handleYFieldChange}
+                />
                 {table}
             </div>
         );
     }
 }
 
-class FieldSelector extends React.Component {
-    static propTypes = {
-        handleFieldChange: React.PropTypes.func.isRequired,
-        agragateFields: React.PropTypes.array,
-        field: React.PropTypes.string,
-        otherField: React.PropTypes.string,
-        name: React.PropTypes.string
-    }
-
-    static defaultProps = {
-        agragateFields: [
-            {field: 'camera.value', name: 'Camera'},
-            {field: 'lens.value', name: 'Lens'},
-            {field: 'exif.focalLength', name: 'Focal length'},
-            {field: 'exif.isoSpeedRating', name: 'ISO'},
-            {field: 'exif.aperture', name: 'Aperture'},
-            {field: 'exif.shutterSpeed', name: 'Shutter Speed'},
-            {field: 'images.pick', name: 'Flag'},
-            {field: 'images.colorLabels', name: 'Color label'},
-            {field: 'images.rating', name: 'Rating'},
-            {field: 'keyword.tag', name: 'Face'},
-            {field: 'strftime("%Y", images.captureTime)', name: 'Year'},
-            {field: 'strftime("%Y-%m", images.captureTime)', name: 'Month'},
-            {field: 'strftime("%Y-%W", images.captureTime)', name: 'Week'},
-            {field: 'strftime("%Y-%m-%d", images.captureTime)', name: 'Day'}
-        ]
-    }
-
-    handleChange = (event) => {
-        this.props.handleFieldChange(event.target.value);
-    }
-
-    render() {
-        const otherFields = _.reject(this.props.agragateFields, {field: this.props.otherField});
-        return (
-            <BootstrapRow>
-                <div>
-                    <h3>Select {this.props.name}</h3>
-                    {otherFields.map((f) => {
-                        return (
-                                <label
-                                    key={f.field}
-                                    className="radio-inline">
-                                    <input
-                                        type="radio"
-                                        checked={this.props.field === f.field}
-                                        value={f.field}
-                                        onChange={this.handleChange} />
-                                        {f.name}
-                                </label>
-                        );
-                    })}
-                </div>
-            </BootstrapRow>
-        );
-    }
-}
+const FieldSelector = function FieldSelector(props) {
+    const otherFields = _.reject(props.agragateFields, { field: props.otherField });
+    return (
+        <BootstrapRow>
+            <div>
+                <h3>Select {props.name}</h3>
+                {otherFields.map((f) =>
+                    <Checkbox key={f.field} handleFieldChange={props.handleFieldChange} field={f} />
+                )}
+            </div>
+        </BootstrapRow>
+    );
+};
+FieldSelector.propTypes = {
+    handleFieldChange: React.PropTypes.func.isRequired,
+    agragateFields: React.PropTypes.array,
+    field: React.PropTypes.string,
+    otherField: React.PropTypes.string,
+    name: React.PropTypes.string,
+};
+FieldSelector.defaultProps = {
+    agragateFields: [
+        { field: 'camera.value', name: 'Camera' },
+        { field: 'lens.value', name: 'Lens' },
+        { field: 'exif.focalLength', name: 'Focal length' },
+        { field: 'exif.isoSpeedRating', name: 'ISO' },
+        { field: 'exif.aperture', name: 'Aperture' },
+        { field: 'exif.shutterSpeed', name: 'Shutter Speed' },
+        { field: 'images.pick', name: 'Flag' },
+        { field: 'images.colorLabels', name: 'Color label' },
+        { field: 'images.rating', name: 'Rating' },
+        { field: 'keyword.tag', name: 'Face' },
+        { field: 'strftime("%Y", images.captureTime)', name: 'Year' },
+        { field: 'strftime("%Y-%m", images.captureTime)', name: 'Month' },
+        { field: 'strftime("%Y-%W", images.captureTime)', name: 'Week' },
+        { field: 'strftime("%Y-%m-%d", images.captureTime)', name: 'Day' },
+    ],
+};
 
 class Table extends React.Component {
     static propTypes = {
         xField: React.PropTypes.string,
-        yField: React.PropTypes.string
+        yField: React.PropTypes.string,
     }
 
     state = {
-        loading: false
+        loading: false,
+    }
+
+    componentDidMount() {
+        this.getData(this.props)
+        .then(this.transformData.bind(this, this.props))
+        .then((data) => {
+            this.setState({
+                data,
+                loading: false,
+            });
+        })
+        .done();
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.getData(nextProps)
+        .then(this.transformData.bind(this, nextProps))
+        .then((data) => {
+            this.setState({
+                data,
+                loading: false,
+            });
+        })
+        .done();
     }
 
     getData(properties) {
-        this.setState({loading: true});
+        this.setState({ loading: true });
 
         let s = squel
             .select()
@@ -147,12 +147,12 @@ class Table extends React.Component {
                 'exif.cameraModelRef = camera.id_local'
             )
             .left_join('AgInternedExifLens', 'lens', 'exif.lensRef = lens.id_local')
-            .where(properties.xField + ' IS NOT NULL')
-            .where(properties.yField + ' IS NOT NULL');
+            .where(`${properties.xField} IS NOT NULL`)
+            .where(`${properties.yField} IS NOT NULL`);
 
 
         _.forOwn(_.omitBy(properties.filter, _.isUndefined), (value, key) => {
-            s = s.where(Utilities.GetFilterExpression(key, value));
+            s = s.where(Utilities.getFilterExpression(key, value));
         });
 
         s = s
@@ -168,29 +168,7 @@ class Table extends React.Component {
 
     transformData(properties, rawData) {
         const dataset = rawData && rawData[0] && rawData[0].values || [];
-        return Q(dataset);
-    }
-
-    componentDidMount() {
-        this.getData(this.props)
-        .then(this.transformData.bind(this, this.props))
-        .then((data) => {
-            this.setState({
-                loading: false,
-                data: data
-            });
-        });
-    }
-
-    componentWillReceiveProps(nextProps) {
-        this.getData(nextProps)
-        .then(this.transformData.bind(this, nextProps))
-        .then((data) => {
-            this.setState({
-                data: data,
-                loading: false
-            });
-        });
+        return q(dataset);
     }
 
     render() {
@@ -199,130 +177,114 @@ class Table extends React.Component {
                 <TableComponent
                     data={this.state.data}
                     xField={this.props.xField}
-                    yField={this.props.yField}/>
+                    yField={this.props.yField}
+                />
             </LoadingWrapper>
         );
     }
 }
 
-class TableComponent extends React.Component {
-    static propTypes = {
-        data: React.PropTypes.array,
-        xField: React.PropTypes.string,
-        yField: React.PropTypes.string
+const TableComponent = function TableComponent(props) {
+    if (!props.data) {
+        return <noscript />;
     }
-    transformData() {
-        const uniqueX = _(this.props.data)
-            .map((r) => {
-                return r[0];
-            })
-            .uniq()
-            .value()
-            .sort(this.correctSort(this.props.xField));
+    const transformedData = TableComponent.transformData(props);
+    return (
+        <div className="table-responsive">
+            <table className="table table-condensed table-col-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th></th>
+                        {transformedData.uniqueX.map((xVal) => <th key={xVal}>{xVal}</th>)}
+                    </tr>
+                </thead>
+                <tbody>
+                    {transformedData.uniqueY.map((yVal) =>
+                        (<tr key={yVal}>
+                            <th>{yVal}</th>
+                            {transformedData.uniqueX.map((xVal) => {
+                                const val = TableComponent.findByXY(
+                                    props,
+                                    xVal,
+                                    yVal,
+                                    transformedData.maxCount,
+                                    transformedData.maxAverage
+                                );
+                                const style = {
+                                    backgroundColor:
+                                        `hsla(0,0%,${Math.round(val.relCount * 100)}%,0.05)`,
+                                };
+                                return (
+                                    <td
+                                        key={`${yVal}_${xVal}`}
+                                        style={style}
+                                        title={val.rating}
+                                    >
+                                        {val.count}
+                                    </td>
+                                );
+                            })}
+                        </tr>)
+                    )}
+                </tbody>
+            </table>
+        </div>
+    );
+};
+TableComponent.propTypes = {
+    data: React.PropTypes.array,
+    xField: React.PropTypes.string,
+    yField: React.PropTypes.string,
+};
+TableComponent.transformData = function transformData(props) {
+    const uniqueX = _(props.data)
+        .map((r) => r[0])
+        .uniq()
+        .value()
+        .sort(this.correctSort(props.xField));
 
-        const uniqueY = _(this.props.data)
-            .map((r) => {
-                return r[1];
-            })
-            .uniq()
-            .value()
-            .sort(this.correctSort(this.props.yField));
+    const uniqueY = _(props.data)
+        .map((r) => r[1])
+        .uniq()
+        .value()
+        .sort(this.correctSort(props.yField));
 
-        const maxCount = _(this.props.data)
-            .map((r) => {
-                return r[2];
-            })
-            .max();
+    const maxCount = _(props.data)
+        .map((r) => r[2])
+        .max();
 
-        const maxAverage = _(this.props.data)
-            .map((r) => {
-                return r[3];
-            })
-            .max();
+    const maxAverage = _(props.data)
+        .map((r) => r[3])
+        .max();
 
-        return {
-            uniqueX: uniqueX,
-            uniqueY: uniqueY,
-            maxCount: maxCount,
-            maxAverage: maxAverage
-        };
-    }
-
-    correctSort(field) {
-        switch (field) {
+    return {
+        uniqueX,
+        uniqueY,
+        maxCount,
+        maxAverage,
+    };
+};
+TableComponent.correctSort = function correctSort(field) {
+    switch (field) {
         case 'numeric':
         case 'exif.focalLength':
         case 'exif.isoSpeedRating':
         case 'exif.aperture':
         case 'images.rating':
         default:
-            return ((a, b) => {
-                return a - b;
-            });
-        }
+            return (a, b) => a - b;
     }
+};
+TableComponent.findByXY = function findByXY(props, xVal, yVal, maxCount, maxAverage) {
+    const row = _.find(props.data, (r) => r[0] === xVal && r[1] === yVal);
 
-    findByXY(xVal, yVal, maxCount, maxAverage) {
-        const row = _.find(this.props.data, (r) => {
-            return r[0] === xVal && r[1] === yVal;
-        });
+    const count = row && row[2] ? row[2] : 0;
+    const avergeRating = row && row[3] ? row[3] : 0;
 
-        const count = row && row[2] ? row[2] : 0;
-        const avergeRating = row && row[3] ? row[3] : 0;
-
-        return {
-            count: count,
-            rating: avergeRating,
-            relCount: count / maxCount,
-            relRating: avergeRating / maxAverage
-        };
-    }
-
-    render() {
-        if (!this.props.data) {
-            return null;
-        }
-        const transformedData = this.transformData();
-        return (
-            <div className="table-responsive">
-                <table className="table table-condensed table-col-hover table-bordered">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            {transformedData.uniqueX.map((xVal) => {
-                                return (<th key={xVal}>{xVal}</th>);
-                            })}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {transformedData.uniqueY.map((yVal) => {
-                            return (<tr key={yVal}>
-                                <th>{yVal}</th>
-                                {transformedData.uniqueX.map((xVal) => {
-                                    const val = this.findByXY(
-                                        xVal,
-                                        yVal,
-                                        transformedData.maxCount,
-                                        transformedData.maxAverage
-                                    );
-                                    const style = {
-                                        backgroundColor:
-                                            `hsla(0,0%,${Math.round(val.relCount * 100)}%,0.05)`
-                                    };
-                                    return (
-                                        <td
-                                            key={`${yVal}_${xVal}`}
-                                            style={style}
-                                            title={val.rating}>
-                                            {val.count}
-                                        </td>
-                                    );
-                                })}
-                            </tr>);
-                        })}
-                    </tbody>
-                </table>
-            </div>
-        );
-    }
-}
+    return {
+        count,
+        rating: avergeRating,
+        relCount: count / maxCount,
+        relRating: avergeRating / maxAverage,
+    };
+};

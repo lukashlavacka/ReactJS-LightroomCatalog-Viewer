@@ -1,9 +1,9 @@
 import React from 'react';
-import {Bar as BarChart, Pie as PieChart} from 'react-chartjs';
+import { Bar as BarChart, Pie as PieChart } from 'react-chartjs';
 import squel from 'squel';
-import Q from 'q';
+import q from 'q';
 import _ from 'lodash';
-import {LoadingWrapper} from './shared';
+import { LoadingWrapper, Checkbox } from './shared';
 import * as Utilities from './utilities';
 import WorkerWrapper from './worker-wrapper';
 
@@ -11,36 +11,36 @@ export default class ChartViewer extends React.Component {
     static propTypes = {
         agragateFields: React.PropTypes.array,
         worker: React.PropTypes.instanceOf(WorkerWrapper).isRequired,
-        filter: React.PropTypes.object
+        filter: React.PropTypes.object,
     }
 
     static defaultProps = {
         agragateFields: [
-            {field: 'camera.value', name: 'Camera', type: 'pie'},
-            {field: 'lens.value', name: 'Lens', type: 'pie'},
-            {field: 'exif.focalLength', name: 'Focal length', type: 'bar'},
-            {field: 'exif.isoSpeedRating', name: 'ISO', type: 'bar'},
-            {field: 'exif.aperture', name: 'Aperture', type: 'bar'},
-            {field: 'exif.shutterSpeed', name: 'Shutter Speed', type: 'bar'},
-            {field: 'images.pick', name: 'Flag', type: 'pie'},
-            {field: 'images.colorLabels', name: 'Color label', type: 'pie'},
-            {field: 'images.rating', name: 'Rating', type: 'bar'},
-            {field: 'keyword.tag', name: 'Face', type: 'pie'},
-            {field: 'strftime("%Y", images.captureTime)', name: 'Year', type: 'bar'},
-            {field: 'strftime("%Y-%m", images.captureTime)', name: 'Month', type: 'bar'},
-            {field: 'strftime("%Y-%W", images.captureTime)', name: 'Week', type: 'bar'},
-            {field: 'strftime("%Y-%m-%d", images.captureTime)', name: 'Day', type: 'bar'}
-        ]
+            { field: 'camera.value', name: 'Camera', type: 'pie' },
+            { field: 'lens.value', name: 'Lens', type: 'pie' },
+            { field: 'exif.focalLength', name: 'Focal length', type: 'bar' },
+            { field: 'exif.isoSpeedRating', name: 'ISO', type: 'bar' },
+            { field: 'exif.aperture', name: 'Aperture', type: 'bar' },
+            { field: 'exif.shutterSpeed', name: 'Shutter Speed', type: 'bar' },
+            { field: 'images.pick', name: 'Flag', type: 'pie' },
+            { field: 'images.colorLabels', name: 'Color label', type: 'pie' },
+            { field: 'images.rating', name: 'Rating', type: 'bar' },
+            { field: 'keyword.tag', name: 'Face', type: 'pie' },
+            { field: 'strftime("%Y", images.captureTime)', name: 'Year', type: 'bar' },
+            { field: 'strftime("%Y-%m", images.captureTime)', name: 'Month', type: 'bar' },
+            { field: 'strftime("%Y-%W", images.captureTime)', name: 'Week', type: 'bar' },
+            { field: 'strftime("%Y-%m-%d", images.captureTime)', name: 'Day', type: 'bar' },
+        ],
+    }
+
+    state = {
+        field: _.find(this.props.agragateFields, { field: 'camera.value' }),
     }
 
     handleFieldChange(fieldName) {
         this.setState({
-            field: _.find(this.props.agragateFields, {field: fieldName})
+            field: _.find(this.props.agragateFields, { field: fieldName }),
         });
-    }
-
-    state = {
-        field: _.find(this.props.agragateFields, {field: 'camera.value'})
     }
 
     render() {
@@ -57,54 +57,72 @@ export default class ChartViewer extends React.Component {
                 <FieldSelector
                     agragateFields={this.props.agragateFields}
                     field={this.state.field}
-                    handleFieldChange={this.handleFieldChange} />
+                    handleFieldChange={this.handleFieldChange}
+                />
                 {chart}
             </div>
         );
     }
 }
 
-class FieldSelector extends React.Component {
-    static propTypes = {
-        agragateFields: React.PropTypes.array,
-        field: React.PropTypes.object.isRequired,
-        handleFieldChange: React.PropTypes.func.isRequired
-    }
-
-    handleChange = (event) => {
-        this.props.handleFieldChange(event.target.value);
-    }
-
-    render() {
-        return (
-            <div>
-                <h3>Select agregate field</h3>
-                {this.props.agragateFields.map((f) => {
-                    return (
-                            <label
-                                key={f.field}
-                                className="radio-inline">
-                                    <input
-                                        type="radio"
-                                        checked={this.props.field.field === f.field}
-                                        value={f.field}
-                                        onChange={this.handleChange} />{f.name}
-                            </label>
-                    );
-                })}
-            </div>
-        );
-    }
-}
+const FieldSelector = (props) =>
+    <div>
+        <h3>Select agregate field</h3>
+        {props.agragateFields.map((f) =>
+            <Checkbox key={f.field} handleFieldChange={props.handleFieldChange} field={f} />
+        )}
+    </div>;
+FieldSelector.propTypes = {
+    agragateFields: React.PropTypes.array,
+    field: React.PropTypes.object.isRequired,
+    handleFieldChange: React.PropTypes.func.isRequired,
+};
 
 class Chart extends React.Component {
     static propTypes = {
         agragateFields: React.PropTypes.array,
-        field: React.PropTypes.object.isRequired
+        field: React.PropTypes.object.isRequired,
+    }
+
+    state = {
+        loading: false,
+        data: { columns: [], values: [] },
+    };
+
+    componentDidMount() {
+        this.getData(this.props)
+        .then(this.transformData.bind(this, this.props))
+        .then((data) => {
+            this.setState({
+                data,
+                loading: false,
+            });
+        })
+        .done();
+    }
+
+    componentWillReceiveProps(nextProps) {
+        const noRedraw = this.props.field.field === nextProps.field.field;
+        this.getData(nextProps)
+        .then(this.transformData.bind(this, nextProps))
+        .then((data) => {
+            const oldValues = this.state.data.values.map((v) => v[0]);
+            const newValues = data.values.map((v) => v[0]);
+            this.setState({
+                data,
+                loading: false,
+                noRedraw: noRedraw && _.isEqual(oldValues, newValues),
+            });
+        })
+        .done();
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
     }
 
     getData(properties) {
-        this.setState({loading: true});
+        this.setState({ loading: true });
         let s = squel
             .select()
             .field(properties.field.field)
@@ -120,7 +138,7 @@ class Chart extends React.Component {
 
 
         _.forOwn(_.omitBy(properties.filter, _.isUndefined), (value, key) => {
-            s = s.where(Utilities.GetFilterExpression(key, value));
+            s = s.where(Utilities.getFilterExpression(key, value));
         });
 
         s = s
@@ -132,63 +150,26 @@ class Chart extends React.Component {
         return properties.worker.exec(query);
     }
 
-    state = {
-        loading: false,
-        data: {columns: [], values: []}
-    };
-
     transformData(properties, rawData) {
-        return Q(rawData[0] || {columns: [], values: []});
-    }
-
-    componentDidMount() {
-        this.getData(this.props)
-        .then(this.transformData.bind(this, this.props))
-        .then((data) => {
-            this.setState({
-                data: data,
-                loading: false
-            });
-        });
-    }
-
-    componentWillReceiveProps(nextProps) {
-        const noRedraw = this.props.field.field === nextProps.field.field;
-        this.getData(nextProps)
-        .then(this.transformData.bind(this, nextProps))
-        .then((data) => {
-            const oldValues = this.state.data.values.map((v) => {
-                return v[0];
-            });
-            const newValues = data.values.map((v) => {
-                return v[0];
-            });
-            this.setState({
-                data: data,
-                loading: false,
-                noRedraw: noRedraw && _.isEqual(oldValues, newValues)
-            });
-        });
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
+        return q(rawData[0] || { columns: [], values: [] });
     }
 
     render() {
         let chartElement;
         switch (this.props.field.type) {
-        case 'pie':
-            chartElement = (<PieChartComponent
-                rawData={this.state.data}
-                noRedraw={this.state.noRedraw} />);
-            break;
-        default:
-        case 'bar':
-            chartElement = (<BarChartComponent
-                rawData={this.state.data}
-                noRedraw={this.state.noRedraw} />);
-            break;
+            case 'pie':
+                chartElement = (<PieChartComponent
+                    rawData={this.state.data}
+                    noRedraw={this.state.noRedraw}
+                />);
+                break;
+            default:
+            case 'bar':
+                chartElement = (<BarChartComponent
+                    rawData={this.state.data}
+                    noRedraw={this.state.noRedraw}
+                />);
+                break;
         }
         return (
             <LoadingWrapper loading={this.state.loading}>
@@ -202,40 +183,37 @@ class BarChartComponent extends React.Component {
     static propTypes = {
         noRedraw: React.PropTypes.bool,
         options: React.PropTypes.object.isRequired,
-        rawData: React.PropTypes.object.isRequired
+        rawData: React.PropTypes.object.isRequired,
     }
 
     static defaultProps = {
         options: {
             responsive: true,
             animationEasing: 'easeInOutCubic',
-            animationSteps: 30
-        }
+            animationSteps: 30,
+        },
     }
 
     expandDataset(rawData) {
         const data = {
-            labels: rawData.values.map((v) => {
-                return v[0] || 'Undefined';
-            }),
-            datasets: []
+            labels: rawData.values.map((v) => v[0] || 'Undefined'),
+            datasets: [],
         };
 
         data.datasets.push({
             label: 'Count',
-            data: rawData.values.map((v) => {
-                return v[1] || 'Undefined';
-            })
+            data: rawData.values.map((v) => v[1] || 'Undefined'),
         });
 
         data.dataset = data.datasets.map((d, i) => {
+            const dataPoint = d;
             const hue = i * (360 / data.datasets.length);
 
-            d.fillColor = `hsla(${hue},90%,50%,0.5)`;
-            d.strokeColor = `hsla(${hue},90%,50%,0.8)`;
-            d.highlightFill = `hsla(${hue},90%,50%,0.75)`;
-            d.highlightStroke = `hsla(${hue},90%,50%,1.0)`;
-            return d;
+            dataPoint.fillColor = `hsla(${hue},90%,50%,0.5)`;
+            dataPoint.strokeColor = `hsla(${hue},90%,50%,0.8)`;
+            dataPoint.highlightFill = `hsla(${hue},90%,50%,0.75)`;
+            dataPoint.highlightStroke = `hsla(${hue},90%,50%,1.0)`;
+            return dataPoint;
         });
         return data;
     }
@@ -258,15 +236,19 @@ class PieChartComponent extends React.Component {
     static propTypes = {
         noRedraw: React.PropTypes.bool,
         options: React.PropTypes.object.isRequired,
-        rawData: React.PropTypes.object.isRequired
+        rawData: React.PropTypes.object.isRequired,
     }
 
     static defaultProps = {
         options: {
             responsive: true,
             animationEasing: 'easeInOutCubic',
-            animationSteps: 30
-        }
+            animationSteps: 30,
+        },
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
     }
 
     expandDataset(rawData) {
@@ -277,15 +259,11 @@ class PieChartComponent extends React.Component {
                 label: v[0] || 'Undefined',
                 value: v[1],
                 color: `hsl(${hue},80%,50%)`,
-                highlight: `hsl(${hue},,90%,60%)`
+                highlight: `hsl(${hue},,90%,60%)`,
             };
         });
 
         return data;
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
     }
 
     render() {
@@ -307,27 +285,20 @@ class PieChartComponent extends React.Component {
     }
 }
 
-class ChartLegend extends React.Component {
-    static propTypes = {
-        datasets: React.PropTypes.array.isRequired
-    }
-
-    render() {
-        return (
-            <div className="chart-legend">
-                <ul>
-                    {this.props.datasets.map((ds) => {
-                        return (
-                            <li key={ds.label}>
-                                <span
-                                    className="legend-color-box"
-                                    style={{backgroundColor: ds.color}}>
-                                </span>{ ds.label }
-                            </li>
-                        );
-                    })}
-                </ul>
-            </div>
-        );
-    }
-}
+const ChartLegend = (props) =>
+    <div className="chart-legend">
+        <ul>
+            {props.datasets.map((ds) =>
+                <li key={ds.label}>
+                    <span
+                        className="legend-color-box"
+                        style={{ backgroundColor: ds.color }}
+                    >
+                    </span>{ ds.label }
+                </li>
+            )}
+        </ul>
+    </div>;
+ChartLegend.propTypes = {
+    datasets: React.PropTypes.array.isRequired,
+};
