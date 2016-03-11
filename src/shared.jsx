@@ -10,7 +10,7 @@ export const BootstrapRow = (props) => {
         lg: props.lg || props.md || props.sm || props.xs || width,
     };
     const classes = _(widths)
-        .mapValues((value, key) => `col-${key}-value`)
+        .mapValues((value, key) => `col-${key}-${value}`)
         .values()
         .join(' ');
 
@@ -46,25 +46,30 @@ LoadingWrapper.propTypes = {
     children: React.PropTypes.node,
 };
 
-export const Checkbox = (props) => {
-    const handleFieldChange =
-        (event) => props.handleFieldChange(props.field.field, event.target.value);
-    return (
-        <label
-            key={props.field.field}
-            className="radio-inline"
-        >
-            <input
-                type="radio"
-                checked={props.selectedField === props.field.field}
-                value={props.field.field}
-                onChange={handleFieldChange}
-            />{props.field.name}
-        </label>
-    );
-};
-Checkbox.propTypes = {
-    handleFieldChange: React.PropTypes.func.isRequired,
-    field: React.PropTypes.object.isRequired,
-    selectedField: React.PropTypes.string,
-};
+export class Checkbox extends React.Component {
+    static propTypes = {
+        handleFieldChange: React.PropTypes.func.isRequired,
+        field: React.PropTypes.object.isRequired,
+        selectedField: React.PropTypes.string,
+    }
+
+    handleFieldChange =
+        (event) => this.props.handleFieldChange(this.props.field, event.target.value)
+
+    render() {
+        return (
+            <label
+                key={this.props.field.field}
+                className="radio-inline"
+            >
+                <input
+                    ref="radioField"
+                    type="radio"
+                    checked={this.props.selectedField === this.props.field.field}
+                    value={this.props.field.field}
+                    onChange={this.handleFieldChange}
+                />{this.props.field.name}
+            </label>
+        );
+    }
+}

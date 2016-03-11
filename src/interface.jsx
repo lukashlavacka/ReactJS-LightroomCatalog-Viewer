@@ -44,18 +44,43 @@ class FileDropWrapper extends React.Component {
         }
     }
 
+    render = () =>
+        <div
+            ref="fileDropWrapper"
+            style={{ height: '100%' }}
+            onDrop={this.onDrop}
+            onDragEnter={this.onDragEnter}
+            onDragOver={this.onDragOver}
+            onDragLeave={this.onDragLeave}
+        >
+            {this.props.children}
+        </div>
+}
+
+class FileInput extends React.Component {
+    static propTypes = {
+        handleStatusChange: React.PropTypes.func.isRequired,
+        handleFileChange: React.PropTypes.func.isRequired,
+    }
+
+    onChange = (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+
+        const files = this.refs.fileInput.files;
+
+        if (files && files.length && files[0]) {
+            this.props.handleFileChange(files[0]);
+        }
+    }
+
     render() {
-        return (
-            <div
-                style={{ height: '100%' }}
-                onDrop={this.onDrop}
-                onDragEnter={this.onDragEnter}
-                onDragOver={this.onDragOver}
-                onDragLeave={this.onDragLeave}
-            >
-                {this.props.children}
+        return (<form className="form-inline" onSubmit={this.onChange}>
+            <div className="form-group">
+                <input ref="fileInput" type="file" required="required" />
             </div>
-        );
+            <button type="submit" className="btn btn-default">Open catalog</button>
+        </form>);
     }
 }
 
@@ -64,8 +89,8 @@ export default class Interface extends React.Component {
         super(props);
         const worker = new WorkerWrapper(
             process.env.NODE_ENV === 'production' ?
-            'js/worker.sql.js' :
-            './node_modules/sql.js/js/worker.sql.js'
+                'js/worker.sql.js' :
+                './node_modules/sql.js/js/worker.sql.js'
         );
         this.state = {
             worker,
@@ -211,8 +236,12 @@ export default class Interface extends React.Component {
             );
         } else {
             content = (
-                <BootstrapRow>
-                    <p>Drop anywhere on the page a Lightroom catalog file.</p>
+                <BootstrapRow sm="{6}" xs="{12}">
+                    <p>Drop anywhere on the page a Lightroom catalog file or select a file</p>
+                    <FileInput
+                        handleFileChange={this.handleFileChange}
+                        handleStatusChange={this.handleStatusChange}
+                    />
                 </BootstrapRow>
             );
         }
