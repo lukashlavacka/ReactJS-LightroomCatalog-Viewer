@@ -1,4 +1,5 @@
 import React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import CheckboxGroup from 'react-checkbox-group';
 import DatePicker from 'react-datepicker';
 import ReactSlider from 'react-slider';
@@ -24,6 +25,7 @@ class FilterFactory extends React.Component {
 
     constructor(props) {
         super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
 
         if (this.props.options) {
             // eslint-disable-next-line react/no-direct-mutation-state
@@ -62,14 +64,6 @@ class FilterFactory extends React.Component {
             })
             .done();
         }
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        return !_.isEqual(this.state.options, nextState.options) ||
-                this.props.valueProp !== nextProps.valueProp ||
-                this.props.nameProp !== nextProps.nameProp ||
-                this.props.table !== nextProps.table ||
-                this.props.dataFilter !== nextProps.dataFilter;
     }
 
     getData(properties) {
@@ -151,6 +145,7 @@ class FilterRangeFactory extends React.Component {
 
     constructor(props) {
         super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
 
         if (props.minMax) {
             this.state = {
@@ -218,14 +213,6 @@ class FilterRangeFactory extends React.Component {
         }
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        return this.state.dbMin !== nextState.dbMin
-            || this.state.dbMax !== nextState.dbMax
-            || this.state.uiMin !== nextState.uiMin
-            || this.state.uiMax !== nextState.uiMax
-            || this.props.aditionalType !== nextProps.aditionalType;
-    }
-
     getData = (props) => {
         this.setState({ loading: true });
         const s = squel
@@ -263,7 +250,12 @@ class FilterRangeFactory extends React.Component {
             uiMin: value[0],
             uiMax: value[1],
         });
-        this.props.handleFilterChange(this.props.type, dbVal);
+
+        if (dbVal[0] <= this.state.dbMin && dbVal[1] >= this.state.dbMax) {
+            this.props.handleFilterChange(this.props.type);
+        } else {
+            this.props.handleFilterChange(this.props.type, dbVal);
+        }
     }
 
     transformFromDBValue = (props, value, isMin) => {
@@ -512,6 +504,11 @@ export const FilterFace = (props) =>
 export class FilterDate extends React.Component {
     static propTypes = {
         handleFilterChange: React.PropTypes.func.isRequired,
+    }
+
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     }
 
     state = {

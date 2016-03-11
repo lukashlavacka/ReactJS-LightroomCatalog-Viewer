@@ -1,4 +1,5 @@
 import React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import ReactGridLayoutWithoutProvider, { WidthProvider as widthProvider } from 'react-grid-layout';
 import _ from 'lodash';
 import * as FilterWidgets from './filter';
@@ -17,6 +18,7 @@ export class WindowDimensions extends React.Component {
 
     constructor(props) {
         super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
 
         this.handleUpdateDimensions();
     }
@@ -63,6 +65,7 @@ export default class WidgetLayout extends React.Component {
 
     constructor(props) {
         super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
 
         const ls = this.props.getLocalStorage();
         this.state = {
@@ -88,10 +91,6 @@ export default class WidgetLayout extends React.Component {
             /* eslint-enable */
             ],
         };
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        return !_.isEqual(this.state, nextState) || !_.isEqual(this.props, nextProps);
     }
 
     onLayoutChange = (layout, layouts) => {

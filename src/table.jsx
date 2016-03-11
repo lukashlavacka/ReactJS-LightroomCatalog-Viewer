@@ -1,4 +1,5 @@
 import React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import squel from 'squel';
 import q from 'q';
 import _ from 'lodash';
@@ -10,6 +11,11 @@ export default class TableViewer extends React.Component {
     static propTypes = {
         worker: React.PropTypes.instanceOf(WorkerWrapper).isRequired,
         filter: React.PropTypes.object,
+    }
+
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     }
 
     state = {
@@ -101,6 +107,11 @@ class Table extends React.Component {
         yField: React.PropTypes.string,
     }
 
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    }
+
     state = {
         loading: false,
     }
@@ -184,7 +195,7 @@ class Table extends React.Component {
     }
 }
 
-const TableComponent = function TableComponent(props) {
+const TableComponent = (props) => {
     if (!props.data) {
         return <noscript />;
     }
@@ -236,7 +247,7 @@ TableComponent.propTypes = {
     xField: React.PropTypes.string,
     yField: React.PropTypes.string,
 };
-TableComponent.transformData = function transformData(props) {
+TableComponent.transformData = (props) => {
     const uniqueX = _(props.data)
         .map((r) => r[0])
         .uniq()
@@ -264,7 +275,7 @@ TableComponent.transformData = function transformData(props) {
         maxAverage,
     };
 };
-TableComponent.correctSort = function correctSort(field) {
+TableComponent.correctSort = (field) => {
     switch (field) {
         case 'numeric':
         case 'exif.focalLength':
@@ -275,7 +286,7 @@ TableComponent.correctSort = function correctSort(field) {
             return (a, b) => a - b;
     }
 };
-TableComponent.findByXY = function findByXY(props, xVal, yVal, maxCount, maxAverage) {
+TableComponent.findByXY = (props, xVal, yVal, maxCount, maxAverage) => {
     const row = _.find(props.data, (r) => r[0] === xVal && r[1] === yVal);
 
     const count = row && row[2] ? row[2] : 0;

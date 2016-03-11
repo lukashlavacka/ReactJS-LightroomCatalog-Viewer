@@ -1,4 +1,5 @@
 import React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import squel from 'squel';
 import q from 'q';
 import _ from 'lodash';
@@ -10,6 +11,7 @@ export default class PhotoStats extends React.Component {
         popularStats: React.PropTypes.array.isRequired,
         filter: React.PropTypes.object,
     }
+
     static defaultProps = {
         popularStats: [
             { key: 'camera', field: 'camera.value', name: 'Camera Model' },
@@ -25,6 +27,11 @@ export default class PhotoStats extends React.Component {
                     `${1 / Math.round(100 / val)}s`,
             },
         ],
+    }
+
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     }
 
     state = {
@@ -54,13 +61,6 @@ export default class PhotoStats extends React.Component {
             });
         })
         .done();
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        return !_.isEqual(
-            _.omitBy(this.props.filter, _.isUndefined),
-            _.omitBy(nextProps.filter, _.isUndefined)
-        ) || !_.isEqual(this.state, nextState);
     }
 
     getData(properties) {

@@ -1,4 +1,5 @@
 import React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import { Bar as BarChart, Pie as PieChart } from 'react-chartjs';
 import squel from 'squel';
 import q from 'q';
@@ -31,6 +32,11 @@ export default class ChartViewer extends React.Component {
             { field: 'strftime("%Y-%W", images.captureTime)', name: 'Week', type: 'bar' },
             { field: 'strftime("%Y-%m-%d", images.captureTime)', name: 'Day', type: 'bar' },
         ],
+    }
+
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     }
 
     state = {
@@ -84,10 +90,15 @@ class Chart extends React.Component {
         field: React.PropTypes.object.isRequired,
     }
 
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    }
+
     state = {
         loading: false,
         data: { columns: [], values: [] },
-    };
+    }
 
     componentDidMount() {
         this.getData(this.props)
@@ -115,10 +126,6 @@ class Chart extends React.Component {
             });
         })
         .done();
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
     }
 
     getData(properties) {
@@ -194,6 +201,11 @@ class BarChartComponent extends React.Component {
         },
     }
 
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    }
+
     expandDataset(rawData) {
         const data = {
             labels: rawData.values.map((v) => v[0] || 'Undefined'),
@@ -247,8 +259,9 @@ class PieChartComponent extends React.Component {
         },
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     }
 
     expandDataset(rawData) {

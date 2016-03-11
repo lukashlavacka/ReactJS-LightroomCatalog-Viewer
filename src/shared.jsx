@@ -1,4 +1,5 @@
 import React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import _ from 'lodash';
 
 export const BootstrapRow = (props) => {
@@ -51,6 +52,11 @@ export class Checkbox extends React.Component {
         handleFieldChange: React.PropTypes.func.isRequired,
         field: React.PropTypes.object.isRequired,
         selectedField: React.PropTypes.string,
+    }
+
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     }
 
     handleFieldChange =

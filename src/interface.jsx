@@ -1,4 +1,5 @@
 import React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import update from 'react-addons-update';
 import NProgress from 'nprogress';
 import WidgetLayout from './widgets';
@@ -12,6 +13,11 @@ class FileDropWrapper extends React.Component {
         handleStatusChange: React.PropTypes.func.isRequired,
         handleFileChange: React.PropTypes.func.isRequired,
         children: React.PropTypes.node,
+    }
+
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     }
 
     onDragEnter = (event) => {
@@ -63,6 +69,11 @@ class FileInput extends React.Component {
         handleFileChange: React.PropTypes.func.isRequired,
     }
 
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    }
+
     onChange = (event) => {
         event.stopPropagation();
         event.preventDefault();
@@ -87,6 +98,7 @@ class FileInput extends React.Component {
 export default class Interface extends React.Component {
     constructor(props) {
         super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
         const worker = new WorkerWrapper(
             process.env.NODE_ENV === 'production' ?
                 'js/worker.sql.js' :

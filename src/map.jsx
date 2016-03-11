@@ -1,4 +1,5 @@
 import React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import ScriptjsLoader from 'react-google-maps/lib/async/ScriptjsLoader';
 import { GoogleMap, Marker, OverlayView } from 'react-google-maps';
 import MarkerClusterer from 'react-google-maps/lib/addons/MarkerClusterer';
@@ -26,6 +27,11 @@ export default class MapViewer extends React.Component {
             { key: '1', name: 'Zoom to cluster' },
             { key: '2', name: 'Filter to cluster' },
         ],
+    }
+
+    constructor(props) {
+        super(props);
+        this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     }
 
     state = {
@@ -58,10 +64,6 @@ export default class MapViewer extends React.Component {
             });
         })
         .done();
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        return !(_.isEqual(this.props, nextProps) && _.isEqual(this.state, nextState));
     }
 
     componentWillUnmount() {
