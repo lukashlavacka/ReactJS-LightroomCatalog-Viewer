@@ -13,14 +13,20 @@ module.exports = {
         noParse: [
             /sql.js$/
         ],
+        preLoaders: [
+            {
+                test: /\.jsx?$/,
+                loader: 'eslint-loader',
+                include: path.resolve(__dirname, './src')
+            }
+        ],
         loaders: [
             {
                 test: /.jsx?$/,
                 loader: 'babel-loader',
                 include: path.resolve(__dirname, './src'),
                 query: {
-                    presets: ['es2015', 'stage-0', 'react'],
-                    optional: ['es7.decorators', 'es7.classProperties']
+                    presets: ['react', 'es2015', 'stage-0' ]
                 }
             },
             {
@@ -51,12 +57,13 @@ module.exports = {
         new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})
     ],
     resolve: {
-        extensions: ['', '.webpack.js', '.web.js', '.js', '.jsx']
-    },
-    eslintConfig: {
-        env: {
-            browser: true
-        }
+        extensions: [
+            '',
+            '.webpack.js',
+            '.web.js',
+            '.js',
+            '.jsx'
+        ]
     },
     scripts: {
         lint: 'eslint src'
