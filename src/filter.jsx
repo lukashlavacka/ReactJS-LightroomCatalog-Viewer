@@ -346,7 +346,9 @@ export const FilterISORating = (props) =>
         {...props}
     />;
 FilterISORating.transformFromUIValue = (props, value) => Math.pow(2, value) * 100;
-FilterISORating.transformFromDBValue = (props, value) => Math.log((value / 100)) / Math.log(2);
+FilterISORating.transformFromDBValue = (props, value) => Math.floor(
+    Math.log((value / 100)) / Math.log(2)
+);
 
 export class FilterAperture extends React.Component {
     static defaultProps = {

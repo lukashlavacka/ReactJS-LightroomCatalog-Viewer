@@ -252,13 +252,13 @@ TableComponent.transformData = (props) => {
         .map((r) => r[0])
         .uniq()
         .value()
-        .sort(this.correctSort(props.xField));
+        .sort(TableComponent.correctSort(props.xField));
 
     const uniqueY = _(props.data)
         .map((r) => r[1])
         .uniq()
         .value()
-        .sort(this.correctSort(props.yField));
+        .sort(TableComponent.correctSort(props.yField));
 
     const maxCount = _(props.data)
         .map((r) => r[2])

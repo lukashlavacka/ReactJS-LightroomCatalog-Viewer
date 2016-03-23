@@ -248,7 +248,7 @@ export default class Interface extends React.Component {
             );
         } else {
             content = (
-                <BootstrapRow sm="{6}" xs="{12}">
+                <BootstrapRow sm={6} xs={12}>
                     <p>Drop anywhere on the page a Lightroom catalog file or select a file</p>
                     <FileInput
                         handleFileChange={this.handleFileChange}
