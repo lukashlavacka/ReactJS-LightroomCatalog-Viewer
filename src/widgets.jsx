@@ -85,9 +85,9 @@ export default class WidgetLayout extends React.Component {
                 { key: 'ChartViewer'        , title: 'Chart'         , filter: null          , grid: { x: 0, y:  9, w: 3, h: 6, minH: 2 } },
                 { key: 'FilterShutter'      , title: 'Shutter Speed' , filter: 'shuter'      , grid: { x: 6, y:  9, w: 3, h: 2, minH: 2 } },
                 { key: 'FilterDate'         , title: 'Date'          , filter: 'date'        , grid: { x: 6, y: 11, w: 3, h: 2, minH: 2 } },
-                { key: 'PhotoStats'         , title: 'Most Popular'  , filter: null          , grid: { x: 0, y: 13, w: 6, h: 2, minH: 2 } },
-                { key: 'TableViewer'        , title: 'Table'         , filter: null          , grid: { x: 0, y: 15, w: 6, h: 6, minH: 2 } },
-                { key: 'MapViewer'          , title: 'Map'           , filter: null          , grid: { x: 0, y: 21, w: 6, h: 6, minH: 2 } },
+                { key: 'PhotoStats'         , title: 'Most Popular'  , filter: null          , grid: { x: 0, y: 13, w: 6, h: 3, minH: 2 } },
+                { key: 'TableViewer'        , title: 'Table'         , filter: null          , grid: { x: 0, y: 16, w: 6, h: 6, minH: 2 } },
+                { key: 'MapViewer'          , title: 'Map'           , filter: null          , grid: { x: 0, y: 22, w: 6, h: 6, minH: 2 } },
             /* eslint-enable */
             ],
         };

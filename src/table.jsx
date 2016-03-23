@@ -23,12 +23,12 @@ export default class TableViewer extends React.Component {
         yField: 'images.rating',
     }
 
-    handleXFieldChange(field) {
-        this.setState({ xField: field });
+    handleXFieldChange = (field) => {
+        this.setState({ xField: field.field });
     }
 
-    handleYFieldChange(field) {
-        this.setState({ yField: field });
+    handleYFieldChange = (field) => {
+        this.setState({ yField: field.field });
     }
 
     render() {
@@ -69,7 +69,12 @@ const FieldSelector = function FieldSelector(props) {
             <div>
                 <h3>Select {props.name}</h3>
                 {otherFields.map((f) =>
-                    <Checkbox key={f.field} handleFieldChange={props.handleFieldChange} field={f} />
+                    <Checkbox
+                        key={f.field}
+                        handleFieldChange={props.handleFieldChange}
+                        field={f}
+                        selectedField={props.field}
+                    />
                 )}
             </div>
         </BootstrapRow>
