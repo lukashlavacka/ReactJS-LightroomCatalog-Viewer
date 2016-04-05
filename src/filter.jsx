@@ -36,6 +36,7 @@ class FilterFactory extends React.Component {
     state = {
         loading: false,
         options: [],
+        selected: [],
     }
 
     componentDidMount() {
@@ -88,10 +89,13 @@ class FilterFactory extends React.Component {
         return q(dataset.values.map((t) => ({ value: t[0], name: t[1] })));
     }
 
-    handleChange = () => {
+    handleChange = (newSelected) => {
+        this.setState({
+            selected: newSelected,
+        });
         this.props.handleFilterChange(
             this.props.type,
-            this.refs[this.props.type].getCheckedValues()
+            newSelected
         );
     }
 
@@ -108,21 +112,24 @@ class FilterFactory extends React.Component {
                 <form>
                     <CheckboxGroup
                         name={this.props.type}
-                        ref={this.props.type}
+                        value={this.state.selected}
                         onChange={this.handleChange}
                     >
-                        {this.state.options.map((o) => (
-                            <label
-                                key={o.value}
-                                className="checkbox-inline"
-                            >
-                                <input
-                                    type="checkbox"
-                                    value={o.value}
-                                />
-                                {this.transformName(o.name)}
-                            </label>
-                        ))}
+                        {
+                            Checkbox => (
+                                <div>
+                                    {this.state.options.map((o) => (
+                                        <label
+                                            key={o.value}
+                                            className="checkbox-inline"
+                                        >
+                                            <Checkbox value={o.value} />
+                                            {this.transformName(o.name)}
+                                        </label>
+                                    ))}
+                                </div>
+                            )
+                        }
                     </CheckboxGroup>
                 </form>
             </LoadingWrapper>
@@ -439,7 +446,7 @@ export const FilterShutter = (props) =>
 FilterShutter.transformFromUIValue = (props, value) => 100 / value;
 FilterShutter.transformFromDBValue = (props, value) => Math.round(100 / value);
 FilterShutter.transformToUIName = (props, value) =>
-    value > 0 ? `1/${Math.round(value)}` : `${1 / value}s`;
+    (value > 0 ? `1/${Math.round(value)}` : `${1 / value}s`);
 
 export const FilterFlag = (props) => <FilterFactory type="flag" {...props} />;
 FilterFlag.propTypes = {

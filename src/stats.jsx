@@ -22,9 +22,9 @@ export default class PhotoStats extends React.Component {
             { key: 'aperture', field: 'ROUND(exif.aperture, 2)', name: 'Aperture' },
             { key: 'iso', field: 'exif.isoSpeedRating', name: 'ISO' },
             { key: 'shutter', field: 'exif.shutterSpeed', name: 'Shutter Speed',
-                transform: (val) => val > 0 ?
+                transform: (val) => (val > 0 ?
                     `1/${Math.round(100 / val)}s` :
-                    `${1 / Math.round(100 / val)}s`,
+                    `${1 / Math.round(100 / val)}s`),
             },
         ],
     }

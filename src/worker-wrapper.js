@@ -41,8 +41,7 @@ export class AsyncWorkerWrapper extends AbstractWorkerWrapper {
             window.console.log(
                 `Last query "${promise.query}" took ${new Date() - promise.timestamp}ms`
             );
-
-            promise.deferred.resolve(event.data.results);
+            promise.deferred.resolve(event.data.results || {});
             delete this.promises[event.data.id];
         };
     }

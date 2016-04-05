@@ -52,6 +52,7 @@ export default class WidgetLayout extends React.Component {
         handleFilterChange: React.PropTypes.func.isRequired,
         worker: React.PropTypes.instanceOf(WorkerWrapper).isRequired,
         cols: React.PropTypes.number.isRequired,
+        isLocalFile: React.PropTypes.bool,
     }
 
     static defaultProps = {
@@ -73,21 +74,21 @@ export default class WidgetLayout extends React.Component {
             layouts: ls.layouts || {},
             widgets: [
             /* eslint-disable no-multi-spaces, comma-spacing, max-len, key-spacing */
-                { key: 'FilterCamera'       , title: 'Camera'        , filter: 'camera'      , grid: { x: 0, y:  1, w: 3, h: 2, minH: 2 } },
-                { key: 'FilterLens'         , title: 'Lens'          , filter: 'lens'        , grid: { x: 6, y:  1, w: 3, h: 2, minH: 2 } },
-                { key: 'FilterFlag'         , title: 'Flag'          , filter: 'flag'        , grid: { x: 0, y:  3, w: 3, h: 2, minH: 2 } },
-                { key: 'FilterFace'         , title: 'Face'          , filter: 'face'        , grid: { x: 6, y:  4, w: 3, h: 2, minH: 2 } },
-                { key: 'FilterColor'        , title: 'Color'         , filter: 'color'       , grid: { x: 0, y:  4, w: 3, h: 2, minH: 2 } },
-                { key: 'FilterFocalLength'  , title: 'Focal Length'  , filter: 'focalLength' , grid: { x: 6, y:  4, w: 3, h: 2, minH: 2 } },
-                { key: 'FilterISORating'    , title: 'ISO'           , filter: 'iso'         , grid: { x: 0, y:  7, w: 3, h: 2, minH: 2 } },
-                { key: 'FilterAperture'     , title: 'Aperture'      , filter: 'aperture'    , grid: { x: 6, y:  7, w: 3, h: 2, minH: 2 } },
-                { key: 'FilterRating'       , title: 'Rating'        , filter: 'rating'      , grid: { x: 6, y:  9, w: 3, h: 2, minH: 2 } },
-                { key: 'ChartViewer'        , title: 'Chart'         , filter: null          , grid: { x: 0, y:  9, w: 3, h: 6, minH: 2 } },
-                { key: 'FilterShutter'      , title: 'Shutter Speed' , filter: 'shuter'      , grid: { x: 6, y:  9, w: 3, h: 2, minH: 2 } },
-                { key: 'FilterDate'         , title: 'Date'          , filter: 'date'        , grid: { x: 6, y: 11, w: 3, h: 2, minH: 2 } },
-                { key: 'PhotoStats'         , title: 'Most Popular'  , filter: null          , grid: { x: 0, y: 13, w: 6, h: 3, minH: 2 } },
-                { key: 'TableViewer'        , title: 'Table'         , filter: null          , grid: { x: 0, y: 16, w: 6, h: 6, minH: 2 } },
-                { key: 'MapViewer'          , title: 'Map'           , filter: null          , grid: { x: 0, y: 22, w: 6, h: 6, minH: 2 } },
+                { key: 'FilterCamera'       , title: 'Camera'        , filter: 'camera'      , disableLocal: false , grid: { x: 0, y:  1, w: 3, h: 2, minH: 2 } },
+                { key: 'FilterLens'         , title: 'Lens'          , filter: 'lens'        , disableLocal: false , grid: { x: 6, y:  1, w: 3, h: 2, minH: 2 } },
+                { key: 'FilterFlag'         , title: 'Flag'          , filter: 'flag'        , disableLocal: false , grid: { x: 0, y:  3, w: 3, h: 2, minH: 2 } },
+                { key: 'FilterFace'         , title: 'Face'          , filter: 'face'        , disableLocal: false , grid: { x: 6, y:  4, w: 3, h: 2, minH: 2 } },
+                { key: 'FilterColor'        , title: 'Color'         , filter: 'color'       , disableLocal: false , grid: { x: 0, y:  4, w: 3, h: 2, minH: 2 } },
+                { key: 'FilterFocalLength'  , title: 'Focal Length'  , filter: 'focalLength' , disableLocal: false , grid: { x: 6, y:  4, w: 3, h: 2, minH: 2 } },
+                { key: 'FilterISORating'    , title: 'ISO'           , filter: 'iso'         , disableLocal: false , grid: { x: 0, y:  7, w: 3, h: 2, minH: 2 } },
+                { key: 'FilterAperture'     , title: 'Aperture'      , filter: 'aperture'    , disableLocal: false , grid: { x: 6, y:  7, w: 3, h: 2, minH: 2 } },
+                { key: 'FilterRating'       , title: 'Rating'        , filter: 'rating'      , disableLocal: false , grid: { x: 6, y:  9, w: 3, h: 2, minH: 2 } },
+                { key: 'ChartViewer'        , title: 'Chart'         , filter: null          , disableLocal: false , grid: { x: 0, y:  9, w: 3, h: 6, minH: 2 } },
+                { key: 'FilterShutter'      , title: 'Shutter Speed' , filter: 'shuter'      , disableLocal: false , grid: { x: 6, y:  9, w: 3, h: 2, minH: 2 } },
+                { key: 'FilterDate'         , title: 'Date'          , filter: 'date'        , disableLocal: false , grid: { x: 6, y: 11, w: 3, h: 2, minH: 2 } },
+                { key: 'PhotoStats'         , title: 'Most Popular'  , filter: null          , disableLocal: false , grid: { x: 0, y: 13, w: 6, h: 3, minH: 2 } },
+                { key: 'TableViewer'        , title: 'Table'         , filter: null          , disableLocal: false , grid: { x: 0, y: 16, w: 6, h: 6, minH: 2 } },
+                { key: 'MapViewer'          , title: 'Map'           , filter: null          , disableLocal: true  , grid: { x: 0, y: 22, w: 6, h: 6, minH: 2 } },
             /* eslint-enable */
             ],
         };
@@ -188,7 +189,11 @@ export default class WidgetLayout extends React.Component {
                     onDragStop={this.triggerResize}
                     {...this.props}
                 >
-                    {this.state.widgets.map(this.getWidget)}
+                    {
+                        this.state.widgets
+                            .filter(w => !this.props.isLocalFile || !w.disableLocal)
+                            .map(this.getWidget)
+                    }
                 </ReactGridLayout>
             </div>
         );

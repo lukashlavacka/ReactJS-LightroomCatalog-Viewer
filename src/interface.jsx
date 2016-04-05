@@ -3,7 +3,7 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import update from 'react-addons-update';
 import NProgress from 'nprogress';
 import WidgetLayout from './widgets';
-import { AsyncWorkerWrapper as WorkerWrapper } from './worker-wrapper';
+import { SyncWorkerWrapper, AsyncWorkerWrapper } from './worker-wrapper';
 import { BootstrapRow } from './shared';
 
 
@@ -96,14 +96,27 @@ class FileInput extends React.Component {
 }
 
 export default class Interface extends React.Component {
+    static propTypes = {
+        isLocalFile: React.PropTypes.bool,
+    }
+
+    static defaultProps = {
+        isLocalFile: window.location.protocol === 'file:',
+    }
+
     constructor(props) {
         super(props);
         this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-        const worker = new WorkerWrapper(
-            process.env.NODE_ENV === 'production' ?
-                'js/worker.sql.js' :
-                './node_modules/sql.js/js/worker.sql.js'
-        );
+        let worker;
+        if (this.props.isLocalFile) {
+            worker = new SyncWorkerWrapper();
+        } else {
+            worker = new AsyncWorkerWrapper(
+                process.env.NODE_ENV === 'production' ?
+                    'js/worker.sql.js' :
+                    './node_modules/sql.js/js/worker.sql.js'
+            );
+        }
         this.state = {
             worker,
             filter: {},
@@ -243,6 +256,7 @@ export default class Interface extends React.Component {
                         handleFilterChange={this.handleFilterChange}
                         saveLocalStorage={this.saveLocalStorage}
                         getLocalStorage={this.getLocalStorage}
+                        isLocalFile={this.props.isLocalFile}
                     />
                 </div>
             );
