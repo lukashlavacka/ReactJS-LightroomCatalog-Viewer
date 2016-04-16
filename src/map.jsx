@@ -132,7 +132,6 @@ export default class MapViewer extends React.Component {
     }
 
     render() {
-        window.console.log('Map rendered: ');
         let overlayView;
         if (this.state.filterBounds) {
             overlayView = (

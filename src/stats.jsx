@@ -90,6 +90,25 @@ export default class PhotoStats extends React.Component {
             return statQuery;
         });
 
+        let sumQuery = squel
+            .select()
+            .field('COUNT(images.id_local)')
+            .from('Adobe_images', 'images')
+            .left_join('AgHarvestedExifMetadata', 'exif', 'images.id_local = exif.image')
+            .left_join('AgLibraryKeywordImage', 'keyword', 'images.id_local = keyword.image')
+            .left_join(
+                'AgInternedExifCameraModel',
+                'camera',
+                'exif.cameraModelRef = camera.id_local'
+            )
+            .left_join('AgInternedExifLens', 'lens', 'exif.lensRef = lens.id_local');
+
+        _.forOwn(_.omitBy(properties.filter, _.isUndefined), (value, key) => {
+            sumQuery = sumQuery.where(Utilities.getFilterExpression(key, value));
+        });
+
+        queries.unshift(sumQuery);
+
         const query = queries.join(';');
 
         return properties.worker.exec(query);
@@ -97,6 +116,10 @@ export default class PhotoStats extends React.Component {
 
     transformData(properties, rawData) {
         const dataset = rawData || [];
+
+        const totalCountDataset = dataset.splice(0, 1);
+        const totalCount = totalCountDataset[0] && totalCountDataset[0].values[0][0] || 1;
+
         return q(dataset.map((d, i) => {
             const stat = this.props.popularStats[i];
             return {
@@ -106,6 +129,7 @@ export default class PhotoStats extends React.Component {
                     stat.transform(d.values[0][0]) :
                     d.values[0][0],
                 count: d.values[0][1],
+                percentage: d.values[0][1] / totalCount,
             };
         }));
     }
@@ -122,7 +146,16 @@ export default class PhotoStats extends React.Component {
                     <tbody>
                         <tr>
                             {this.state.data.map((s) =>
-                                <td key={s.key}>{s.value} [{s.count} photo(s)]</td>
+                                <td key={s.key}>
+                                    {s.value}
+                                </td>
+                            )}
+                        </tr>
+                        <tr>
+                            {this.state.data.map((s) =>
+                                <td key={s.key}>
+                                    {s.count} photo(s) / {Math.round(s.percentage * 100)}%
+                                </td>
                             )}
                         </tr>
                     </tbody>

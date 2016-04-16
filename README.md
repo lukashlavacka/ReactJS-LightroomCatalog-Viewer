@@ -12,8 +12,10 @@ Drop Lightroom catalog file and UI should update.
 - [x] Add various metadata filters (rating, person, color, album, ...)
 - [x] Show basic statistics
 - [x] Select agregate field(s) for chart
-- [ ] Chart rendering
+- [x] Chart rendering
 - [ ] Multiple chart rendering
+- [ ] Make it work when saving locally (Ctrl+S)
+- [ ] Create some analytics engine providing suggestions
 
 
 ## References

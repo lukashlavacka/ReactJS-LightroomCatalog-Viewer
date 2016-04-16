@@ -125,7 +125,7 @@ export default class WidgetLayout extends React.Component {
         );
     }
 
-    handleMinifyWidget(widget) {
+    handleMinifyWidget = (widget) => {
         const layout = this.state.layout;
 
         const newLayout = _.cloneDeep(layout);
@@ -133,25 +133,16 @@ export default class WidgetLayout extends React.Component {
         const oldWidgetLayout = layout[widgetLayoutIndex];
         const newMinified = oldWidgetLayout.h > 1;
 
-        const minifidWidgetCount = _.filter(layout, { h: 1 }).length;
-
         let newWidgetLayout;
         if (newMinified) {
             newWidgetLayout = _.extend({}, oldWidgetLayout, {
                 h: 1,
                 w: 1,
-                x: minifidWidgetCount % this.props.cols,
-                y: Math.floor(minifidWidgetCount / this.props.cols),
                 isResizable: false,
-                static: true,
                 prevLayout: _.clone(oldWidgetLayout),
             });
         } else {
             newWidgetLayout = oldWidgetLayout.prevLayout;
-        }
-
-        for (let i = newLayout.length - 1; i >= 0; i--) {
-            newLayout[i].y = newLayout[i].h > 1 ? 1 : 0;
         }
 
 

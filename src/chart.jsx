@@ -272,7 +272,7 @@ class PieChartComponent extends React.Component {
                 label: v[0] || 'Undefined',
                 value: v[1],
                 color: `hsl(${hue},80%,50%)`,
-                highlight: `hsl(${hue},,90%,60%)`,
+                highlight: `hsl(${hue},90%,60%)`,
             };
         });
 
