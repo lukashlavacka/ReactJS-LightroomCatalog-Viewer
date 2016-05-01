@@ -43,9 +43,9 @@ export default class ChartViewer extends React.Component {
         field: _.find(this.props.agragateFields, { field: 'camera.value' }),
     }
 
-    handleFieldChange(fieldName) {
+    handleFieldChange = (field) => {
         this.setState({
-            field: _.find(this.props.agragateFields, { field: fieldName }),
+            field: _.find(this.props.agragateFields, { field: field.field }),
         });
     }
 
@@ -75,7 +75,12 @@ const FieldSelector = (props) =>
     <div>
         <h3>Select agregate field</h3>
         {props.agragateFields.map((f) =>
-            <Checkbox key={f.field} handleFieldChange={props.handleFieldChange} field={f} />
+            <Checkbox
+                key={f.field}
+                handleFieldChange={props.handleFieldChange}
+                field={f}
+                selectedField={props.field.field}
+            />
         )}
     </div>;
 FieldSelector.propTypes = {
