@@ -532,12 +532,23 @@ export class FilterDate extends React.Component {
         this.getData(this.props)
             .then(this.transformData.bind(this, this.props))
             .then((data) => {
+                let momentMin = moment(data.min);
+                let momentMax = moment(data.max);
+                const moment30past = moment().subtract(30, 'years');
+                const moment30future = moment().add(30, 'years');
+                if (momentMin < moment30past) {
+                    momentMin = moment30past;
+                }
+                if (momentMax > moment30future) {
+                    momentMax = moment30future;
+                }
+
                 this.setState({
                     loading: false,
-                    min: moment(data.min),
-                    max: moment(data.max),
-                    startDate: moment(data.min),
-                    endDate: moment(data.max),
+                    min: momentMin.clone().subtract(1, 'days'),
+                    max: momentMax.clone().add(1, 'days'),
+                    startDate: momentMin,
+                    endDate: momentMax,
                 });
             })
             .done();

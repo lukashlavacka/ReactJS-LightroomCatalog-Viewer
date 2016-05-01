@@ -85,8 +85,8 @@ export function getFilterExpression(type, filter) {
             break;
         case 'date':
             expression = expression
-            .and(`${property} >= "${minFilter.format('YYYY-MM-DD')}"`)
-            .and(`${property} < "${maxFilter.add(1, 'days').format('YYYY-MM-DD')}"`);
+            .and(`${property} >= "${filterValues[0].format('YYYY-MM-DD')}"`)
+            .and(`${property} < "${filterValues[1].clone().add(1, 'days').format('YYYY-MM-DD')}"`);
             break;
         case 'rating':
             if (filterValues[0] === 0) {
