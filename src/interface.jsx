@@ -67,6 +67,7 @@ class FileInput extends React.Component {
     static propTypes = {
         handleStatusChange: React.PropTypes.func.isRequired,
         handleFileChange: React.PropTypes.func.isRequired,
+        accept: React.PropTypes.string,
     }
 
     constructor(props) {
@@ -88,7 +89,7 @@ class FileInput extends React.Component {
     render() {
         return (<form className="form-inline" onSubmit={this.onChange}>
             <div className="form-group">
-                <input ref="fileInput" type="file" required="required" />
+                <input ref="fileInput" type="file" required="required" accept={this.props.accept} />
             </div>
             <button type="submit" className="btn btn-default">Open catalog</button>
         </form>);
@@ -267,6 +268,7 @@ export default class Interface extends React.Component {
                     <FileInput
                         handleFileChange={this.handleFileChange}
                         handleStatusChange={this.handleStatusChange}
+                        accept=".lrcat"
                     />
                 </BootstrapRow>
             );
