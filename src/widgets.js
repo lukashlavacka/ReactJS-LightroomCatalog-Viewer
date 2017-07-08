@@ -79,7 +79,6 @@ export default class WidgetLayout extends Component {
       layout: ls.layout || [],
       layouts: ls.layouts || {},
       widgets: [
-        /* eslint-disable no-multi-spaces, comma-spacing, max-len, key-spacing */
         {
           key: "FilterCamera",
           title: "Camera",
@@ -185,8 +184,8 @@ export default class WidgetLayout extends Component {
           disableLocal: true,
           grid: { x: 0, y: 22, w: 6, h: 6, minH: 2 }
         }
-        /* eslint-enable */
-      ]
+      ],
+      prevLayout: ls.prevLayout || {}
     };
   }
 
@@ -228,8 +227,11 @@ export default class WidgetLayout extends Component {
 
   handleMinifyWidget = widget => {
     const layout = this.state.layout;
+    const prevLayout = this.state.prevLayout;
 
     const newLayout = _.cloneDeep(layout);
+    const newPrevLayout = _.cloneDeep(prevLayout);
+
     const widgetLayoutIndex = _.findIndex(newLayout, { i: widget.key });
     const oldWidgetLayout = layout[widgetLayoutIndex];
     const newMinified = oldWidgetLayout.h > 1;
@@ -239,17 +241,19 @@ export default class WidgetLayout extends Component {
       newWidgetLayout = _.extend({}, oldWidgetLayout, {
         h: 1,
         w: 1,
-        isResizable: false,
-        prevLayout: _.clone(oldWidgetLayout)
+        isResizable: false
       });
+      newPrevLayout[widget.key] = _.clone(oldWidgetLayout);
     } else {
-      newWidgetLayout = oldWidgetLayout.prevLayout;
+      newWidgetLayout = prevLayout[widget.key] || {};
+      newPrevLayout[widget.key] = null;
     }
 
     newLayout.splice(widgetLayoutIndex, 1, newWidgetLayout);
 
-    this.setState({ layout: newLayout });
+    this.setState({ layout: newLayout, prevLayout: newPrevLayout });
     this.props.saveLocalStorage("layout", newLayout);
+    this.props.saveLocalStorage("prevLayout", newPrevLayout);
   };
 
   triggerResize() {
@@ -260,10 +264,12 @@ export default class WidgetLayout extends Component {
   handleResetUI = () => {
     this.props.saveLocalStorage("layout", []);
     this.props.saveLocalStorage("layouts", {});
+    this.props.saveLocalStorage("prevLayout", {});
 
     this.setState({
       layout: [],
-      layouts: {}
+      layouts: {},
+      prevLayout: {}
     });
   };
 
