@@ -443,7 +443,7 @@ export class FilterAperture extends Component {
       return value / 10;
     }
 
-    return this.types[this.state.type][value];
+    return this.props.types[this.state.type][value];
   };
 
   transformFromDBValue = (props, value, isFirst) => {
@@ -452,7 +452,7 @@ export class FilterAperture extends Component {
     }
 
     return (
-      _.findIndex(this.types[this.state.type], v => value < v) -
+      _.findIndex(this.props.types[this.state.type], v => value < v) -
       (isFirst ? 1 : 0)
     );
   };
