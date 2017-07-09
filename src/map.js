@@ -9,13 +9,41 @@ import {
 } from "react-google-maps";
 import withScriptjs from "react-google-maps/lib/async/withScriptjs";
 import MarkerClusterer from "react-google-maps/lib/addons/MarkerClusterer";
-// import { triggerEvent } from 'react-google-maps/lib/utils';
 import squel from "squel";
 import q from "q";
 import _ from "lodash";
 import { LoadingWrapper } from "./shared";
 import * as Utilities from "./utilities";
 import WorkerWrapper from "./worker-wrapper";
+
+const GoogleMapInstance = withScriptjs(
+  withGoogleMap(props =>
+    <GoogleMap
+      ref={props.onMapLoad}
+      defaultZoom={1}
+      defaultCenter={{ lat: 0, lng: 0 }}
+    >
+      {props.overlayView}
+      <MarkerClusterer
+        averageCenter
+        enableRetinaIcons
+        gridSize={60}
+        onClick={props.onMarkerClick}
+        zoomOnClick={props.zoomOnClick}
+      >
+        {props.data.map(d =>
+          <Marker
+            key={d.id}
+            clickable={false}
+            optimized
+            title={`${d.id}`}
+            position={d}
+          />
+        )}
+      </MarkerClusterer>
+    </GoogleMap>
+  )
+);
 
 export default class MapViewer extends Component {
   static version = Math.ceil(Math.random() * 22);
@@ -48,8 +76,6 @@ export default class MapViewer extends Component {
   };
 
   componentDidMount() {
-    // window.addEventListener('resize', this.handleUpdateDimensions);
-
     this.getData(this.props)
       .then(this.transformData.bind(this, this.props))
       .then(data => {
@@ -73,11 +99,7 @@ export default class MapViewer extends Component {
       .done();
   }
 
-  // componentWillUnmount() {
-  //     window.removeEventListener('resize', this.handleUpdateDimensions);
-  // }
-
-  onMarkerClick = markerCluster => {
+  handleMarkerClick = markerCluster => {
     if (this.state.type === "2") {
       const imageIDs = markerCluster.markers_.map(m => parseInt(m.title, 10));
       this.props.handleFilterChange("map", imageIDs);
@@ -136,17 +158,13 @@ export default class MapViewer extends Component {
     );
   }
 
+  handleMapLoad = map => (this.googleMapComponent = map);
+
   handleChange = event => {
     this.setState({
       type: event.target.value
     });
   };
-
-  // handleUpdateDimensions = () => {
-  //     if (this.googleMapComponent) {
-  //         triggerEvent(this.googleMapComponent, 'resize');
-  //     }
-  // }
 
   render() {
     let overlayView;
@@ -175,36 +193,6 @@ export default class MapViewer extends Component {
         </OverlayView>
       );
     }
-    const GoogleMapInstance = withScriptjs(
-      withGoogleMap(props =>
-        <GoogleMap
-          ref={it => {
-            this.googleMapComponent = it;
-          }}
-          defaultZoom={1}
-          defaultCenter={{ lat: 0, lng: 0 }}
-        >
-          {overlayView}
-          <MarkerClusterer
-            averageCenter
-            enableRetinaIcons
-            gridSize={60}
-            onClick={this.onMarkerClick}
-            zoomOnClick={!this.state.filterBounds}
-          >
-            {this.state.data.map(d =>
-              <Marker
-                key={d.id}
-                clickable={false}
-                optimized
-                title={`${d.id}`}
-                position={d}
-              />
-            )}
-          </MarkerClusterer>
-        </GoogleMap>
-      )
-    );
 
     return (
       <LoadingWrapper
@@ -229,6 +217,11 @@ export default class MapViewer extends Component {
           containerElement={<div style={{ height: `100%` }} />}
           mapElement={<div style={{ height: `100%` }} />}
           loadingElement={<div className="loading-wrapper loading" />}
+          onMapLoad={this.handleMapLoad}
+          overlayView={overlayView}
+          onMarkerClick={this.handleMarkerClick}
+          zoomOnClick={!this.state.filterBounds}
+          data={this.state.data}
         />
       </LoadingWrapper>
     );

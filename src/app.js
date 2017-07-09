@@ -7,7 +7,6 @@ import WidgetLayout from "./widgets";
 import { SyncWorkerWrapper, AsyncWorkerWrapper } from "./worker-wrapper";
 import { BootstrapRow } from "./shared";
 
-// eslint-disable-next-line react/prefer-stateless-function
 class FileDropWrapper extends Component {
   static propTypes = {
     handleStatusChange: PropTypes.func.isRequired,

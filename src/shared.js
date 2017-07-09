@@ -58,7 +58,7 @@ LoadingWrapper.propTypes = {
 export const NoDataWrapper = props =>
   props.noData === true
     ? <em>No Data</em>
-    : <div>
+    : <div style={{ height: "100%" }}>
         {props.children}
       </div>;
 NoDataWrapper.propTypes = {
