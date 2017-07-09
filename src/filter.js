@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, PureComponent } from "react";
 import PropTypes from "prop-types";
 import PureRenderMixin from "react-addons-pure-render-mixin";
 import { Checkbox, CheckboxGroup } from "react-checkbox-group";
@@ -26,9 +26,6 @@ class FilterFactory extends Component {
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
 
     if (this.props.options) {
       // eslint-disable-next-line react/no-direct-mutation-state
@@ -38,6 +35,7 @@ class FilterFactory extends Component {
 
   state = {
     loading: false,
+    loaded: false,
     options: [],
     selected: []
   };
@@ -46,20 +44,6 @@ class FilterFactory extends Component {
     if (this.props.table) {
       this.getData(this.props)
         .then(this.transformData.bind(this, this.props))
-        .then(data => {
-          this.setState({
-            options: data,
-            loading: false
-          });
-        })
-        .done();
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.table) {
-      this.getData(nextProps)
-        .then(this.transformData.bind(this, nextProps))
         .then(data => {
           this.setState({
             options: data,
@@ -261,6 +245,9 @@ class FilterRangeFactory extends Component {
 
   transformFromDBValue = (props, value, isMin) => {
     if (_.isFunction(props.transformFromDBValue)) {
+      return props.transformFromDBValue(this.props, value, isMin);
+    }
+    if (_.isFunction(this.props.transformFromDBValue)) {
       return this.props.transformFromDBValue(this.props, value, isMin);
     }
     return value;
@@ -270,6 +257,9 @@ class FilterRangeFactory extends Component {
     if (_.isFunction(props.transformFromUIValue)) {
       return props.transformFromUIValue(this.props, value);
     }
+    if (_.isFunction(this.props.transformFromUIValue)) {
+      return this.props.transformFromUIValue(this.props, value);
+    }
     return value;
   };
 
@@ -278,7 +268,7 @@ class FilterRangeFactory extends Component {
       return props.transformToUIName(props, value);
     }
     if (_.isFunction(this.props.transformFromUIValue)) {
-      return props.transformFromUIValue(props, value);
+      return this.props.transformFromUIValue(props, value);
     }
     return value;
   };
@@ -346,7 +336,14 @@ FilterLens.transformName = function transformName(name) {
 };
 
 export const FilterFocalLength = props =>
-  <FilterRangeFactory type="focalLength" field="focalLength" {...props} />;
+  <FilterRangeFactory
+    type="focalLength"
+    field="focalLength"
+    transformFromDBValue={FilterFocalLength.transformFromDBValue}
+    {...props}
+  />;
+FilterFocalLength.transformFromDBValue = (props, value, isFirst) =>
+  isFirst ? Math.floor(value) : Math.ceil(value);
 
 export const FilterISORating = props =>
   <FilterRangeFactory
