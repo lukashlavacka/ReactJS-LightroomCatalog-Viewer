@@ -183,3 +183,7 @@ h3,
   bottom: 0;
   right: 0;
 }
+
+.no-bottom-margin {
+  margin-bottom: 0;
+}

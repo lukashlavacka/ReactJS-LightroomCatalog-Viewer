@@ -117,7 +117,7 @@ export default class PhotoStats extends PureComponent {
           loading={this.state.loading}
           noData={!this.state.data.length}
         >
-          <table className="table">
+          <table className="table table-condensed no-bottom-margin">
             <thead>
               <tr>
                 {this.state.data.map(s =>

@@ -172,22 +172,35 @@ export default class MapViewer extends PureComponent {
         loading={this.state.loading}
         noData={!this.state.data || !this.state.data.length}
       >
-        {this.props.types.map(type =>
-          <div key={type.key} className="radio-inline">
-            <label>
-              <input
-                type="radio"
-                checked={this.state.type === type.key}
-                value={type.key}
-                onChange={this.handleChange}
-              />
-              {type.name}
-            </label>
-          </div>
-        )}
+        <div className="form-group">
+          {this.props.types.map(type =>
+            <div key={type.key} className="radio-inline">
+              <label>
+                <input
+                  type="radio"
+                  checked={this.state.type === type.key}
+                  value={type.key}
+                  onChange={this.handleChange}
+                />
+                {type.name}
+              </label>
+            </div>
+          )}
+        </div>
         <GoogleMapInstance
           googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp"
-          containerElement={<div style={{ height: `100%` }} />}
+          containerElement={
+            <div
+              style={{
+                bottom: 0,
+                top: "40px",
+                position: "absolute",
+                left: 0,
+                right: 0,
+                padding: "15px"
+              }}
+            />
+          }
           mapElement={<div style={{ height: `100%` }} />}
           loadingElement={<div className="loading-wrapper loading" />}
           onMapLoad={this.handleMapLoad}
