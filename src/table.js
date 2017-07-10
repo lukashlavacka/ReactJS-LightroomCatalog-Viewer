@@ -1,6 +1,5 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import squel from "squel";
 import q from "q";
 import _ from "lodash";
 import { LoadingWrapper, BootstrapRow, Checkbox } from "./shared";
@@ -122,33 +121,13 @@ class Table extends PureComponent {
   getData(properties) {
     this.setState({ loading: true });
 
-    let s = squel
-      .select()
+    let s = Utilities.dbSquelFrom()
       .field(properties.xField)
       .field(properties.yField)
       .field("COUNT(images.id_local)")
       .field("AVG(IFNULL(images.rating, 0))")
-      .from("Adobe_images", "images")
-      .left_join(
-        "AgHarvestedExifMetadata",
-        "exif",
-        "images.id_local = exif.image"
-      )
-      .left_join(
-        "AgLibraryKeywordImage",
-        "keywordImage",
-        "images.id_local = keywordImage.image"
-      )
-      .left_join("AgLibraryKeyword", "face", "keywordImage.tag = face.id_local")
-      .left_join(
-        "AgInternedExifCameraModel",
-        "camera",
-        "exif.cameraModelRef = camera.id_local"
-      )
-      .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local")
       .where(`${properties.xField} IS NOT NULL`)
-      .where(`${properties.yField} IS NOT NULL`)
-      .where("face.keywordType = 'person' OR face.id_local IS NULL");
+      .where(`${properties.yField} IS NOT NULL`);
 
     _.forOwn(_.omitBy(properties.filter, _.isUndefined), (value, key) => {
       s = s.where(Utilities.getFilterExpression(key, value));

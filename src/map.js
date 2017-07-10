@@ -8,7 +8,6 @@ import {
 } from "react-google-maps";
 import withScriptjs from "react-google-maps/lib/async/withScriptjs";
 import MarkerClusterer from "react-google-maps/lib/addons/MarkerClusterer";
-import squel from "squel";
 import q from "q";
 import _ from "lodash";
 import { LoadingWrapper } from "./shared";
@@ -106,28 +105,10 @@ export default class MapViewer extends PureComponent {
 
   getData(properties) {
     this.setState({ loading: true });
-    let s = squel
-      .select()
+    let s = Utilities.dbSquelFrom()
       .field("images.id_local")
       .field("exif.gpsLatitude")
       .field("exif.gpsLongitude")
-      .from("Adobe_images", "images")
-      .left_join(
-        "AgHarvestedExifMetadata",
-        "exif",
-        "images.id_local = exif.image"
-      )
-      .left_join(
-        "AgLibraryKeywordImage",
-        "keywordImage",
-        "images.id_local = keywordImage.image"
-      )
-      .left_join(
-        "AgInternedExifCameraModel",
-        "camera",
-        "exif.cameraModelRef = camera.id_local"
-      )
-      .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local")
       .where("exif.hasGPS = 1");
 
     _.forOwn(_.omitBy(properties.filter, _.isUndefined), (value, key) => {

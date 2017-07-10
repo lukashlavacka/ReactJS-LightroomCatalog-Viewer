@@ -1,7 +1,6 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import { Bar as BarChart, Pie as PieChart } from "react-chartjs-2";
-import squel from "squel";
 import q from "q";
 import _ from "lodash";
 import { LoadingWrapper, Checkbox } from "./shared";
@@ -107,29 +106,9 @@ class Chart extends PureComponent {
 
   getData(properties) {
     this.setState({ loading: true });
-    let s = squel
-      .select()
+    let s = Utilities.dbSquelFrom()
       .field(properties.field.field)
-      .field('COUNT("images.id_local")')
-      .from("Adobe_images", "images")
-      .left_join(
-        "AgHarvestedExifMetadata",
-        "exif",
-        "images.id_local = exif.image"
-      )
-      .left_join(
-        "AgLibraryKeywordImage",
-        "keywordImage",
-        "images.id_local = keywordImage.image"
-      )
-      .left_join("AgLibraryKeyword", "face", "keywordImage.tag = face.id_local")
-      .left_join(
-        "AgInternedExifCameraModel",
-        "camera",
-        "exif.cameraModelRef = camera.id_local"
-      )
-      .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local")
-      .where("face.keywordType = 'person' OR face.id_local IS NULL");
+      .field('COUNT("images.id_local")');
 
     _.forOwn(_.omitBy(properties.filter, _.isUndefined), (value, key) => {
       s = s.where(Utilities.getFilterExpression(key, value));

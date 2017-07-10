@@ -154,6 +154,38 @@ export function formatDbValue(key, val) {
   }
 }
 
+export function dbSquelFrom() {
+  return squel
+    .select()
+    .from("Adobe_images", "images")
+    .left_join(
+      "AgHarvestedExifMetadata",
+      "exif",
+      "images.id_local = exif.image"
+    )
+    .left_join(
+      "AgLibraryKeywordImage",
+      "keywordImage",
+      "images.id_local = keywordImage.image"
+    )
+    .left_join(
+      "AgInternedExifCameraModel",
+      "camera",
+      "exif.cameraModelRef = camera.id_local"
+    )
+    .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local")
+    .left_join(
+      "AgLibraryKeyword",
+      "face",
+      "keywordImage.tag = face.id_local AND (face.keywordType = 'person' OR face.id_local IS NULL)"
+    )
+    .left_join(
+      "AgLibraryKeyword",
+      "tag",
+      "keywordImage.tag = tag.id_local AND (face.keywordType IS NULL)"
+    );
+}
+
 export const aggregateFields = [
   { field: "camera.value", name: "Camera", chartType: "pie" },
   { field: "lens.value", name: "Lens", chartType: "pie" },

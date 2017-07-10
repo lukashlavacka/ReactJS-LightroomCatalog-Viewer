@@ -1,6 +1,5 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import squel from "squel";
 import q from "q";
 import _ from "lodash";
 import { LoadingWrapper } from "./shared";
@@ -63,28 +62,10 @@ export default class PhotoStats extends PureComponent {
   getData(properties) {
     this.setState({ loading: true });
     const queries = this.props.popularStats.map(s => {
-      let statQuery = squel
-        .select()
+      let statQuery = Utilities.dbSquelFrom()
         .field(s.field)
         .field("COUNT(images.id_local)")
-        .from("Adobe_images", "images")
         .where(`${s.field} IS NOT NULL`)
-        .left_join(
-          "AgHarvestedExifMetadata",
-          "exif",
-          "images.id_local = exif.image"
-        )
-        .left_join(
-          "AgLibraryKeywordImage",
-          "keywordImage",
-          "images.id_local = keywordImage.image"
-        )
-        .left_join(
-          "AgInternedExifCameraModel",
-          "camera",
-          "exif.cameraModelRef = camera.id_local"
-        )
-        .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local")
         .group(s.field)
         .order("COUNT(images.id_local)", false)
         .limit(1);
@@ -95,26 +76,7 @@ export default class PhotoStats extends PureComponent {
       return statQuery;
     });
 
-    let sumQuery = squel
-      .select()
-      .field("COUNT(images.id_local)")
-      .from("Adobe_images", "images")
-      .left_join(
-        "AgHarvestedExifMetadata",
-        "exif",
-        "images.id_local = exif.image"
-      )
-      .left_join(
-        "AgLibraryKeywordImage",
-        "keywordImage",
-        "images.id_local = keywordImage.image"
-      )
-      .left_join(
-        "AgInternedExifCameraModel",
-        "camera",
-        "exif.cameraModelRef = camera.id_local"
-      )
-      .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local");
+    let sumQuery = Utilities.dbSquelFrom().field("COUNT(images.id_local)");
 
     _.forOwn(_.omitBy(properties.filter, _.isUndefined), (value, key) => {
       sumQuery = sumQuery.where(Utilities.getFilterExpression(key, value));
