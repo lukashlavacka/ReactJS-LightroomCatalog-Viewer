@@ -19,19 +19,14 @@ export default class PhotoStats extends PureComponent {
       {
         key: "focalLength",
         field: "exif.focalLength",
-        name: "Focal Length",
-        transform: val => `${val}mm`
+        name: "Focal Length"
       },
       { key: "aperture", field: "ROUND(exif.aperture, 2)", name: "Aperture" },
       { key: "iso", field: "exif.isoSpeedRating", name: "ISO" },
       {
         key: "shutter",
         field: "exif.shutterSpeed",
-        name: "Shutter Speed",
-        transform: val =>
-          val > 0
-            ? `1/${Math.round(100 / val)}s`
-            : `${1 / Math.round(100 / val)}s`
+        name: "Shutter Speed"
       }
     ]
   };
@@ -145,9 +140,7 @@ export default class PhotoStats extends PureComponent {
         return {
           key: stat.key,
           name: stat.name,
-          value: _.isFunction(stat.transform)
-            ? stat.transform(d.values[0][0])
-            : d.values[0][0],
+          value: Utilities.formatDbValue(stat.key, d.values[0][0]),
           count: d.values[0][1],
           percentage: d.values[0][1] / totalCount
         };

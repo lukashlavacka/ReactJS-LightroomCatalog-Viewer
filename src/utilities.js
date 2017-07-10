@@ -120,3 +120,36 @@ export function getFilterExpression(type, filter) {
 
   return expression;
 }
+
+export function transformDbValue(key, val) {
+  switch (key) {
+    case "shutter":
+      return val > 0 ? 1 / Math.round(100 / val) : 1 / Math.round(100 / val);
+    default:
+      return val;
+  }
+}
+
+export function formatDbValue(key, val) {
+  if (!val) return "n/a";
+  switch (key) {
+    case "shutter":
+      return val > 0
+        ? `1/${Math.round(100 / val)}s`
+        : `${1 / Math.round(100 / val)}s`;
+    case "focalLength":
+      return val => `${val}mm`;
+    case "aperture":
+      return `f/${Math.round(val * 10) / 10}`;
+    case "flag":
+      return (
+        {
+          "0": "None",
+          "-1": "Rejected",
+          "1": "Selected"
+        }[val.toString()] || "Undefined"
+      );
+    default:
+      return val;
+  }
+}

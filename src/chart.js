@@ -17,35 +17,50 @@ export default class ChartViewer extends PureComponent {
 
   static defaultProps = {
     agragateFields: [
-      { field: "camera.value", name: "Camera", type: "pie" },
-      { field: "lens.value", name: "Lens", type: "pie" },
-      { field: "exif.focalLength", name: "Focal length", type: "bar" },
-      { field: "exif.isoSpeedRating", name: "ISO", type: "bar" },
-      { field: "exif.aperture", name: "Aperture", type: "bar" },
-      { field: "exif.shutterSpeed", name: "Shutter Speed", type: "bar" },
-      { field: "images.pick", name: "Flag", type: "pie" },
-      { field: "images.colorLabels", name: "Color label", type: "pie" },
-      { field: "images.rating", name: "Rating", type: "bar" },
-      { field: "keyword.tag", name: "Face", type: "pie" },
+      { field: "camera.value", name: "Camera", chartType: "pie" },
+      { field: "lens.value", name: "Lens", chartType: "pie" },
+      {
+        field: "exif.focalLength",
+        name: "Focal length",
+        chartType: "bar",
+        type: "focalLength"
+      },
+      { field: "exif.isoSpeedRating", name: "ISO", chartType: "bar" },
+      {
+        field: "exif.aperture",
+        name: "Aperture",
+        chartType: "bar",
+        type: "aperture"
+      },
+      {
+        field: "exif.shutterSpeed",
+        name: "Shutter Speed",
+        chartType: "bar",
+        type: "shutter"
+      },
+      { field: "images.pick", name: "Flag", chartType: "pie", type: "flag" },
+      { field: "images.colorLabels", name: "Color label", chartType: "pie" },
+      { field: "images.rating", name: "Rating", chartType: "bar" },
+      { field: "face.name", name: "Face", chartType: "pie" },
       {
         field: 'strftime("%Y", images.captureTime)',
         name: "Year",
-        type: "bar"
+        chartType: "bar"
       },
       {
         field: 'strftime("%Y-%m", images.captureTime)',
         name: "Month",
-        type: "bar"
+        chartType: "bar"
       },
       {
         field: 'strftime("%Y-%W", images.captureTime)',
         name: "Week",
-        type: "bar"
+        chartType: "bar"
       },
       {
         field: 'strftime("%Y-%m-%d", images.captureTime)',
         name: "Day",
-        type: "bar"
+        chartType: "bar"
       }
     ]
   };
@@ -158,12 +173,14 @@ class Chart extends PureComponent {
         "keywordImage",
         "images.id_local = keywordImage.image"
       )
+      .left_join("AgLibraryKeyword", "face", "keywordImage.tag = face.id_local")
       .left_join(
         "AgInternedExifCameraModel",
         "camera",
         "exif.cameraModelRef = camera.id_local"
       )
-      .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local");
+      .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local")
+      .where("face.keywordType = 'person' OR face.id_local IS NULL");
 
     _.forOwn(_.omitBy(properties.filter, _.isUndefined), (value, key) => {
       s = s.where(Utilities.getFilterExpression(key, value));
@@ -182,10 +199,11 @@ class Chart extends PureComponent {
 
   render() {
     let chartElement;
-    switch (this.props.field.type) {
+    switch (this.props.field.chartType) {
       case "pie":
         chartElement = (
           <PieChartComponent
+            type={this.props.field.type}
             rawData={this.state.data}
             noRedraw={this.state.noRedraw}
           />
@@ -195,6 +213,7 @@ class Chart extends PureComponent {
       case "bar":
         chartElement = (
           <BarChartComponent
+            type={this.props.field.type}
             rawData={this.state.data}
             noRedraw={this.state.noRedraw}
           />
@@ -229,13 +248,15 @@ class BarChartComponent extends PureComponent {
 
   expandDataset(rawData) {
     const data = {
-      labels: rawData.values.map(v => v[0] || "Undefined"),
+      labels: rawData.values.map(v =>
+        Utilities.formatDbValue(this.props.type, v[0])
+      ),
       datasets: []
     };
 
     data.datasets.push({
       label: "Count",
-      data: rawData.values.map(v => v[1] || "n/a"),
+      data: rawData.values.map((v, i) => v[1] || "n/a"),
       backgroundColor: rawData.values.map(
         (v, i) => `hsla(${i * (360 / rawData.values.length)},90%,50%,0.5)`
       ),
@@ -279,7 +300,8 @@ class PieChartComponent extends PureComponent {
   static propTypes = {
     noRedraw: PropTypes.bool,
     options: PropTypes.object.isRequired,
-    rawData: PropTypes.object.isRequired
+    rawData: PropTypes.object.isRequired,
+    type: PropTypes.string
   };
 
   static defaultProps = {
@@ -306,7 +328,9 @@ class PieChartComponent extends PureComponent {
           })
         }
       ],
-      labels: sortedRawData.map((v, i) => v[0] || "Undefined")
+      labels: sortedRawData.map((v, i) =>
+        Utilities.formatDbValue(this.props.type, v[0])
+      )
     };
 
     return data;
