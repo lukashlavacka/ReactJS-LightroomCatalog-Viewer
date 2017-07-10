@@ -30,7 +30,7 @@ export function getFilterExpression(type, filter) {
       property = "images.rating";
       break;
     case "face":
-      property = "keyword.tag";
+      property = "keywordImage.tag";
       break;
     case "map":
       property = "images.id_local";

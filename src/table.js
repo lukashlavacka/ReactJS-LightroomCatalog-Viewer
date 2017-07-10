@@ -98,7 +98,7 @@ FieldSelector.defaultProps = {
     { field: "images.pick", name: "Flag" },
     { field: "images.colorLabels", name: "Color label" },
     { field: "images.rating", name: "Rating" },
-    { field: "keyword.tag", name: "Face" },
+    { field: "keywordImage.tag", name: "Face" },
     { field: 'strftime("%Y", images.captureTime)', name: "Year" },
     { field: 'strftime("%Y-%m", images.captureTime)', name: "Month" },
     { field: 'strftime("%Y-%W", images.captureTime)', name: "Week" },
@@ -157,8 +157,8 @@ class Table extends PureComponent {
       )
       .left_join(
         "AgLibraryKeywordImage",
-        "keyword",
-        "images.id_local = keyword.image"
+        "keywordImage",
+        "images.id_local = keywordImage.image"
       )
       .left_join(
         "AgInternedExifCameraModel",

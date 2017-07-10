@@ -155,8 +155,8 @@ class Chart extends PureComponent {
       )
       .left_join(
         "AgLibraryKeywordImage",
-        "keyword",
-        "images.id_local = keyword.image"
+        "keywordImage",
+        "images.id_local = keywordImage.image"
       )
       .left_join(
         "AgInternedExifCameraModel",
