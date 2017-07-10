@@ -1,6 +1,5 @@
-import React, { Component, PureComponent } from "react";
+import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import PureRenderMixin from "react-addons-pure-render-mixin";
 import { Checkbox, CheckboxGroup } from "react-checkbox-group";
 import DatePicker from "react-datepicker";
 import ReactSlider from "react-slider";
@@ -11,7 +10,7 @@ import _ from "lodash";
 import { LoadingWrapper } from "./shared";
 import WorkerWrapper from "./worker-wrapper";
 
-class FilterFactory extends Component {
+class FilterFactory extends PureComponent {
   static propTypes = {
     handleFilterChange: PropTypes.func,
     transformName: PropTypes.func,
@@ -112,7 +111,7 @@ class FilterFactory extends Component {
   }
 }
 
-class FilterRangeFactory extends Component {
+class FilterRangeFactory extends PureComponent {
   static propTypes = {
     field: PropTypes.string,
     type: PropTypes.string,
@@ -127,9 +126,6 @@ class FilterRangeFactory extends Component {
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
 
     if (props.minMax) {
       this.state = {
@@ -358,7 +354,7 @@ FilterISORating.transformFromUIValue = (props, value) =>
 FilterISORating.transformFromDBValue = (props, value) =>
   Math.floor(Math.log(value / 100) / Math.log(2));
 
-export class FilterAperture extends Component {
+export class FilterAperture extends PureComponent {
   static defaultProps = {
     types: {
       Full: [0.5, 0.7, 1.0, 1.4, 2, 2.8, 4, 5.6, 8, 11, 16, 22, 32],
@@ -567,17 +563,10 @@ export const FilterFace = props =>
     {...props}
   />;
 
-export class FilterDate extends Component {
+export class FilterDate extends PureComponent {
   static propTypes = {
     handleFilterChange: PropTypes.func.isRequired
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   state = {
     loading: false,
