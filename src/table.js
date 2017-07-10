@@ -59,7 +59,7 @@ export default class TableViewer extends PureComponent {
 }
 
 const FieldSelector = function FieldSelector(props) {
-  const otherFields = _.reject(props.agragateFields, {
+  const otherFields = _.reject(Utilities.aggregateFields, {
     field: props.otherField
   });
   return (
@@ -82,28 +82,9 @@ const FieldSelector = function FieldSelector(props) {
 };
 FieldSelector.propTypes = {
   handleFieldChange: PropTypes.func.isRequired,
-  agragateFields: PropTypes.array,
   field: PropTypes.string,
   otherField: PropTypes.string,
   name: PropTypes.string
-};
-FieldSelector.defaultProps = {
-  agragateFields: [
-    { field: "camera.value", name: "Camera" },
-    { field: "lens.value", name: "Lens" },
-    { field: "exif.focalLength", name: "Focal length" },
-    { field: "exif.isoSpeedRating", name: "ISO" },
-    { field: "exif.aperture", name: "Aperture" },
-    { field: "exif.shutterSpeed", name: "Shutter Speed" },
-    { field: "images.pick", name: "Flag" },
-    { field: "images.colorLabels", name: "Color label" },
-    { field: "images.rating", name: "Rating" },
-    { field: "keywordImage.tag", name: "Face" },
-    { field: 'strftime("%Y", images.captureTime)', name: "Year" },
-    { field: 'strftime("%Y-%m", images.captureTime)', name: "Month" },
-    { field: 'strftime("%Y-%W", images.captureTime)', name: "Week" },
-    { field: 'strftime("%Y-%m-%d", images.captureTime)', name: "Day" }
-  ]
 };
 
 class Table extends PureComponent {
@@ -160,6 +141,7 @@ class Table extends PureComponent {
         "keywordImage",
         "images.id_local = keywordImage.image"
       )
+      .left_join("AgLibraryKeyword", "face", "keywordImage.tag = face.id_local")
       .left_join(
         "AgInternedExifCameraModel",
         "camera",
@@ -167,7 +149,8 @@ class Table extends PureComponent {
       )
       .left_join("AgInternedExifLens", "lens", "exif.lensRef = lens.id_local")
       .where(`${properties.xField} IS NOT NULL`)
-      .where(`${properties.yField} IS NOT NULL`);
+      .where(`${properties.yField} IS NOT NULL`)
+      .where("face.keywordType = 'person' OR face.id_local IS NULL");
 
     _.forOwn(_.omitBy(properties.filter, _.isUndefined), (value, key) => {
       s = s.where(Utilities.getFilterExpression(key, value));
@@ -210,6 +193,8 @@ const TableComponent = props => {
     return <noscript />;
   }
   const transformedData = TableComponent.transformData(props);
+  const xFieldObj = _.find(Utilities.aggregateFields, { field: props.xField });
+  const yFieldObj = _.find(Utilities.aggregateFields, { field: props.yField });
   return (
     <div className="table-responsive">
       <table className="table table-condensed table-col-hover table-bordered">
@@ -218,7 +203,7 @@ const TableComponent = props => {
             <th />
             {transformedData.uniqueX.map(xVal =>
               <th key={xVal}>
-                {xVal}
+                {Utilities.formatDbValue(xFieldObj.type, xVal)}
               </th>
             )}
           </tr>
@@ -227,7 +212,7 @@ const TableComponent = props => {
           {transformedData.uniqueY.map(yVal =>
             <tr key={yVal}>
               <th>
-                {yVal}
+                {Utilities.formatDbValue(yFieldObj.type, yVal)}
               </th>
               {transformedData.uniqueX.map(xVal => {
                 const val = TableComponent.findByXY(

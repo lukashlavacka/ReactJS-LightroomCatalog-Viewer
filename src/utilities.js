@@ -138,7 +138,7 @@ export function formatDbValue(key, val) {
         ? `1/${Math.round(100 / val)}s`
         : `${1 / Math.round(100 / val)}s`;
     case "focalLength":
-      return val => `${val}mm`;
+      return `${val}mm`;
     case "aperture":
       return `f/${Math.round(val * 10) / 10}`;
     case "flag":
@@ -153,3 +153,51 @@ export function formatDbValue(key, val) {
       return val;
   }
 }
+
+export const aggregateFields = [
+  { field: "camera.value", name: "Camera", chartType: "pie" },
+  { field: "lens.value", name: "Lens", chartType: "pie" },
+  {
+    field: "exif.focalLength",
+    name: "Focal length",
+    chartType: "bar",
+    type: "focalLength"
+  },
+  { field: "exif.isoSpeedRating", name: "ISO", chartType: "bar" },
+  {
+    field: "exif.aperture",
+    name: "Aperture",
+    chartType: "bar",
+    type: "aperture"
+  },
+  {
+    field: "exif.shutterSpeed",
+    name: "Shutter Speed",
+    chartType: "bar",
+    type: "shutter"
+  },
+  { field: "images.pick", name: "Flag", chartType: "pie", type: "flag" },
+  { field: "images.colorLabels", name: "Color label", chartType: "pie" },
+  { field: "images.rating", name: "Rating", chartType: "bar" },
+  { field: "face.name", name: "Face", chartType: "pie" },
+  {
+    field: 'strftime("%Y", images.captureTime)',
+    name: "Year",
+    chartType: "bar"
+  },
+  {
+    field: 'strftime("%Y-%m", images.captureTime)',
+    name: "Month",
+    chartType: "bar"
+  },
+  {
+    field: 'strftime("%Y-%W", images.captureTime)',
+    name: "Week",
+    chartType: "bar"
+  },
+  {
+    field: 'strftime("%Y-%m-%d", images.captureTime)',
+    name: "Day",
+    chartType: "bar"
+  }
+];

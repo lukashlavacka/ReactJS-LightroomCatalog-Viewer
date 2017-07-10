@@ -10,68 +10,17 @@ import WorkerWrapper from "./worker-wrapper";
 
 export default class ChartViewer extends PureComponent {
   static propTypes = {
-    agragateFields: PropTypes.array,
     worker: PropTypes.instanceOf(WorkerWrapper).isRequired,
     filter: PropTypes.object
   };
 
-  static defaultProps = {
-    agragateFields: [
-      { field: "camera.value", name: "Camera", chartType: "pie" },
-      { field: "lens.value", name: "Lens", chartType: "pie" },
-      {
-        field: "exif.focalLength",
-        name: "Focal length",
-        chartType: "bar",
-        type: "focalLength"
-      },
-      { field: "exif.isoSpeedRating", name: "ISO", chartType: "bar" },
-      {
-        field: "exif.aperture",
-        name: "Aperture",
-        chartType: "bar",
-        type: "aperture"
-      },
-      {
-        field: "exif.shutterSpeed",
-        name: "Shutter Speed",
-        chartType: "bar",
-        type: "shutter"
-      },
-      { field: "images.pick", name: "Flag", chartType: "pie", type: "flag" },
-      { field: "images.colorLabels", name: "Color label", chartType: "pie" },
-      { field: "images.rating", name: "Rating", chartType: "bar" },
-      { field: "face.name", name: "Face", chartType: "pie" },
-      {
-        field: 'strftime("%Y", images.captureTime)',
-        name: "Year",
-        chartType: "bar"
-      },
-      {
-        field: 'strftime("%Y-%m", images.captureTime)',
-        name: "Month",
-        chartType: "bar"
-      },
-      {
-        field: 'strftime("%Y-%W", images.captureTime)',
-        name: "Week",
-        chartType: "bar"
-      },
-      {
-        field: 'strftime("%Y-%m-%d", images.captureTime)',
-        name: "Day",
-        chartType: "bar"
-      }
-    ]
-  };
-
   state = {
-    field: _.find(this.props.agragateFields, { field: "camera.value" })
+    field: _.find(Utilities.aggregateFields, { field: "camera.value" })
   };
 
   handleFieldChange = field => {
     this.setState({
-      field: _.find(this.props.agragateFields, { field: field.field })
+      field: _.find(Utilities.aggregateFields, { field: field.field })
     });
   };
 
@@ -89,7 +38,7 @@ export default class ChartViewer extends PureComponent {
     return (
       <div>
         <FieldSelector
-          agragateFields={this.props.agragateFields}
+          aggregateFields={Utilities.aggregateFields}
           field={this.state.field}
           handleFieldChange={this.handleFieldChange}
         />
@@ -102,7 +51,7 @@ export default class ChartViewer extends PureComponent {
 const FieldSelector = props =>
   <div>
     <h3>Select agregate field</h3>
-    {props.agragateFields.map(f =>
+    {props.aggregateFields.map(f =>
       <Checkbox
         key={f.field}
         handleFieldChange={props.handleFieldChange}
@@ -112,14 +61,14 @@ const FieldSelector = props =>
     )}
   </div>;
 FieldSelector.propTypes = {
-  agragateFields: PropTypes.array,
+  aggregateFields: PropTypes.array,
   field: PropTypes.object.isRequired,
   handleFieldChange: PropTypes.func.isRequired
 };
 
 class Chart extends PureComponent {
   static propTypes = {
-    agragateFields: PropTypes.array,
+    aggregateFields: PropTypes.array,
     field: PropTypes.object.isRequired
   };
 
