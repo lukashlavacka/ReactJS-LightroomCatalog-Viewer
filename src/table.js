@@ -59,18 +59,16 @@ export default class TableViewer extends PureComponent {
 }
 
 const FieldSelector = function FieldSelector(props) {
-  const otherFields = _.reject(Utilities.aggregateFields, {
-    field: props.otherField
-  });
   return (
     <BootstrapRow>
       <div>
         <h3>
           Select {props.name}
         </h3>
-        {otherFields.map(f =>
+        {Utilities.aggregateFields.map(f =>
           <Checkbox
             key={f.field}
+            disabled={f.field === props.otherField}
             handleFieldChange={props.handleFieldChange}
             field={f}
             selectedField={props.field}

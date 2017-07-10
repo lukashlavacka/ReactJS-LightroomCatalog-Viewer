@@ -81,6 +81,7 @@ export class Checkbox extends PureComponent {
         <input
           ref="radioField"
           type="radio"
+          disabled={this.props.disabled}
           checked={this.props.selectedField === this.props.field.field}
           value={this.props.field.field}
           onChange={this.handleFieldChange}
