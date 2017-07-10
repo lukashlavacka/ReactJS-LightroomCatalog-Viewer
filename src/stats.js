@@ -1,13 +1,12 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import PureRenderMixin from "react-addons-pure-render-mixin";
 import squel from "squel";
 import q from "q";
 import _ from "lodash";
 import { LoadingWrapper } from "./shared";
 import * as Utilities from "./utilities";
 
-export default class PhotoStats extends Component {
+export default class PhotoStats extends PureComponent {
   static propTypes = {
     popularStats: PropTypes.array.isRequired,
     filter: PropTypes.object
@@ -36,13 +35,6 @@ export default class PhotoStats extends Component {
       }
     ]
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   state = {
     loading: false,

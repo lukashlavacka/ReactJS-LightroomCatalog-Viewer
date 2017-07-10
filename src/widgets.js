@@ -1,6 +1,5 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import PureRenderMixin from "react-addons-pure-render-mixin";
 import ReactGridLayoutWithoutProvider, {
   WidthProvider as widthProvider
 } from "react-grid-layout";
@@ -14,16 +13,13 @@ import WorkerWrapper from "./worker-wrapper";
 
 const ReactGridLayout = widthProvider(ReactGridLayoutWithoutProvider);
 
-export class WindowDimensions extends Component {
+export class WindowDimensions extends PureComponent {
   static propTypes = {
     handleUpdateDimensions: PropTypes.func.isRequired
   };
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
 
     this.handleUpdateDimensions();
   }
@@ -48,7 +44,7 @@ export class WindowDimensions extends Component {
   }
 }
 
-export default class WidgetLayout extends Component {
+export default class WidgetLayout extends PureComponent {
   static propTypes = {
     getLocalStorage: PropTypes.func.isRequired,
     saveLocalStorage: PropTypes.func.isRequired,
@@ -70,9 +66,6 @@ export default class WidgetLayout extends Component {
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
 
     const ls = this.props.getLocalStorage();
     this.state = {

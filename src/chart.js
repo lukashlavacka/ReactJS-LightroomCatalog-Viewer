@@ -1,6 +1,5 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import PureRenderMixin from "react-addons-pure-render-mixin";
 import { Bar as BarChart, Pie as PieChart } from "react-chartjs-2";
 import squel from "squel";
 import q from "q";
@@ -9,7 +8,7 @@ import { LoadingWrapper, Checkbox } from "./shared";
 import * as Utilities from "./utilities";
 import WorkerWrapper from "./worker-wrapper";
 
-export default class ChartViewer extends Component {
+export default class ChartViewer extends PureComponent {
   static propTypes = {
     agragateFields: PropTypes.array,
     worker: PropTypes.instanceOf(WorkerWrapper).isRequired,
@@ -50,13 +49,6 @@ export default class ChartViewer extends Component {
       }
     ]
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   state = {
     field: _.find(this.props.agragateFields, { field: "camera.value" })
@@ -110,18 +102,11 @@ FieldSelector.propTypes = {
   handleFieldChange: PropTypes.func.isRequired
 };
 
-class Chart extends Component {
+class Chart extends PureComponent {
   static propTypes = {
     agragateFields: PropTypes.array,
     field: PropTypes.object.isRequired
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   state = {
     loading: false,
@@ -227,7 +212,7 @@ class Chart extends Component {
   }
 }
 
-class BarChartComponent extends Component {
+class BarChartComponent extends PureComponent {
   static propTypes = {
     noRedraw: PropTypes.bool,
     options: PropTypes.object.isRequired,
@@ -241,13 +226,6 @@ class BarChartComponent extends Component {
       animationSteps: 30
     }
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   expandDataset(rawData) {
     const data = {
@@ -297,7 +275,7 @@ class BarChartComponent extends Component {
   }
 }
 
-class PieChartComponent extends Component {
+class PieChartComponent extends PureComponent {
   static propTypes = {
     noRedraw: PropTypes.bool,
     options: PropTypes.object.isRequired,
@@ -311,13 +289,6 @@ class PieChartComponent extends Component {
       animationSteps: 30
     }
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   expandDataset(rawData) {
     var sortedRawData = _.sortBy(rawData.values, "v[0]");

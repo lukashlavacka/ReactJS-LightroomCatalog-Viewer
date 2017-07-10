@@ -1,25 +1,17 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import PureRenderMixin from "react-addons-pure-render-mixin";
-import update from "react-addons-update";
+import update from "immutability-helper";
 import NProgress from "nprogress";
 import WidgetLayout from "./widgets";
 import { SyncWorkerWrapper, AsyncWorkerWrapper } from "./worker-wrapper";
 import { BootstrapRow } from "./shared";
 
-class FileDropWrapper extends Component {
+class FileDropWrapper extends PureComponent {
   static propTypes = {
     handleStatusChange: PropTypes.func.isRequired,
     handleFileChange: PropTypes.func.isRequired,
     children: PropTypes.node
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   onDragEnter = event => {
     event.stopPropagation();
@@ -64,20 +56,13 @@ class FileDropWrapper extends Component {
     </div>;
 }
 
-class FileInput extends Component {
+class FileInput extends PureComponent {
   static propTypes = {
     handleStatusChange: PropTypes.func.isRequired,
     handleFileChange: PropTypes.func.isRequired,
     handleLoadDefaultFile: PropTypes.func.isRequired,
     accept: PropTypes.string
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   onChange = event => {
     event.stopPropagation();
@@ -116,7 +101,7 @@ class FileInput extends Component {
   }
 }
 
-export default class App extends Component {
+export default class App extends PureComponent {
   static propTypes = {
     isLocalFile: PropTypes.bool
   };
@@ -127,9 +112,6 @@ export default class App extends Component {
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
     let worker;
     if (this.props.isLocalFile) {
       worker = new SyncWorkerWrapper();

@@ -1,6 +1,5 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import PureRenderMixin from "react-addons-pure-render-mixin";
 import {
   withGoogleMap,
   GoogleMap,
@@ -45,7 +44,7 @@ const GoogleMapInstance = withScriptjs(
   )
 );
 
-export default class MapViewer extends Component {
+export default class MapViewer extends PureComponent {
   static version = Math.ceil(Math.random() * 22);
 
   static propTypes = {
@@ -61,13 +60,6 @@ export default class MapViewer extends Component {
       { key: "2", name: "Filter to cluster" }
     ]
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   state = {
     loading: false,

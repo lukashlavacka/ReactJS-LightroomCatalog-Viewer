@@ -1,6 +1,5 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import PureRenderMixin from "react-addons-pure-render-mixin";
 import squel from "squel";
 import q from "q";
 import _ from "lodash";
@@ -8,18 +7,11 @@ import { LoadingWrapper, BootstrapRow, Checkbox } from "./shared";
 import * as Utilities from "./utilities";
 import WorkerWrapper from "./worker-wrapper";
 
-export default class TableViewer extends Component {
+export default class TableViewer extends PureComponent {
   static propTypes = {
     worker: PropTypes.instanceOf(WorkerWrapper).isRequired,
     filter: PropTypes.object
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   state = {
     xField: "exif.isoSpeedRating",
@@ -114,18 +106,11 @@ FieldSelector.defaultProps = {
   ]
 };
 
-class Table extends Component {
+class Table extends PureComponent {
   static propTypes = {
     xField: PropTypes.string,
     yField: PropTypes.string
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   state = {
     loading: false

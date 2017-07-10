@@ -1,6 +1,5 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import PureRenderMixin from "react-addons-pure-render-mixin";
 import _ from "lodash";
 
 export const BootstrapRow = props => {
@@ -66,19 +65,12 @@ NoDataWrapper.propTypes = {
   children: PropTypes.node
 };
 
-export class Checkbox extends Component {
+export class Checkbox extends PureComponent {
   static propTypes = {
     handleFieldChange: PropTypes.func.isRequired,
     field: PropTypes.object.isRequired,
     selectedField: PropTypes.string
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(
-      this
-    );
-  }
 
   handleFieldChange = event =>
     this.props.handleFieldChange(this.props.field, event.target.value);
