@@ -23,15 +23,6 @@ class FilterFactory extends PureComponent {
     dataFilter: PropTypes.string
   };
 
-  constructor(props) {
-    super(props);
-
-    if (this.props.options) {
-      // eslint-disable-next-line react/no-direct-mutation-state
-      this.state.options = this.props.options;
-    }
-  }
-
   state = {
     loading: false,
     loaded: false,
@@ -98,7 +89,7 @@ class FilterFactory extends PureComponent {
             value={this.state.selected}
             onChange={this.handleChange}
           >
-            {this.state.options.map(o =>
+            {(this.props.options || this.state.options).map(o =>
               <label key={o.value} className="checkbox-inline">
                 <Checkbox value={o.value} />
                 {this.transformName(o.name)}
