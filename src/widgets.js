@@ -205,10 +205,15 @@ export default class WidgetLayout extends Component {
       TableViewer,
       MapViewer
     });
-    const widgetElement = React.createElement(
-      allWidgets[widget.key],
-      this.props
-    );
+
+    // if widget is filter we don't need to pass filter
+    let widgetElement;
+    if (widget.filter) {
+      const { filter, ...passProps } = this.props;
+      widgetElement = React.createElement(allWidgets[widget.key], passProps);
+    } else {
+      widgetElement = React.createElement(allWidgets[widget.key], this.props);
+    }
     const minified =
       (_.find(this.state.layout, { i: widget.key }) || {}).h === 1;
     return (
