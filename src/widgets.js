@@ -9,6 +9,7 @@ import PhotoStats from "./stats";
 import ChartViewer from "./chart";
 import TableViewer from "./table";
 import MapViewer from "./map";
+import Recommendation from "./recommendation";
 import WorkerWrapper from "./worker-wrapper";
 
 const ReactGridLayout = widthProvider(ReactGridLayoutWithoutProvider);
@@ -171,11 +172,18 @@ export default class WidgetLayout extends PureComponent {
           grid: { x: 0, y: 16, w: 6, h: 6, minH: 2 }
         },
         {
+          key: "Recommendation",
+          title: "Recommendations",
+          filter: null,
+          disableLocal: false,
+          grid: { x: 0, y: 22, w: 6, h: 3, minH: 2 }
+        },
+        {
           key: "MapViewer",
           title: "Map",
           filter: null,
           disableLocal: true,
-          grid: { x: 0, y: 22, w: 6, h: 6, minH: 2 }
+          grid: { x: 0, y: 25, w: 6, h: 6, minH: 2 }
         }
       ],
       prevLayout: ls.prevLayout || {}
@@ -196,7 +204,8 @@ export default class WidgetLayout extends PureComponent {
       PhotoStats,
       ChartViewer,
       TableViewer,
-      MapViewer
+      MapViewer,
+      Recommendation
     });
 
     // if widget is filter we don't need to pass filter
