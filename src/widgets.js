@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React, { PureComponent, Component } from "react";
 import PropTypes from "prop-types";
 import ReactGridLayoutWithoutProvider, {
   WidthProvider as widthProvider
@@ -45,7 +45,7 @@ export class WindowDimensions extends PureComponent {
   }
 }
 
-export default class WidgetLayout extends PureComponent {
+export default class WidgetLayout extends Component {
   static propTypes = {
     getLocalStorage: PropTypes.func.isRequired,
     saveLocalStorage: PropTypes.func.isRequired,
@@ -64,6 +64,10 @@ export default class WidgetLayout extends PureComponent {
       ".react-grid-item-drag-handle, .react-grid-item-drag-handle h4",
     minH: 2
   };
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return _.isEqual(this.props, nextProps) && _.isEqual(this.state, nextState);
+  }
 
   constructor(props) {
     super(props);
