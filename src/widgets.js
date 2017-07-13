@@ -66,7 +66,9 @@ export default class WidgetLayout extends Component {
   };
 
   shouldComponentUpdate(nextProps, nextState) {
-    return _.isEqual(this.props, nextProps) && _.isEqual(this.state, nextState);
+    return (
+      !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState)
+    );
   }
 
   constructor(props) {

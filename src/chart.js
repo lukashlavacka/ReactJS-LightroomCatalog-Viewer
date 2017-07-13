@@ -5,6 +5,7 @@ import q from "q";
 import _ from "lodash";
 import { LoadingWrapper, Checkbox } from "./shared";
 import * as Utilities from "./utilities";
+import DataWidget from "./dataWidget";
 import WorkerWrapper from "./worker-wrapper";
 
 export default class ChartViewer extends PureComponent {
@@ -65,36 +66,20 @@ FieldSelector.propTypes = {
   handleFieldChange: PropTypes.func.isRequired
 };
 
-class Chart extends PureComponent {
+class Chart extends DataWidget {
   static propTypes = {
+    ...DataWidget.defaultProps,
     aggregateFields: PropTypes.array,
     field: PropTypes.object.isRequired
   };
 
-  state = {
-    loading: false,
-    data: { columns: [], values: [] }
-  };
-
-  componentDidMount() {
-    this.getData(this.props)
-      .then(this.transformData.bind(this, this.props))
-      .then(data => {
-        this.setState({
-          data,
-          loading: false
-        });
-      })
-      .done();
-  }
-
   componentWillReceiveProps(nextProps) {
     const noRedraw = this.props.field.field === nextProps.field.field;
     this.getData(nextProps)
-      .then(this.transformData.bind(this, nextProps))
+      .then(this.transformDataPromise.bind(this, nextProps))
       .then(data => {
-        const oldValues = this.state.data.values.map(v => v[0]);
-        const newValues = data.values.map(v => v[0]);
+        const oldValues = this.state.data[0].values.map(v => v[0]);
+        const newValues = data[0].values.map(v => v[0]);
         this.setState({
           data,
           loading: false,
@@ -104,8 +89,7 @@ class Chart extends PureComponent {
       .done();
   }
 
-  getData(properties) {
-    this.setState({ loading: true });
+  getQuery(properties) {
     let s = Utilities.dbSquelFrom()
       .field(properties.field.field)
       .field('COUNT("images.id_local")');
@@ -116,13 +100,11 @@ class Chart extends PureComponent {
 
     s = s.order(properties.field.field).group(properties.field.field);
 
-    const query = s.toString();
-
-    return properties.worker.exec(query);
+    return s.toString();
   }
 
-  transformData(properties, rawData) {
-    return q(rawData[0] || { columns: [], values: [] });
+  transformData(properties, rawData, data) {
+    return [rawData[0] || { columns: [], values: [] }];
   }
 
   render() {
@@ -132,7 +114,7 @@ class Chart extends PureComponent {
         chartElement = (
           <PieChartComponent
             type={this.props.field.type}
-            rawData={this.state.data}
+            rawData={this.state.data[0] || {}}
             noRedraw={this.state.noRedraw}
           />
         );
@@ -142,20 +124,13 @@ class Chart extends PureComponent {
         chartElement = (
           <BarChartComponent
             type={this.props.field.type}
-            rawData={this.state.data}
+            rawData={this.state.data[0] || {}}
             noRedraw={this.state.noRedraw}
           />
         );
         break;
     }
-    return (
-      <LoadingWrapper
-        loading={this.state.loading}
-        noData={!this.state.data.columns.length}
-      >
-        {chartElement}
-      </LoadingWrapper>
-    );
+    return this.loadingWrapper(chartElement);
   }
 }
 

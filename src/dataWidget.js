@@ -3,9 +3,11 @@ import PropTypes from "prop-types";
 import q from "q";
 import { LoadingWrapper } from "./shared";
 import * as Utilities from "./utilities";
+import WorkerWrapper from "./worker-wrapper";
 
 export default class DataWidget extends PureComponent {
 	static propTypes = {
+		worker: PropTypes.instanceOf(WorkerWrapper).isRequired,
 		filter: PropTypes.object
 	};
 
@@ -46,10 +48,10 @@ export default class DataWidget extends PureComponent {
 
 	transformDataPromise(properties, rawData) {
 		const dataset = (rawData && rawData[0] && rawData[0].values) || [];
-		return q(this.transformData(properties, dataset, rawData));
+		return q(this.transformData(properties, rawData, dataset) || []);
 	}
 
-	wrapper(content) {
+	loadingWrapper(content) {
 		return (
 			<LoadingWrapper
 				loading={this.state.loading}
@@ -57,24 +59,6 @@ export default class DataWidget extends PureComponent {
 			>
 				{content}
 			</LoadingWrapper>
-		);
-	}
-}
-
-export class TestClass extends DataWidget {
-	getQuery(props) {
-		return Utilities.dbSquelFrom().field("COUNT(images.id_local)").toString();
-	}
-
-	transformData(props, data) {
-		return data[0];
-	}
-
-	render() {
-		return this.wrapper(
-			<div>
-				{this.state.data}
-			</div>
 		);
 	}
 }

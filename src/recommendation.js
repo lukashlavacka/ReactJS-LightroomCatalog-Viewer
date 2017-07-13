@@ -5,14 +5,16 @@ import _ from "lodash";
 import squel from "squel";
 import { LoadingWrapper } from "./shared";
 import * as Utilities from "./utilities";
+import DataWidget from "./dataWidget";
 
-export default class Recommendation extends PureComponent {
+export default class Recommendation extends DataWidget {
 	static propTypes = {
-		recommendations: PropTypes.array.isRequired,
-		filter: PropTypes.object
+		...DataWidget.propTypes,
+		recommendations: PropTypes.array.isRequired
 	};
 
 	static defaultProps = {
+		...DataWidget.defaultProps,
 		recommendations: [
 			{
 				key: "lensMinMax",
@@ -84,91 +86,56 @@ export default class Recommendation extends PureComponent {
 		]
 	};
 
-	state = {
-		loading: false,
-		data: [],
-		applyFilter: false
-	};
-
-	componentDidMount() {
-		this.getData(this.props)
-			.then(this.transformData.bind(this, this.props))
-			.then(data => {
-				this.setState({
-					data,
-					loading: false
-				});
-			})
-			.done();
+	constructor(props) {
+		super(props);
+		this.state = Object.assign(this.state, { applyFilter: false });
 	}
 
-	componentWillReceiveProps(nextProps) {
-		this.getData(nextProps)
-			.then(this.transformData.bind(this, nextProps))
-			.then(data => {
-				this.setState({
-					data,
-					loading: false
-				});
-			})
-			.done();
-	}
-
-	getData(properties) {
-		this.setState({ loading: true });
+	getQuery(properties) {
 		const queries = this.props.recommendations.map(r => r.query.toString());
 
-		const query = queries.join(";");
-
-		return properties.worker.exec(query);
+		return queries.join(";");
 	}
 
 	resultDataToObject(data, index) {
 		return _.zipObject(data.columns, data.values[index]);
 	}
 
-	transformData(properties, rawData) {
-		return q(
-			rawData.map((d, di) => {
-				var recommendation = _.find(properties.recommendations, {
-					key: d.values[0][0]
-				});
-				return {
-					name: recommendation.name,
-					key: recommendation.key,
-					items: d.values.map((v, vi) => {
-						var dataObject = this.resultDataToObject(d, vi);
-						return {
-							value: recommendation.text(dataObject),
-							index: vi
-						};
-					})
-				};
-			})
-		);
+	transformData(properties, rawData, data) {
+		return rawData.map((d, di) => {
+			var recommendation = _.find(properties.recommendations, {
+				key: d.values[0][0]
+			});
+			return {
+				name: recommendation.name,
+				key: recommendation.key,
+				items: d.values.map((v, vi) => {
+					var dataObject = this.resultDataToObject(d, vi);
+					return {
+						value: recommendation.text(dataObject),
+						index: vi
+					};
+				})
+			};
+		});
 	}
 
 	render() {
-		return (
-			<LoadingWrapper
-				loading={this.state.loading}
-				noData={!this.state.data.length}
-			>
-				<ul>
-					{this.state.data.map(r =>
-						<li key={r.key}>
-							{r.name}
-							<ul>
-								{r.items.map(ri =>
-									<li key={ri.index}>
-										{ri.value}
-									</li>
-								)}
-							</ul>
-						</li>
-					)}
-				</ul>
-			</LoadingWrapper>
+		return this.loadingWrapper(
+			<ul>
+				{this.state.data.map(r =>
+					<li key={r.key}>
+						{r.name}
+						<ul>
+							{r.items.map(ri =>
+								<li key={ri.index}>
+									{ri.value}
+								</li>
+							)}
+						</ul>
+					</li>
+				)}
+			</ul>
 		);
 	}
 }
