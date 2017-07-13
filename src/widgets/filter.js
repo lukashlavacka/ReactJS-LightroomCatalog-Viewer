@@ -309,18 +309,7 @@ export const FilterCamera = props =>
   <FilterFactory type="camera" table="AgInternedExifCameraModel" {...props} />;
 
 export const FilterLens = props =>
-  <FilterFactory
-    type="lens"
-    table="AgInternedExifLens"
-    transformName={FilterLens.transformName}
-    {...props}
-  />;
-FilterLens.transformName = function transformName(name) {
-  if (name === "DT 0mm F0 SAM") {
-    return "Unknown";
-  }
-  return name;
-};
+  <FilterFactory type="lens" table="AgInternedExifLens" {...props} />;
 
 export const FilterFocalLength = props =>
   <FilterRangeFactory
