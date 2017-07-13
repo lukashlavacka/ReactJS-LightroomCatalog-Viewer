@@ -19,13 +19,13 @@ export default class Recommendation extends DataWidget {
 				name: "Expand your lens range",
 				text: data =>
 					`You took ${data.totalCount} pictures with ${data.lensName} lens. Out of those ${Math.round(
-						data.maxFocalLengthCount * 10 / data.totalCount
-					) *
-						10}% has been taken at the maximal focal length of ${Utilities.formatDbValue(
+						data.maxFocalLengthCount / data.totalCount * 100
+					)}% has been taken at the maximal focal length of ${Utilities.formatDbValue(
 						"focalLength",
 						data.maxFocalLength
-					)} and ${Math.round(data.minFocalLengthCount * 10 / data.totalCount) *
-						10}% has been taken at the minimal focal length of ${Utilities.formatDbValue(
+					)} and ${Math.round(
+						data.minFocalLengthCount / data.totalCount * 100
+					)}% has been taken at the minimal focal length of ${Utilities.formatDbValue(
 						"focalLength",
 						data.minFocalLength
 					)}. Consider buying or carrying shorter or longer lens`,
@@ -80,6 +80,40 @@ export default class Recommendation extends DataWidget {
 							.and("maxQuery.focalLengthCount * 10 > COUNT(images.id_local)")
 							.or("minQuery.focalLengthCount * 10 > COUNT(images.id_local)")
 					)
+			},
+			{
+				key: "lensHighIso",
+				name: "Lighter lens",
+				text: data =>
+					`You took ${data.totalCount} pictures with ${data.lensName} lens. Out of those ${Math.round(
+						data.highIsoCount / data.totalCount * 100
+					)}% has been taken at ISO 1600 or higher. Consider buying or carrying a lens with lower minimal aperture, a flash or a camera capable of higher ISO sensitivity`,
+				query: Utilities.dbSquelFrom()
+					.distinct()
+					.field("'lensHighIso'", "key")
+					.field("lens.value", "lensName")
+					.field("COUNT(images.id_local)", "totalCount")
+					.field("highIsoQuery.highIsoCount", "highIsoCount")
+					.join(
+						Utilities.dbSquelFrom()
+							.field("exif.lensRef")
+							.field("COUNT(images.id_local)", "highIsoCount")
+							.where("exif.isoSpeedRating >= 1600")
+							.group("exif.lensRef"),
+						"highIsoQuery",
+						"highIsoQuery.lensRef = exif.lensRef"
+					)
+					.join(
+						Utilities.dbSquelFrom()
+							.field("exif.lensRef")
+							.field("MIN(exif.aperture)", "minAperture")
+							.group("exif.lensRef"),
+						"minApertureQuery",
+						"minApertureQuery.lensRef = exif.lensRef"
+					)
+					.where("minApertureQuery.minAperture >= 2.8")
+					.group("exif.lensRef")
+					.having("highIsoQuery.highIsoCount * 10 > COUNT(images.id_local)")
 			}
 		]
 	};
