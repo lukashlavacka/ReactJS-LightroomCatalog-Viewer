@@ -124,12 +124,8 @@ class FilterRangeFactory extends PureComponent {
         dbMax: props.minMax.max,
         dbMinVal: props.minMax.min,
         dbMaxVal: props.minMax.max,
-        uiMin: props.invert
-          ? this.transformFromDBValue(props, props.minMax.max)
-          : this.transformFromDBValue(props, props.minMax.min, true),
-        uiMax: props.invert
-          ? this.transformFromDBValue(props, props.minMax.min, true)
-          : this.transformFromDBValue(props, props.minMax.max)
+        uiMin: this.transformFromDBValue(props, props.minMax.min, true),
+        uiMax: this.transformFromDBValue(props, props.minMax.max)
       };
     }
   }
@@ -150,12 +146,8 @@ class FilterRangeFactory extends PureComponent {
             dbMax: minMax.max,
             dbMinVal: minMax.min,
             dbMaxVal: minMax.max,
-            uiMin: this.props.invert
-              ? this.transformFromDBValue(this.props, minMax.max)
-              : this.transformFromDBValue(this.props, minMax.min, true),
-            uiMax: this.props.invert
-              ? this.transformFromDBValue(this.props, minMax.min, true)
-              : this.transformFromDBValue(this.props, minMax.max)
+            uiMin: this.transformFromDBValue(this.props, minMax.min, true),
+            uiMax: this.transformFromDBValue(this.props, minMax.max)
           });
         })
         .done();
@@ -278,16 +270,8 @@ class FilterRangeFactory extends PureComponent {
       <LoadingWrapper loading={this.state.loading}>
         <ReactSlider
           value={[this.state.uiMin, this.state.uiMax]}
-          min={
-            this.props.invert
-              ? this.transformFromDBValue(this.props, this.state.dbMax)
-              : this.transformFromDBValue(this.props, this.state.dbMin, true)
-          }
-          max={
-            this.props.invert
-              ? this.transformFromDBValue(this.props, this.state.dbMin, true)
-              : this.transformFromDBValue(this.props, this.state.dbMax)
-          }
+          min={this.transformFromDBValue(this.props, this.state.dbMin, true)}
+          max={this.transformFromDBValue(this.props, this.state.dbMax)}
           onChange={this.handleChange}
           pearling
           invert={this.props.invert}
@@ -469,15 +453,17 @@ export const FilterShutter = props =>
   <FilterRangeFactory
     type="shutter"
     field="shutterSpeed"
-    transformFromDBValue={FilterShutter.transformFromDBValue}
-    transformFromUIValue={FilterShutter.transformFromUIValue}
     transformToUIName={FilterShutter.transformToUIName}
+    transformFromDBValue={FilterShutter.transformFromDBValue}
+    invert
     {...props}
   />;
-FilterShutter.transformFromUIValue = (props, value) => Math.log2(value);
-FilterShutter.transformFromDBValue = (props, value) => Math.pow(2, value);
+FilterShutter.transformFromDBValue = (props, value, isFirst) =>
+  isFirst ? Math.floor(value) : Math.ceil(value);
 FilterShutter.transformToUIName = (props, value) =>
-  value > 1 ? `1/${Math.round(value)}s` : `${Math.round(10 / value) / 10}s`;
+  value > 1
+    ? `1/${Math.round(Math.pow(2, value))}s`
+    : `${Math.round(10 / Math.pow(2, value)) / 10}s`;
 
 export const FilterFlag = props => <FilterFactory type="flag" {...props} />;
 FilterFlag.propTypes = {
