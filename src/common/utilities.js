@@ -121,22 +121,13 @@ export function getFilterExpression(type, filter) {
   return expression;
 }
 
-export function transformDbValue(key, val) {
-  switch (key) {
-    case "shutter":
-      return val > 0 ? 1 / Math.round(100 / val) : 1 / Math.round(100 / val);
-    default:
-      return val;
-  }
-}
-
 export function formatDbValue(key, val) {
   if (!val) return "n/a";
   switch (key) {
     case "shutter":
       return val > 0
-        ? `1/${Math.round(100 / val)}s`
-        : `${1 / Math.round(100 / val)}s`;
+        ? `1/${Math.round(Math.pow(2, val) * 10) / 10}s`
+        : `${Math.round(1 / Math.pow(2, val))}s`;
     case "focalLength":
       return `${val}mm`;
     case "aperture":
