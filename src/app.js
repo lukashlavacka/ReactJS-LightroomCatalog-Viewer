@@ -89,13 +89,15 @@ class FileInput extends PureComponent {
         <button type="submit" className="btn btn-default">
           Open catalog
         </button>
-        <button
-          type="button"
-          className="btn"
-          onClick={this.props.handleLoadDefaultFile}
-        >
-          Load test catalog
-        </button>
+        {!this.props.isLocalFile
+          ? <button
+              type="button"
+              className="btn"
+              onClick={this.props.handleLoadDefaultFile}
+            >
+              Load test catalog
+            </button>
+          : null}
       </form>
     );
   }
@@ -279,6 +281,7 @@ export default class App extends PureComponent {
             handleFileChange={this.handleFileChange}
             handleStatusChange={this.handleStatusChange}
             handleLoadDefaultFile={this.handleLoadDefaultFile}
+            isLocalFile={this.props.isLocalFile}
             accept=".lrcat"
           />
         </BootstrapRow>

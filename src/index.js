@@ -10,6 +10,8 @@ import "./app.css";
 
 import App from "./app";
 import registerServiceWorker from "./registerServiceWorker";
+import { configureLogging } from "./common/utilities";
 
 ReactDOM.render(<App />, document.getElementById("root"));
-registerServiceWorker();
+if (window.location.protocol !== "file:") registerServiceWorker();
+configureLogging();

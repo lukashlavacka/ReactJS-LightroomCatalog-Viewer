@@ -224,3 +224,19 @@ export const aggregateFields = [
     chartType: "bar"
   }
 ];
+
+export function configureLogging() {
+  switch ((process.env.NODE_ENV || "").toLowerCase()) {
+    case "production":
+      var console = window.console;
+      if (!console) return;
+      console.log = console.info = function() {};
+      // console.warn = function() {};
+      // console.error = function() {};
+      break;
+    case "test":
+      return;
+    default:
+      break;
+  }
+}

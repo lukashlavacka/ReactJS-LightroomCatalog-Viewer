@@ -1,28 +1,15 @@
-import { defer } from "q";
-import SQL from "sql.js";
+import q, { defer } from "q";
 
 export default class AbstractWorkerWrapper {}
 
 export class SyncWorkerWrapper extends AbstractWorkerWrapper {
   open = buffer => {
-    const deferred = defer();
-    this.db = new SQL.Database(buffer);
-
-    setTimeout(() => {
-      deferred.resolve();
-    }, 0);
-
-    return deferred.promise;
+    this.db = new window.SQL.Database(buffer);
+    return q();
   };
 
   exec = query => {
-    const deferred = defer();
-
-    setTimeout(() => {
-      deferred.resolve(this.db.exec(query));
-    }, 0);
-
-    return deferred.promise;
+    return q(this.db.exec(query));
   };
 }
 
