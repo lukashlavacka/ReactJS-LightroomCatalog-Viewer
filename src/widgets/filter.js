@@ -194,7 +194,7 @@ class FilterRangeFactory extends PureComponent {
       .field(`MIN(${props.field})`)
       .field(`MAX(${props.field})`)
       .from("AgHarvestedExifMetadata")
-      .where(`${props.field} > 0`);
+      .where(`${props.field} IS NOT NULL`);
     const query = s.toString();
 
     return props.worker.exec(query);
@@ -480,16 +480,15 @@ export const FilterShutter = props =>
   <FilterRangeFactory
     type="shutter"
     field="shutterSpeed"
-    invert
     transformFromDBValue={FilterShutter.transformFromDBValue}
     transformFromUIValue={FilterShutter.transformFromUIValue}
     transformToUIName={FilterShutter.transformToUIName}
     {...props}
   />;
-FilterShutter.transformFromUIValue = (props, value) => 100 / value;
-FilterShutter.transformFromDBValue = (props, value) => Math.round(100 / value);
+FilterShutter.transformFromUIValue = (props, value) => Math.log2(value);
+FilterShutter.transformFromDBValue = (props, value) => Math.pow(2, value);
 FilterShutter.transformToUIName = (props, value) =>
-  value > 0 ? `1/${Math.round(value)}` : `${1 / value}s`;
+  value > 1 ? `1/${Math.round(value)}s` : `${Math.round(10 / value) / 10}s`;
 
 export const FilterFlag = props => <FilterFactory type="flag" {...props} />;
 FilterFlag.propTypes = {
