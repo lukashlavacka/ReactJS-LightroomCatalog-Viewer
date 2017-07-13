@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import update from "immutability-helper";
 import NProgress from "nprogress";
 import WidgetLayout from "./widgets";
-import { SyncWorkerWrapper, AsyncWorkerWrapper } from "./worker-wrapper";
-import { BootstrapRow } from "./shared";
+import { SyncWorkerWrapper, AsyncWorkerWrapper } from "./common/worker-wrapper";
+import { BootstrapRow } from "./common/shared";
 
 class FileDropWrapper extends PureComponent {
   static propTypes = {

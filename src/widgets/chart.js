@@ -2,10 +2,10 @@ import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import { Bar as BarChart, Pie as PieChart } from "react-chartjs-2";
 import _ from "lodash";
-import { Checkbox } from "./shared";
-import * as Utilities from "./utilities";
-import DataWidget from "./dataWidget";
-import WorkerWrapper from "./worker-wrapper";
+import { Checkbox } from "../common/shared";
+import * as Utilities from "../common/utilities";
+import DataWidget from "../common/dataWidget";
+import WorkerWrapper from "../common/worker-wrapper";
 
 export default class ChartViewer extends PureComponent {
   static propTypes = {

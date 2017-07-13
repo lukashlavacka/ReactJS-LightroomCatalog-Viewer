@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
-import * as Utilities from "./utilities";
-import DataWidget from "./dataWidget";
+import * as Utilities from "../common/utilities";
+import DataWidget from "../common/dataWidget";
 
 export default class PhotoStats extends DataWidget {
   static propTypes = {

@@ -4,13 +4,13 @@ import ReactGridLayoutWithoutProvider, {
   WidthProvider as widthProvider
 } from "react-grid-layout";
 import _ from "lodash";
-import * as FilterWidgets from "./filter";
-import PhotoStats from "./stats";
-import ChartViewer from "./chart";
-import TableViewer from "./table";
-import MapViewer from "./map";
-import Recommendation from "./recommendation";
-import WorkerWrapper from "./worker-wrapper";
+import * as FilterWidgets from "./widgets/filter";
+import PhotoStats from "./widgets/stats";
+import ChartViewer from "./widgets/chart";
+import TableViewer from "./widgets/table";
+import MapViewer from "./widgets/map";
+import Recommendation from "./widgets/recommendation";
+import WorkerWrapper from "./common/worker-wrapper";
 
 const ReactGridLayout = widthProvider(ReactGridLayoutWithoutProvider);
 

@@ -9,8 +9,8 @@ import {
 import withScriptjs from "react-google-maps/lib/async/withScriptjs";
 import MarkerClusterer from "react-google-maps/lib/addons/MarkerClusterer";
 import _ from "lodash";
-import * as Utilities from "./utilities";
-import DataWidget from "./dataWidget";
+import * as Utilities from "../common/utilities";
+import DataWidget from "../common/dataWidget";
 
 const GoogleMapInstance = withScriptjs(
   withGoogleMap(props =>

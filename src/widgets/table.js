@@ -1,10 +1,10 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
-import { BootstrapRow, Checkbox } from "./shared";
-import * as Utilities from "./utilities";
-import WorkerWrapper from "./worker-wrapper";
-import DataWidget from "./dataWidget";
+import { BootstrapRow, Checkbox } from "../common/shared";
+import * as Utilities from "../common/utilities";
+import WorkerWrapper from "../common/worker-wrapper";
+import DataWidget from "../common/dataWidget";
 
 export default class TableViewer extends PureComponent {
   static propTypes = {

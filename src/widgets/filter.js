@@ -7,8 +7,8 @@ import moment from "moment";
 import squel from "squel";
 import q from "q";
 import _ from "lodash";
-import { LoadingWrapper } from "./shared";
-import WorkerWrapper from "./worker-wrapper";
+import { LoadingWrapper } from "../common/shared";
+import WorkerWrapper from "../common/worker-wrapper";
 
 class FilterFactory extends PureComponent {
   static propTypes = {
