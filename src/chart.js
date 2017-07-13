@@ -1,9 +1,8 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import { Bar as BarChart, Pie as PieChart } from "react-chartjs-2";
-import q from "q";
 import _ from "lodash";
-import { LoadingWrapper, Checkbox } from "./shared";
+import { Checkbox } from "./shared";
 import * as Utilities from "./utilities";
 import DataWidget from "./dataWidget";
 import WorkerWrapper from "./worker-wrapper";

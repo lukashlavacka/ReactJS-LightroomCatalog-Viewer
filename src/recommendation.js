@@ -1,9 +1,7 @@
-import React, { PureComponent } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import q from "q";
 import _ from "lodash";
 import squel from "squel";
-import { LoadingWrapper } from "./shared";
 import * as Utilities from "./utilities";
 import DataWidget from "./dataWidget";
 

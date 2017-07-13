@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import {
   withGoogleMap,
@@ -8,11 +8,9 @@ import {
 } from "react-google-maps";
 import withScriptjs from "react-google-maps/lib/async/withScriptjs";
 import MarkerClusterer from "react-google-maps/lib/addons/MarkerClusterer";
-import q from "q";
 import _ from "lodash";
-import { LoadingWrapper } from "./shared";
 import * as Utilities from "./utilities";
-import WorkerWrapper from "./worker-wrapper";
+import DataWidget from "./dataWidget";
 
 const GoogleMapInstance = withScriptjs(
   withGoogleMap(props =>
@@ -43,51 +41,26 @@ const GoogleMapInstance = withScriptjs(
   )
 );
 
-export default class MapViewer extends PureComponent {
+export default class MapViewer extends DataWidget {
   static version = Math.ceil(Math.random() * 22);
 
   static propTypes = {
-    worker: PropTypes.instanceOf(WorkerWrapper).isRequired,
-    filter: PropTypes.object,
+    ...DataWidget.propTypes,
     types: PropTypes.array.isRequired,
     handleFilterChange: PropTypes.func.isRequired
   };
 
   static defaultProps = {
+    ...DataWidget.defaultProps,
     types: [
       { key: "1", name: "Zoom to cluster" },
       { key: "2", name: "Filter to cluster" }
     ]
   };
 
-  state = {
-    loading: false,
-    data: [],
-    type: "2"
-  };
-
-  componentDidMount() {
-    this.getData(this.props)
-      .then(this.transformData.bind(this, this.props))
-      .then(data => {
-        this.setState({
-          data,
-          loading: false
-        });
-      })
-      .done();
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.getData(nextProps)
-      .then(this.transformData.bind(this, nextProps))
-      .then(data => {
-        this.setState({
-          data,
-          loading: false
-        });
-      })
-      .done();
+  constructor(props) {
+    super(props);
+    this.state = Object.assign(this.state, { type: "2" });
   }
 
   handleMarkerClick = markerCluster => {
@@ -103,7 +76,7 @@ export default class MapViewer extends PureComponent {
     this.setState({ filterBounds: undefined });
   };
 
-  getData(properties) {
+  getQuery(properties) {
     this.setState({ loading: true });
     let s = Utilities.dbSquelFrom()
       .field("images.id_local")
@@ -115,20 +88,15 @@ export default class MapViewer extends PureComponent {
       s = s.where(Utilities.getFilterExpression(key, value));
     });
 
-    const query = s.toString();
-
-    return properties.worker.exec(query);
+    return s.toString();
   }
 
-  transformData(properties, rawData) {
-    const dataset = (rawData && rawData[0] && rawData[0].values) || [];
-    return q(
-      dataset.map(d => ({
-        id: d[0],
-        lat: d[1],
-        lng: d[2]
-      }))
-    );
+  transformData(properties, rawData, data) {
+    return data.map(d => ({
+      id: d[0],
+      lat: d[1],
+      lng: d[2]
+    }));
   }
 
   handleMapLoad = map => (this.googleMapComponent = map);
@@ -167,11 +135,8 @@ export default class MapViewer extends PureComponent {
       );
     }
 
-    return (
-      <LoadingWrapper
-        loading={this.state.loading}
-        noData={!this.state.data || !this.state.data.length}
-      >
+    return this.loadingWrapper(
+      <div>
         <div className="form-group">
           {this.props.types.map(type =>
             <div key={type.key} className="radio-inline">
@@ -209,7 +174,7 @@ export default class MapViewer extends PureComponent {
           zoomOnClick={!this.state.filterBounds}
           data={this.state.data}
         />
-      </LoadingWrapper>
+      </div>
     );
   }
 }

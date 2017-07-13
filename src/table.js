@@ -1,10 +1,10 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import q from "q";
 import _ from "lodash";
-import { LoadingWrapper, BootstrapRow, Checkbox } from "./shared";
+import { BootstrapRow, Checkbox } from "./shared";
 import * as Utilities from "./utilities";
 import WorkerWrapper from "./worker-wrapper";
+import DataWidget from "./dataWidget";
 
 export default class TableViewer extends PureComponent {
   static propTypes = {
@@ -84,43 +84,14 @@ FieldSelector.propTypes = {
   name: PropTypes.string
 };
 
-class Table extends PureComponent {
+class Table extends DataWidget {
   static propTypes = {
+    ...DataWidget.propTypes,
     xField: PropTypes.string,
     yField: PropTypes.string
   };
 
-  state = {
-    loading: false
-  };
-
-  componentDidMount() {
-    this.getData(this.props)
-      .then(this.transformData.bind(this, this.props))
-      .then(data => {
-        this.setState({
-          data,
-          loading: false
-        });
-      })
-      .done();
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.getData(nextProps)
-      .then(this.transformData.bind(this, nextProps))
-      .then(data => {
-        this.setState({
-          data,
-          loading: false
-        });
-      })
-      .done();
-  }
-
-  getData(properties) {
-    this.setState({ loading: true });
-
+  getQuery(properties) {
     let s = Utilities.dbSquelFrom()
       .field(properties.xField)
       .field(properties.yField)
@@ -139,28 +110,16 @@ class Table extends PureComponent {
       .group(properties.xField)
       .group(properties.yField);
 
-    const query = s.toString();
-
-    return properties.worker.exec(query);
-  }
-
-  transformData(properties, rawData) {
-    const dataset = (rawData && rawData[0] && rawData[0].values) || [];
-    return q(dataset);
+    return s.toString();
   }
 
   render() {
-    return (
-      <LoadingWrapper
-        loading={this.state.loading}
-        noData={!this.state.data || !this.state.data.length}
-      >
-        <TableComponent
-          data={this.state.data}
-          xField={this.props.xField}
-          yField={this.props.yField}
-        />
-      </LoadingWrapper>
+    return this.loadingWrapper(
+      <TableComponent
+        data={this.state.data}
+        xField={this.props.xField}
+        yField={this.props.yField}
+      />
     );
   }
 }

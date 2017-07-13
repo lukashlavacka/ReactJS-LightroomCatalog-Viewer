@@ -2,7 +2,6 @@ import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import q from "q";
 import { LoadingWrapper } from "./shared";
-import * as Utilities from "./utilities";
 import WorkerWrapper from "./worker-wrapper";
 
 export default class DataWidget extends PureComponent {
@@ -44,6 +43,10 @@ export default class DataWidget extends PureComponent {
 		this.setState({ loading: true });
 		const query = this.getQuery(properties);
 		return properties.worker.exec(query);
+	}
+
+	transformData(properties, rawData, dataset) {
+		return dataset;
 	}
 
 	transformDataPromise(properties, rawData) {

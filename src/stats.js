@@ -1,10 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import q from "q";
 import _ from "lodash";
-import { LoadingWrapper } from "./shared";
 import * as Utilities from "./utilities";
-import WorkerWrapper from "./worker-wrapper";
 import DataWidget from "./dataWidget";
 
 export default class PhotoStats extends DataWidget {
