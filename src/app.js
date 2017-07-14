@@ -109,7 +109,7 @@ export default class App extends PureComponent {
   };
 
   static defaultProps = {
-    isLocalFile: window.location.protocol === "file:"
+    isLocalFile: process.env.REACT_APP_LOCAL
   };
 
   constructor(props) {
@@ -118,7 +118,9 @@ export default class App extends PureComponent {
     if (this.props.isLocalFile) {
       worker = new SyncWorkerWrapper();
     } else {
-      worker = new AsyncWorkerWrapper("./worker.sql.js");
+      worker = new AsyncWorkerWrapper(
+        `./worker.sql${process.env.REACT_APP_CHROME}.js`
+      );
     }
     this.state = {
       worker,
@@ -137,7 +139,7 @@ export default class App extends PureComponent {
 
   getLocalStorage() {
     let ls = {};
-    if (window.localStorage) {
+    if (!process.env.REACT_APP_CHROME && window.localStorage) {
       try {
         ls =
           JSON.parse(
@@ -152,7 +154,7 @@ export default class App extends PureComponent {
 
   saveLocalStorage(field, value) {
     let ls = {};
-    if (window.localStorage) {
+    if (!process.env.REACT_APP_CHROME && window.localStorage) {
       try {
         ls =
           JSON.parse(
@@ -163,7 +165,7 @@ export default class App extends PureComponent {
       }
     }
     ls[field] = value;
-    if (window.localStorage) {
+    if (!process.env.REACT_APP_CHROME && window.localStorage) {
       window.localStorage.setItem(
         "ReactJs-LightroomCatalog-Viewer",
         JSON.stringify(ls)
@@ -267,7 +269,7 @@ export default class App extends PureComponent {
             handleFilterChange={this.handleFilterChange}
             saveLocalStorage={this.saveLocalStorage}
             getLocalStorage={this.getLocalStorage}
-            isLocalFile={this.props.isLocalFile}
+            isLocalFile={this.props.isLocalFile || process.env.REACT_APP_CHROME}
           />
         </div>
       );

@@ -1,0 +1,19 @@
+{
+  "short_name": "Lightroom Catalog Viewer",
+  "name": "React Lightroom Catalog Viewer",
+  "icons": {
+    "16": "favicon.ico",
+    "64": "favicon.png"
+  },
+  "version": "0.2",
+  "manifest_version": 2,
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  }
+}

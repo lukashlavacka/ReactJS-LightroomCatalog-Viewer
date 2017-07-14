@@ -21,13 +21,13 @@
     "react-grid-layout": "^0.14.6",
     "react-scripts": "1.0.10",
     "react-slider": "^0.8.0",
-    "sql.js": "^0.4.0",
     "squel": "^5.10.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build:local": "set PUBLIC_URL=.&& react-scripts build && rm -r build-local && cp -r build build-local",
+    "build:local": "set PUBLIC_URL=.&& set REACT_APP_LOCAL=1&& react-scripts build && rm -fr build-local && cp -r build build-local",
+    "build:chrome": "set PUBLIC_URL=.&& set REACT_APP_CHROME=_chrome-app&& react-scripts build && rm -fr build-chrome && cp -r build build-chrome",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
