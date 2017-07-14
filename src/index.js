@@ -13,6 +13,6 @@ import registerServiceWorker from "./registerServiceWorker";
 import { configureLogging } from "./common/utilities";
 
 ReactDOM.render(<App />, document.getElementById("root"));
-if (!process.env.REACT_APP_CHROME && !process.env.REACT_APP_LOCAL)
+if (!process.env.REACT_APP_CHROME && !process.env.REACT_APP_FILE)
 	registerServiceWorker();
 configureLogging();

@@ -109,18 +109,18 @@ export default class App extends PureComponent {
   };
 
   static defaultProps = {
-    isLocalFile: process.env.REACT_APP_LOCAL
+    isLocalFile: process.env.REACT_APP_FILE
   };
 
   constructor(props) {
     super(props);
     let worker;
     if (this.props.isLocalFile) {
-      worker = new SyncWorkerWrapper();
+      worker = new SyncWorkerWrapper("./lib/sql.js");
+    } else if (process.env.REACT_APP_CHROME) {
+      worker = new AsyncWorkerWrapper("./lib/worker.sql-noEval.js");
     } else {
-      worker = new AsyncWorkerWrapper(
-        `./worker.sql${process.env.REACT_APP_CHROME}.js`
-      );
+      worker = new AsyncWorkerWrapper("./lib/worker.sql.js");
     }
     this.state = {
       worker,
@@ -209,19 +209,16 @@ export default class App extends PureComponent {
 
   parseData(data, now) {
     const Uints = new Uint8Array(data);
-    this.state.worker
-      .open(Uints)
-      .then(() => {
-        this.handleProgress("end");
-        this.handleStatusChange(
-          `Loaded in ${new Date() - now} miliseconds.`,
-          "success"
-        );
-        this.setState({
-          dbReady: true
-        });
-      })
-      .done();
+    this.state.worker.open(Uints).then(() => {
+      this.handleProgress("end");
+      this.handleStatusChange(
+        `Loaded in ${new Date() - now} miliseconds.`,
+        "success"
+      );
+      this.setState({
+        dbReady: true
+      });
+    });
   }
 
   handleStatusChange = status => {

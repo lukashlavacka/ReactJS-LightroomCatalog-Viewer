@@ -1,10 +1,11 @@
 import q, { defer } from "q";
+const SQL = window.SQL; // sql.js seems not to be working when loaded using package or dynamic loading
 
 export default class AbstractWorkerWrapper {}
 
 export class SyncWorkerWrapper extends AbstractWorkerWrapper {
   open = buffer => {
-    this.db = new window.SQL.Database(buffer);
+    this.db = new SQL.Database(buffer);
     return q();
   };
 

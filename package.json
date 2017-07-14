@@ -26,12 +26,15 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build:local": "set PUBLIC_URL=.&& set REACT_APP_LOCAL=1&& react-scripts build && rm -fr build-local && cp -r build build-local",
-    "build:chrome": "set PUBLIC_URL=.&& set REACT_APP_CHROME=_chrome-app&& react-scripts build && rm -fr build-chrome && cp -r build build-chrome",
+    "build:file": "set PUBLIC_URL=.&& set REACT_APP_FILE=1 && set REACT_APP_SQL=sql&& react-scripts build && rm -fr build-file && cp -r build build-file",
+    "build:local": "set PUBLIC_URL=.&& react-scripts build && rm -fr build-local && cp -r build build-local",
+    "build:chrome": "set PUBLIC_URL=.&& set REACT_APP_CHROME=1&& react-scripts build && rm -fr build-chrome && cp -r build build-chrome",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
-    "analyze": "source-map-explorer build/static/js/main.*"
+    "analyze": "source-map-explorer build/static/js/main.*",
+    "preserve": "npm run build:local",
+    "serve": "serve -s build-local"
   }
 }
