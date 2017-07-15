@@ -77,8 +77,18 @@ class Chart extends DataWidget {
     this.getData(nextProps)
       .then(this.transformDataPromise.bind(this, nextProps))
       .then(data => {
-        const oldValues = this.state.data[0].values.map(v => v[0]);
-        const newValues = data[0].values.map(v => v[0]);
+        const oldValues =
+          this.state.data &&
+          this.state.data[0] &&
+          this.state.data[0].values &&
+          this.state.data[0].values.length &&
+          this.state.data[0].values.map(v => v[0]);
+        const newValues =
+          data &&
+          data[0] &&
+          data[0].values &&
+          data[0].values.length &&
+          data[0].values.map(v => v[0]);
         this.setState({
           data,
           loading: false,
@@ -103,7 +113,7 @@ class Chart extends DataWidget {
   }
 
   transformData(properties, rawData, data) {
-    return [rawData[0] || { columns: [], values: [] }];
+    return rawData.length ? [rawData[0]] : [];
   }
 
   render() {
