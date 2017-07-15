@@ -289,7 +289,7 @@ export default class WidgetLayout extends Component {
   render() {
     return (
       <div>
-        <button type="button" onClick={this.handleResetUI}>
+        <button type="button" className="btn" onClick={this.handleResetUI}>
           Reset UI
         </button>
         <ReactGridLayout

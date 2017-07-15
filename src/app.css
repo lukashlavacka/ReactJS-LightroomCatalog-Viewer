@@ -96,19 +96,6 @@ h3,
   margin-bottom: 10px;
 }
 
-/* Chart legend style */
-
-.chart-legend li {
-  float: left;
-  list-style-type: none;
-  padding-left: 3px;
-}
-
-.chart-legend li span {
-  padding-left: 3px;
-  padding-right: 3px;
-}
-
 /* Bootstrap panel styling for react-grid-layout */
 
 .panel-react-grid {
@@ -176,14 +163,48 @@ h3,
   cursor: move;
 }
 
+/* File drop styling */
 .file-drop-wrapper {
-  position: absolute;
-  top: 0;
+  box-sizing: border-box;
+  position: fixed;
+  width: 100%;
+  height: 100%;
   left: 0;
-  bottom: 0;
-  right: 0;
+  top: 0;
+  overflow: auto;
+}
+.file-drop-wrapper.dragging {
+  background-color: rgba(128, 128, 128, 0.8);
+}
+.file-drop-wrapper .file-drop-element {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 2;
+  display: none;
+  pointer-events: none;
+}
+.file-drop-wrapper.dragging .file-drop-element {
+  display: block;
 }
 
+.file-drop-wrapper .file-drop-message {
+  display: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.file-drop-wrapper.dragging .file-drop-message {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  background-color: rgba(128, 128, 128, 0.8);
+}
+
+/* Reduces bottom margin */
 .no-bottom-margin {
   margin-bottom: 0;
 }

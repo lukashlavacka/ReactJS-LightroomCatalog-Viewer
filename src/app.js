@@ -13,21 +13,26 @@ class FileDropWrapper extends PureComponent {
     children: PropTypes.node
   };
 
+  state = { dragging: false };
+
   onDragEnter = event => {
     event.stopPropagation();
     event.preventDefault();
+    this.setState({ dragging: true });
     this.props.handleStatusChange("Drop file anywhere", "none");
   };
 
   onDragLeave = event => {
     event.stopPropagation();
     event.preventDefault();
+    this.setState({ dragging: false });
     this.props.handleStatusChange("Drag any Lightroom catalog file", "none");
   };
 
   onDragOver = event => {
     event.stopPropagation();
     event.preventDefault();
+    this.setState({ dragging: true });
     this.props.handleStatusChange("Drop file anywhere", "none");
   };
 
@@ -35,6 +40,7 @@ class FileDropWrapper extends PureComponent {
     event.stopPropagation();
     event.preventDefault();
 
+    this.setState({ dragging: false });
     const dt = event.dataTransfer;
     const files = dt.files;
 
@@ -45,13 +51,16 @@ class FileDropWrapper extends PureComponent {
 
   render = () =>
     <div
-      ref="fileDropWrapper"
-      className="file-drop-wrapper"
+      className={`file-drop-wrapper ${this.state.dragging ? "dragging" : ""}`}
       onDrop={this.onDrop}
       onDragEnter={this.onDragEnter}
       onDragOver={this.onDragOver}
       onDragLeave={this.onDragLeave}
     >
+      <div className="file-drop-message">
+        <div className="alert alert-success">Drop file anywhere</div>
+      </div>
+      <div ref="fileDropWrapper" className="file-drop-element" />
       {this.props.children}
     </div>;
 }
@@ -291,8 +300,12 @@ export default class App extends PureComponent {
         handleFileChange={this.handleFileChange}
         handleStatusChange={this.handleStatusChange}
       >
-        <h1>Welcome to Lightroom Catalog Reader</h1>
-        {content}
+        <div className="container">
+          <div className="page-header">
+            <h1>Welcome to Lightroom Catalog Reader</h1>
+          </div>
+          {content}
+        </div>
       </FileDropWrapper>
     );
   }
