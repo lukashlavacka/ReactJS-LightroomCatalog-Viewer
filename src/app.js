@@ -87,26 +87,31 @@ class FileInput extends PureComponent {
   render() {
     return (
       <form className="form-inline" onSubmit={this.onChange}>
-        <div className="form-group">
-          <input
-            ref="fileInput"
-            type="file"
-            required="required"
-            accept={this.props.accept}
-          />
+        <div className="btn-group">
+          <label className="custom-file">
+            <input
+              ref="fileInput"
+              type="file"
+              required="required"
+              accept={this.props.accept}
+              className="custom-file-input"
+            />
+            <span className="custom-file-control" />
+          </label>
+
+          <button type="submit" className="btn btn-primary">
+            Open catalog
+          </button>
+          {!this.props.isLocalFile
+            ? <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={this.props.handleLoadDefaultFile}
+              >
+                Load test catalog
+              </button>
+            : null}
         </div>
-        <button type="submit" className="btn btn-default">
-          Open catalog
-        </button>
-        {!this.props.isLocalFile
-          ? <button
-              type="button"
-              className="btn"
-              onClick={this.props.handleLoadDefaultFile}
-            >
-              Load test catalog
-            </button>
-          : null}
       </form>
     );
   }
@@ -118,7 +123,7 @@ export default class App extends PureComponent {
   };
 
   static defaultProps = {
-    isLocalFile: process.env.REACT_APP_FILE
+    isLocalFile: !!process.env.REACT_APP_FILE
   };
 
   constructor(props) {
@@ -275,7 +280,9 @@ export default class App extends PureComponent {
             handleFilterChange={this.handleFilterChange}
             saveLocalStorage={this.saveLocalStorage}
             getLocalStorage={this.getLocalStorage}
-            isLocalFile={this.props.isLocalFile || process.env.REACT_APP_CHROME}
+            isLocalFile={
+              this.props.isLocalFile || !!process.env.REACT_APP_CHROME
+            }
           />
         </div>
       );

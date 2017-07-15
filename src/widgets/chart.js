@@ -2,7 +2,7 @@ import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import { Bar as BarChart, Pie as PieChart } from "react-chartjs-2";
 import _ from "lodash";
-import { Checkbox } from "../common/shared";
+import { Radio } from "../common/shared";
 import * as Utilities from "../common/utilities";
 import DataWidget from "../common/dataWidget";
 import WorkerWrapper from "../common/worker-wrapper";
@@ -51,7 +51,7 @@ const FieldSelector = props =>
   <div>
     <h3>Select agregate field</h3>
     {props.aggregateFields.map(f =>
-      <Checkbox
+      <Radio
         key={f.field}
         handleFieldChange={props.handleFieldChange}
         field={f}

@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
-import { BootstrapRow, Checkbox } from "../common/shared";
+import { BootstrapRow, Radio } from "../common/shared";
 import * as Utilities from "../common/utilities";
 import WorkerWrapper from "../common/worker-wrapper";
 import DataWidget from "../common/dataWidget";
@@ -65,7 +65,7 @@ const FieldSelector = function FieldSelector(props) {
           Select {props.name}
         </h3>
         {Utilities.aggregateFields.map(f =>
-          <Checkbox
+          <Radio
             key={f.field}
             disabled={f.field === props.otherField}
             handleFieldChange={props.handleFieldChange}

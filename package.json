@@ -4,8 +4,9 @@
   "private": true,
   "homepage": "https://lukashlavacka.github.io/ReactJS-LightroomCatalog-Viewer",
   "dependencies": {
-    "bootstrap": "^3.3.7",
+    "bootstrap": "^4.0.0-alpha.6",
     "chart.js": "^2.6.0",
+    "font-awesome": "^4.7.0",
     "immutability-helper": "^2.2.3",
     "moment": "^2.18.1",
     "nprogress": "^0.2.0",
@@ -29,6 +30,7 @@
     "build:file": "set PUBLIC_URL=.&& set REACT_APP_FILE=1 && set REACT_APP_SQL=sql&& react-scripts build && rm -fr build-file && cp -r build build-file",
     "build:local": "set PUBLIC_URL=.&& react-scripts build && rm -fr build-local && cp -r build build-local",
     "build:chrome": "set PUBLIC_URL=.&& set REACT_APP_CHROME=1&& react-scripts build && rm -fr build-chrome && cp -r build build-chrome",
+    "build-all": "npm run build:file && npm run build:local && npm run build:chrome && npm run build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",

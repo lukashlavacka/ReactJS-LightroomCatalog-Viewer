@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.css";
+import "font-awesome/css/font-awesome.css";
 import "nprogress/nprogress.css";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-grid-layout/css/styles.css";

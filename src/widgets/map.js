@@ -11,6 +11,7 @@ import MarkerClusterer from "react-google-maps/lib/addons/MarkerClusterer";
 import _ from "lodash";
 import * as Utilities from "../common/utilities";
 import DataWidget from "../common/dataWidget";
+import { Radio } from "../common/shared";
 
 const GoogleMapInstance = withScriptjs(
   withGoogleMap(props =>
@@ -53,18 +54,18 @@ export default class MapViewer extends DataWidget {
   static defaultProps = {
     ...DataWidget.defaultProps,
     types: [
-      { key: "1", name: "Zoom to cluster" },
-      { key: "2", name: "Filter to cluster" }
+      { key: "1", field: "zoom", name: "Zoom to cluster" },
+      { key: "2", field: "filter", name: "Filter to cluster" }
     ]
   };
 
   constructor(props) {
     super(props);
-    this.state = Object.assign(this.state, { type: "2" });
+    this.state = Object.assign(this.state, { type: "filter" });
   }
 
   handleMarkerClick = markerCluster => {
-    if (this.state.type === "2") {
+    if (this.state.type === "filter") {
       const imageIDs = markerCluster.markers_.map(m => parseInt(m.title, 10));
       this.props.handleFilterChange("map", imageIDs);
       this.setState({ filterBounds: markerCluster.bounds_ });
@@ -101,9 +102,9 @@ export default class MapViewer extends DataWidget {
 
   handleMapLoad = map => (this.googleMapComponent = map);
 
-  handleChange = event => {
+  handleChange = type => {
     this.setState({
-      type: event.target.value
+      type: type.field
     });
   };
 
@@ -139,17 +140,12 @@ export default class MapViewer extends DataWidget {
       <div>
         <div className="form-group">
           {this.props.types.map(type =>
-            <div key={type.key} className="radio-inline">
-              <label>
-                <input
-                  type="radio"
-                  checked={this.state.type === type.key}
-                  value={type.key}
-                  onChange={this.handleChange}
-                />
-                {type.name}
-              </label>
-            </div>
+            <Radio
+              key={type.key}
+              handleFieldChange={this.handleChange}
+              field={type}
+              selectedField={this.state.type}
+            />
           )}
         </div>
         <GoogleMapInstance

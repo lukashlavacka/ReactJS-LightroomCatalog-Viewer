@@ -90,9 +90,12 @@ class FilterFactory extends PureComponent {
             onChange={this.handleChange}
           >
             {(this.props.options || this.state.options).map(o =>
-              <label key={o.value} className="checkbox-inline">
-                <Checkbox value={o.value} />
-                {this.transformName(o.name)}
+              <label key={o.value} className="custom-control custom-checkbox">
+                <Checkbox value={o.value} className="custom-control-input" />
+                <span className="custom-control-indicator" />
+                <span className="custom-control-description">
+                  {this.transformName(o.name)}
+                </span>
               </label>
             )}
           </CheckboxGroup>
@@ -432,17 +435,19 @@ export class FilterAperture extends PureComponent {
           {...this.props}
         />
         {_.keys(this.props.types).map(key =>
-          <div key={key} className="radio-inline">
-            <label>
-              <input
-                type="radio"
-                checked={this.state.type === key}
-                value={key}
-                onChange={this.handleChange}
-              />
+          <label key={key} className="custom-control custom-radio">
+            <input
+              type="radio"
+              className="custom-control-input"
+              checked={this.state.type === key}
+              value={key}
+              onChange={this.handleChange}
+            />
+            <span className="custom-control-indicator" />
+            <span className="custom-control-description">
               {key}
-            </label>
-          </div>
+            </span>
+          </label>
         )}
       </div>
     );

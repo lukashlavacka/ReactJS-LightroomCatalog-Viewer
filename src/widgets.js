@@ -315,24 +315,20 @@ const WidgetWrapper = props => {
     props.handleMinifyWidget(props.widget, e.target.value);
   const body = props.minified
     ? null
-    : <div className="panel-body panel-body-react-grid">
+    : <div className="card-block card-body-react-grid">
         {props.children}
       </div>;
-  const glyphiconClass = props.minified
-    ? "glyphicon glyphicon-plus"
-    : "glyphicon glyphicon-minus";
+  const glyphiconClass = props.minified ? "plus-square-o" : "minus-square-o";
 
   return (
-    <div className="panel panel-default panel-react-grid">
-      <div className="panel-heading react-grid-item-drag-handle">
-        <div className="btn-group pull-right">
-          <button
-            className="btn btn-default btn-sm"
-            onClick={handleMinifyWidget}
-          >
-            <span className={glyphiconClass} aria-hidden="true" />
-          </button>
-        </div>
+    <div className="card react-grid-item">
+      <div className="card-header react-grid-item-drag-handle">
+        <button
+          className="btn btn-link btn-lg float-right card-btn-minify"
+          onClick={handleMinifyWidget}
+        >
+          <i className={`fa fa-lg fa-${glyphiconClass}`} aria-hidden="true" />
+        </button>
         <h4>
           {props.title}
         </h4>

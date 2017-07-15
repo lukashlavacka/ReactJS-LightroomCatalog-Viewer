@@ -65,7 +65,7 @@ NoDataWrapper.propTypes = {
   children: PropTypes.node
 };
 
-export class Checkbox extends PureComponent {
+export class Radio extends PureComponent {
   static propTypes = {
     handleFieldChange: PropTypes.func.isRequired,
     field: PropTypes.object.isRequired,
@@ -77,16 +77,23 @@ export class Checkbox extends PureComponent {
 
   render() {
     return (
-      <label key={this.props.field.field} className="radio-inline">
+      <label
+        key={this.props.field.field}
+        className="custom-control custom-radio"
+      >
         <input
           ref="radioField"
           type="radio"
+          className="custom-control-input"
           disabled={this.props.disabled}
           checked={this.props.selectedField === this.props.field.field}
           value={this.props.field.field}
           onChange={this.handleFieldChange}
         />
-        {this.props.field.name}
+        <span className="custom-control-indicator" />
+        <span className="custom-control-description">
+          {this.props.field.name}
+        </span>
       </label>
     );
   }
