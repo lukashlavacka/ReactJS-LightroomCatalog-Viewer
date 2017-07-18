@@ -37,6 +37,8 @@
         "deploy": "gh-pages -d build",
         "analyze": "source-map-explorer build/static/js/main.*",
         "preserve": "npm run build:local",
-        "serve": "serve -s build-local"
+        "serve": "serve -s build-local",
+        "predeploy:file": "npm run build:file",
+        "deploy:file": "gh-pages -d build-file -b static -s {lib/sql.js,static/**/*.js,static/**/*.css,static/media/*.*,favicon.ico,index.html}"
     }
 }
