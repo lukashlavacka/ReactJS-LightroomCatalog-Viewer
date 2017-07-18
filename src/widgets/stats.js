@@ -79,7 +79,7 @@ export default class PhotoStats extends DataWidget {
   render() {
     if (this.state.data && this.state.data.map)
       return this.loadingWrapper(
-        <table className="table table-condensed no-bottom-margin">
+        <table className="table table-sm table-hover no-bottom-margin">
           <thead>
             <tr>
               {this.state.data.map(s =>

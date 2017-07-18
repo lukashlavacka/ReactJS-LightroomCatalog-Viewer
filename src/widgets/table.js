@@ -133,7 +133,7 @@ const TableComponent = props => {
   const yFieldObj = _.find(Utilities.aggregateFields, { field: props.yField });
   return (
     <div className="table-responsive">
-      <table className="table table-condensed table-col-hover table-bordered no-bottom-margin">
+      <table className="table table-sm table-hover table-col-hover table-bordered no-bottom-margin">
         <thead>
           <tr>
             <th />
