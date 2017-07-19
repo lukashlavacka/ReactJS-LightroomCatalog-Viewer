@@ -94,8 +94,7 @@ class Chart extends DataWidget {
           loading: false,
           noRedraw: noRedraw && _.isEqual(oldValues, newValues)
         });
-      })
-      .done();
+      });
   }
 
   getQuery(properties) {

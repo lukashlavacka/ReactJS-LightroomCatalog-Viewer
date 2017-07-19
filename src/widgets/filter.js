@@ -5,7 +5,6 @@ import DatePicker from "react-datepicker";
 import ReactSlider from "react-slider";
 import moment from "moment";
 import squel from "squel";
-import q from "q";
 import _ from "lodash";
 import { LoadingWrapper } from "../common/shared";
 import WorkerWrapper from "../common/worker-wrapper";
@@ -42,8 +41,7 @@ class FilterFactory extends PureComponent {
             options: data,
             loading: false
           });
-        })
-        .done();
+        });
     }
   }
 
@@ -66,7 +64,9 @@ class FilterFactory extends PureComponent {
 
   transformData = (properties, rawData) => {
     const dataset = (rawData && rawData[0]) || { values: [] };
-    return q(dataset.values.map(t => ({ value: t[0], name: t[1] })));
+    return Promise.resolve(
+      dataset.values.map(t => ({ value: t[0], name: t[1] }))
+    );
   };
 
   handleChange = newSelected => {
@@ -155,8 +155,7 @@ class FilterRangeFactory extends PureComponent {
             uiMin: this.transformFromDBValue(this.props, minMax.min, true),
             uiMax: this.transformFromDBValue(this.props, minMax.max)
           });
-        })
-        .done();
+        });
     }
   }
 
@@ -209,7 +208,7 @@ class FilterRangeFactory extends PureComponent {
         max: values[1]
       };
     }
-    return q(minMax);
+    return Promise.resolve(minMax);
   };
 
   handleChange = value => {
@@ -571,8 +570,7 @@ export class FilterDate extends PureComponent {
           startDate: momentMin,
           endDate: momentMax
         });
-      })
-      .done();
+      });
   }
 
   getData(properties) {
@@ -598,7 +596,7 @@ export class FilterDate extends PureComponent {
         max: values[1]
       };
     }
-    return q(minMax);
+    return Promise.resolve(minMax);
   };
 
   handleStartChange = startDate => {

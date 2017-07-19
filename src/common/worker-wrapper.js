@@ -1,4 +1,3 @@
-import q, { defer } from "q";
 const SQL = window.SQL; // sql.js seems not to be working when loaded using package or dynamic loading
 
 export default class AbstractWorkerWrapper {}
@@ -6,11 +5,11 @@ export default class AbstractWorkerWrapper {}
 export class SyncWorkerWrapper extends AbstractWorkerWrapper {
   open = buffer => {
     this.db = new SQL.Database(buffer);
-    return q();
+    return Promise.resolve();
   };
 
   exec = query => {
-    return q(this.db.exec(query));
+    return Promise.resolve(this.db.exec(query));
   };
 }
 
@@ -24,22 +23,27 @@ export class AsyncWorkerWrapper extends AbstractWorkerWrapper {
     this.worker = new Worker(workerPath);
 
     this.worker.onmessage = event => {
-      const promise = this.promises[event.data.id];
+      const promiseObject = this.promises[event.data.id];
       window.console.log(
-        `Last query "${promise.query}" took ${new Date() - promise.timestamp}ms`
+        `Last query "${promiseObject.query}" took ${new Date() -
+          promiseObject.timestamp}ms`
       );
-      promise.deferred.resolve(event.data.results || {});
+      promiseObject.resolve(event.data.results || {});
       delete this.promises[event.data.id];
     };
   }
 
   open = buffer => {
     this.id = this.id + 1;
-    const deferred = defer();
-    this.promises[this.id] = {
-      deferred,
-      timestamp: new Date()
-    };
+
+    const promise = new Promise(
+      resolve =>
+        (this.promises[this.id] = {
+          resolve,
+          query: "Open DB",
+          timestamp: new Date()
+        })
+    );
 
     this.worker.postMessage({
       id: this.id,
@@ -47,17 +51,19 @@ export class AsyncWorkerWrapper extends AbstractWorkerWrapper {
       buffer
     });
 
-    return deferred.promise;
+    return promise;
   };
 
   exec = query => {
     this.id = this.id + 1;
-    const deferred = defer();
-    this.promises[this.id] = {
-      deferred,
-      query,
-      timestamp: new Date()
-    };
+    const promise = new Promise(
+      resolve =>
+        (this.promises[this.id] = {
+          resolve,
+          query,
+          timestamp: new Date()
+        })
+    );
 
     this.worker.postMessage({
       id: this.id,
@@ -65,6 +71,6 @@ export class AsyncWorkerWrapper extends AbstractWorkerWrapper {
       sql: query
     });
 
-    return deferred.promise;
+    return promise;
   };
 }

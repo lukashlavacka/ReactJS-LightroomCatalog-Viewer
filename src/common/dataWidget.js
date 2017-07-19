@@ -1,6 +1,5 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import q from "q";
 import { LoadingWrapper } from "./shared";
 import WorkerWrapper from "./worker-wrapper";
 
@@ -23,8 +22,7 @@ export default class DataWidget extends PureComponent {
 					data,
 					loading: false
 				});
-			})
-			.done();
+			});
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -35,8 +33,7 @@ export default class DataWidget extends PureComponent {
 					data,
 					loading: false
 				});
-			})
-			.done();
+			});
 	}
 
 	getData(properties) {
@@ -51,7 +48,9 @@ export default class DataWidget extends PureComponent {
 
 	transformDataPromise(properties, rawData) {
 		const dataset = (rawData && rawData[0] && rawData[0].values) || [];
-		return q(this.transformData(properties, rawData, dataset) || []);
+		return Promise.resolve(
+			this.transformData(properties, rawData, dataset) || []
+		);
 	}
 
 	loadingWrapper(content) {
