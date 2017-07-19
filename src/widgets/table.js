@@ -97,7 +97,6 @@ class Table extends DataWidget {
       .field(properties.xField)
       .field(properties.yField)
       .field("COUNT(images.id_local)")
-      .field("AVG(IFNULL(images.rating, 0))")
       .where(`${properties.xField} IS NOT NULL`)
       .where(`${properties.yField} IS NOT NULL`);
 
@@ -156,16 +155,14 @@ const TableComponent = props => {
                   props,
                   xVal,
                   yVal,
-                  transformedData.maxCount,
-                  transformedData.maxAverage
+                  transformedData.maxCount
                 );
+                const relCountPercent = Math.round(val.relCount * 100);
                 const style = {
-                  backgroundColor: `hsla(0,0%,${Math.round(
-                    val.relCount * 100
-                  )}%,0.05)`
+                  backgroundColor: `hsla(0,0%,${relCountPercent}%,0.1)`
                 };
                 return (
-                  <td key={`${yVal}_${xVal}`} style={style} title={val.rating}>
+                  <td key={`${yVal}_${xVal}`} style={style}>
                     {val.count}
                   </td>
                 );
@@ -197,13 +194,10 @@ TableComponent.transformData = props => {
 
   const maxCount = _(props.data).map(r => r[2]).max();
 
-  const maxAverage = _(props.data).map(r => r[3]).max();
-
   return {
     uniqueX,
     uniqueY,
-    maxCount,
-    maxAverage
+    maxCount
   };
 };
 TableComponent.correctSort = field => {
@@ -217,16 +211,13 @@ TableComponent.correctSort = field => {
       return (a, b) => a - b;
   }
 };
-TableComponent.findByXY = (props, xVal, yVal, maxCount, maxAverage) => {
+TableComponent.findByXY = (props, xVal, yVal, maxCount) => {
   const row = _.find(props.data, r => r[0] === xVal && r[1] === yVal);
 
   const count = row && row[2] ? row[2] : 0;
-  const avergeRating = row && row[3] ? row[3] : 0;
 
   return {
     count,
-    rating: avergeRating,
-    relCount: count / maxCount,
-    relRating: avergeRating / maxAverage
+    relCount: count / maxCount
   };
 };
