@@ -10,6 +10,9 @@ import _ from "lodash";
 import { LoadingWrapper } from "../common/shared";
 import WorkerWrapper from "../common/worker-wrapper";
 
+import "react-datepicker/dist/react-datepicker.css";
+import "./filter.css";
+
 class FilterFactory extends PureComponent {
   static propTypes = {
     handleFilterChange: PropTypes.func,

@@ -4,3 +4,20 @@ html {
 body {
 	overflow-y: auto;
 }
+
+/* Smaller margins for headers */
+
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3 {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+/* Reduces bottom margin */
+.no-bottom-margin {
+	margin-bottom: 0;
+}

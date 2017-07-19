@@ -2,6 +2,8 @@ import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
 
+import "./shared.css";
+
 export const BootstrapRow = props => {
   const width = props.width || 12;
   const widths = {

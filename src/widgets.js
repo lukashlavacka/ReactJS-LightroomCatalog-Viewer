@@ -12,6 +12,9 @@ import MapViewer from "./widgets/map";
 import Recommendation from "./widgets/recommendation";
 import WorkerWrapper from "./common/worker-wrapper";
 
+import "react-grid-layout/css/styles.css";
+import "./widgets.css";
+
 const ReactGridLayout = widthProvider(ReactGridLayoutWithoutProvider);
 
 export class WindowDimensions extends PureComponent {

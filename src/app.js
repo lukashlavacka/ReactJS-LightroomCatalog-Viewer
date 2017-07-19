@@ -6,6 +6,9 @@ import WidgetLayout from "./widgets";
 import { SyncWorkerWrapper, AsyncWorkerWrapper } from "./common/worker-wrapper";
 import { BootstrapRow } from "./common/shared";
 
+import "nprogress/nprogress.css";
+import "./app.css";
+
 class FileDropWrapper extends PureComponent {
   static propTypes = {
     handleStatusChange: PropTypes.func.isRequired,

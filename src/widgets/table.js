@@ -5,6 +5,7 @@ import { BootstrapRow, Radio } from "../common/shared";
 import * as Utilities from "../common/utilities";
 import WorkerWrapper from "../common/worker-wrapper";
 import DataWidget from "../common/dataWidget";
+import "./table.css";
 
 export default class TableViewer extends PureComponent {
   static propTypes = {

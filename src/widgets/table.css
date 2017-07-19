@@ -1,0 +1,32 @@
+table.table-col-hover {
+  overflow: hidden;
+  z-index: 1;
+}
+table.table-col-hover td,
+table.table-col-hover th {
+  cursor: pointer;
+  padding: 10px;
+  position: relative;
+}
+
+table.table-col-hover td:hover::before {
+  background-color: rgba(0, 0, 0, 0.075);
+  content: '\00a0';
+  height: 100%;
+  left: -5000px;
+  position: absolute;
+  top: 0;
+  width: 10000px;
+  pointer-events: none;
+}
+
+table.table-col-hover td:hover::after {
+  background-color: rgba(0, 0, 0, 0.075);
+  content: '\00a0';
+  height: 10000px;
+  left: 0;
+  position: absolute;
+  top: -5000px;
+  width: 100%;
+  pointer-events: none;
+}

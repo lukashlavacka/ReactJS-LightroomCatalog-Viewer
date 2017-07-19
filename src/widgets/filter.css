@@ -1,0 +1,42 @@
+.slider {
+  width: 100%;
+  max-width: 500px;
+  height: 25px;
+  /*border: 1px solid grey;*/
+}
+
+.handle {
+  font-size: 0.9em;
+  text-align: center;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid grey;
+  color: black;
+  cursor: e-resize;
+}
+
+.handle.active {
+  background-color: grey;
+}
+
+.bar {
+  position: relative;
+  background: #ddd;
+}
+
+.bar.bar-1 {
+  background: #d99;
+}
+
+.bar.bar-2 {
+  background: #9d9;
+}
+
+.slider .bar {
+  top: 10px;
+  height: 5px;
+}
+
+.slider .handle {
+  width: 50px;
+}
