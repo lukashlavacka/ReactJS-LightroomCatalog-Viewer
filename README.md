@@ -14,8 +14,8 @@ Drop Lightroom catalog file and UI should update.
 - [x] Select agregate field(s) for chart
 - [x] Chart rendering
 - [ ] Multiple chart rendering
-- [ ] Make it work when saving locally (Ctrl+S)
-- [ ] Create some analytics engine providing suggestions
+- [x] Make it work when saving locally (Ctrl+S) (Release or branch `static`)
+- [x] Create some analytics engine providing suggestions
 
 
 ## References
@@ -24,7 +24,7 @@ Drop Lightroom catalog file and UI should update.
 *	Uses [ziad-saab/react-checkbox-group](//github.com/ziad-saab/react-checkbox-group) for column selection
 *	Uses [hiddentao/squel](//github.com/hiddentao/squel) as SQL query builder
 *	Uses [nnnick/Chart.js](//github.com/nnnick/Chart.js) as charting library
-*	Uses [jhudson8/react-chartjs](//github.com/jhudson8/react-chartjs) as React Chart.js wrapper
+*	Uses [jerairrest/react-chartjs-2](//github.com/jerairrest/react-chartjs-2) as React Chart.js 2 wrapper
 *	Uses [mpowaga/react-slider](//github.com/mpowaga/react-slider) for sliders
 *	Uses [rstacruz/nprogress](//github.com/rstacruz/nprogress) as unobstrusive progress indicator
 *	Uses [STRML/react-grid-layout](//github.com/STRML/react-grid-layout) as grid system
