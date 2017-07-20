@@ -7,7 +7,7 @@ import moment from "moment";
 import squel from "squel";
 import _ from "lodash";
 import { LoadingWrapper } from "../common/shared";
-import WorkerWrapper from "../common/worker-wrapper";
+import type { IWorkerWrapper } from "../common/worker-wrapper";
 
 import "react-datepicker/dist/react-datepicker.css";
 import "./filter.css";
@@ -16,7 +16,7 @@ class FilterFactory extends PureComponent {
   static propTypes = {
     handleFilterChange: PropTypes.func,
     transformName: PropTypes.func,
-    worker: PropTypes.instanceOf(WorkerWrapper).isRequired,
+    worker: PropTypes.any,
     type: PropTypes.string,
     table: PropTypes.string,
     options: PropTypes.array,

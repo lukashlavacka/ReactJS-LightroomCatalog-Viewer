@@ -5,12 +5,12 @@ import _ from "lodash";
 import { Radio } from "../common/shared";
 import * as Utilities from "../common/utilities";
 import DataWidget from "../common/dataWidget";
-import WorkerWrapper from "../common/worker-wrapper";
+import { IWorkerWrapper } from "../common/worker-wrapper";
 
 export default class ChartViewer extends PureComponent {
-  static propTypes = {
-    worker: PropTypes.instanceOf(WorkerWrapper).isRequired,
-    filter: PropTypes.object
+  props: {
+    worker: IWorkerWrapper,
+    filter: object
   };
 
   state = {

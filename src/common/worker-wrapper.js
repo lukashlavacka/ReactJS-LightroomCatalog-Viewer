@@ -1,49 +1,68 @@
-const SQL = window.SQL; // sql.js seems not to be working when loaded using package or dynamic loading
+// @flow
 
-export default class AbstractWorkerWrapper {}
+import type {
+  RawData,
+  SqlMessageEventData,
+  SQLType,
+  SQLDatabase
+} from "./types";
 
-export class SyncWorkerWrapper extends AbstractWorkerWrapper {
-  open = buffer => {
-    this.db = new SQL.Database(buffer);
+const SQL = (window.SQL: SQLType); // sql.js seems not to be working when loaded using package or dynamic loading
+
+export interface IWorkerWrapper {
+  open(buffer: Uint8Array): Promise<void>,
+  exec(query: string): Promise<?RawData>
+}
+
+export class SyncWorkerWrapper implements IWorkerWrapper {
+  db: SQLDatabase;
+
+  open = (buffer: Uint8Array) => {
+    this.db = (SQL && SQL.Database && new SQL.Database(buffer)) || null;
     return Promise.resolve();
   };
 
-  exec = query => {
+  exec = (query: string) => {
     return Promise.resolve(this.db.exec(query));
   };
 }
 
-export class AsyncWorkerWrapper extends AbstractWorkerWrapper {
-  promises = {};
+export class AsyncWorkerWrapper implements IWorkerWrapper {
+  promises: {
+    [query_id: number]: {
+      query: string,
+      timestamp: Date,
+      resolve: (result?: RawData) => void
+    }
+  } = {};
   id = 0;
+  worker: Worker;
 
-  constructor(workerPath) {
-    super(workerPath);
-
+  constructor(workerPath: string) {
     this.worker = new Worker(workerPath);
 
-    this.worker.onmessage = event => {
-      const promiseObject = this.promises[event.data.id];
+    this.worker.onmessage = (event: MessageEvent) => {
+      const eventData = ((event.data: any): SqlMessageEventData);
+      const promiseObject = this.promises[eventData.id];
       window.console.log(
         `Last query "${promiseObject.query}" took ${new Date() -
           promiseObject.timestamp}ms`
       );
-      promiseObject.resolve(event.data.results || {});
-      delete this.promises[event.data.id];
+      promiseObject.resolve(eventData.results);
+      delete this.promises[eventData.id];
     };
   }
 
-  open = buffer => {
+  open = (buffer: Uint8Array) => {
     this.id = this.id + 1;
 
-    const promise = new Promise(
-      resolve =>
-        (this.promises[this.id] = {
-          resolve,
-          query: "Open DB",
-          timestamp: new Date()
-        })
-    );
+    const promise = new Promise((resolve: () => void) => {
+      this.promises[this.id] = {
+        resolve,
+        query: "Open DB",
+        timestamp: new Date()
+      };
+    });
 
     this.worker.postMessage({
       id: this.id,
@@ -54,16 +73,15 @@ export class AsyncWorkerWrapper extends AbstractWorkerWrapper {
     return promise;
   };
 
-  exec = query => {
+  exec = (query: string) => {
     this.id = this.id + 1;
-    const promise = new Promise(
-      resolve =>
-        (this.promises[this.id] = {
-          resolve,
-          query,
-          timestamp: new Date()
-        })
-    );
+    const promise = new Promise((resolve: (result?: RawData) => void) => {
+      this.promises[this.id] = {
+        resolve,
+        query,
+        timestamp: new Date()
+      };
+    });
 
     this.worker.postMessage({
       id: this.id,

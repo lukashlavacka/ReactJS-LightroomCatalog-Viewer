@@ -10,7 +10,7 @@ import ChartViewer from "./widgets/chart";
 import TableViewer from "./widgets/table";
 import MapViewer from "./widgets/map";
 import Recommendation from "./widgets/recommendation";
-import WorkerWrapper from "./common/worker-wrapper";
+import { IWorkerWrapper } from "./common/worker-wrapper";
 
 import "react-grid-layout/css/styles.css";
 import "./widgets.css";
@@ -18,8 +18,8 @@ import "./widgets.css";
 const ReactGridLayout = widthProvider(ReactGridLayoutWithoutProvider);
 
 export class WindowDimensions extends PureComponent {
-  static propTypes = {
-    handleUpdateDimensions: PropTypes.func.isRequired
+  props: {
+    handleUpdateDimensions: ({ width: number, height: number }) => void
   };
 
   constructor(props) {
@@ -49,13 +49,13 @@ export class WindowDimensions extends PureComponent {
 }
 
 export default class WidgetLayout extends Component {
-  static propTypes = {
-    getLocalStorage: PropTypes.func.isRequired,
-    saveLocalStorage: PropTypes.func.isRequired,
-    handleFilterChange: PropTypes.func.isRequired,
-    worker: PropTypes.instanceOf(WorkerWrapper).isRequired,
-    cols: PropTypes.number.isRequired,
-    isLocalFile: PropTypes.bool
+  props: {
+    getLocalStorage: () => object,
+    saveLocalStorage: (identifier: string, state: any) => void,
+    handleFilterChange: (identifier: string, state: any) => void,
+    worker: IWorkerWrapper,
+    cols: number,
+    isLocalFile: boolean
   };
 
   static defaultProps = {
@@ -68,13 +68,13 @@ export default class WidgetLayout extends Component {
     minH: 2
   };
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps: object, nextState: object) {
     return (
       !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState)
     );
   }
 
-  constructor(props) {
+  constructor(props: object) {
     super(props);
 
     const ls = this.props.getLocalStorage();

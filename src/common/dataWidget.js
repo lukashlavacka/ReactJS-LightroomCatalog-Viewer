@@ -1,66 +1,79 @@
+// @flow
 import React, { PureComponent } from "react";
-import PropTypes from "prop-types";
 import { LoadingWrapper } from "./shared";
-import WorkerWrapper from "./worker-wrapper";
+import { IWorkerWrapper } from "./worker-wrapper";
+
+import type { RawData } from "./types";
 
 export default class DataWidget extends PureComponent {
-	static propTypes = {
-		worker: PropTypes.instanceOf(WorkerWrapper).isRequired,
-		filter: PropTypes.object
-	};
+  props: {
+    worker: IWorkerWrapper,
+    filter: Object
+  };
 
-	state = {
-		loading: false,
-		data: []
-	};
+  state = {
+    loading: false,
+    data: []
+  };
 
-	componentDidMount() {
-		this.getData(this.props)
-			.then(this.transformDataPromise.bind(this, this.props))
-			.then(data => {
-				this.setState({
-					data,
-					loading: false
-				});
-			});
-	}
+  componentDidMount() {
+    this.getData(this.props)
+      .then(this.transformDataPromise.bind(this, this.props))
+      .then(data => {
+        this.setState({
+          data,
+          loading: false
+        });
+      });
+  }
 
-	componentWillReceiveProps(nextProps) {
-		this.getData(nextProps)
-			.then(this.transformDataPromise.bind(this, nextProps))
-			.then(data => {
-				this.setState({
-					data,
-					loading: false
-				});
-			});
-	}
+  componentWillReceiveProps(nextProps: typeof DataWidget.prototype.props) {
+    this.getData(nextProps)
+      .then(this.transformDataPromise.bind(this, nextProps))
+      .then(data => {
+        this.setState({
+          data,
+          loading: false
+        });
+      });
+  }
 
-	getData(properties) {
-		this.setState({ loading: true });
-		const query = this.getQuery(properties);
-		return properties.worker.exec(query);
-	}
+  getData(properties: typeof DataWidget.prototype.props): Promise<any> {
+    this.setState({ loading: true });
+    const query = this.getQuery(properties);
+    return properties.worker.exec(query);
+  }
 
-	transformData(properties, rawData, dataset) {
-		return dataset;
-	}
+  getQuery(properties: typeof DataWidget.prototype.props): string {
+    return "";
+  }
 
-	transformDataPromise(properties, rawData) {
-		const dataset = (rawData && rawData[0] && rawData[0].values) || [];
-		return Promise.resolve(
-			this.transformData(properties, rawData, dataset) || []
-		);
-	}
+  transformData(
+    properties: typeof DataWidget.prototype.props,
+    rawData: RawData,
+    dataset: Array<Array<any>>
+  ): Array<any> {
+    return dataset;
+  }
 
-	loadingWrapper(content) {
-		return (
-			<LoadingWrapper
-				loading={this.state.loading}
-				noData={!this.state.data.length}
-			>
-				{content}
-			</LoadingWrapper>
-		);
-	}
+  transformDataPromise(
+    properties: typeof DataWidget.prototype.props,
+    rawData: RawData
+  ): Promise<Array<any>> {
+    const dataset = (rawData && rawData.length && rawData[0].values) || [[]];
+    return Promise.resolve(
+      this.transformData(properties, rawData, dataset) || []
+    );
+  }
+
+  loadingWrapper(content: ?React$Element<any>): ?React$Element<any> {
+    return (
+      <LoadingWrapper
+        loading={this.state.loading}
+        noData={!this.state.data.length}
+      >
+        {content}
+      </LoadingWrapper>
+    );
+  }
 }

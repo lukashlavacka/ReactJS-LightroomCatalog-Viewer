@@ -7,8 +7,9 @@
             "label": "start",
             "type": "npm",
             "script": "start",
-            "isBackground": true,
-            "identifier": "start"
+            "isBackground": false,
+            "identifier": "start",
+            "path": "../package.json"
         },
         {
             "label": "build",
@@ -19,13 +20,15 @@
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "path": "../package.json"
         },
         {
             "label": "flow",
             "type": "npm",
             "script": "run flow",
-            "identifier": "flow"
-        },
+            "identifier": "flow",
+            "path": "../package.json"
+        }
     ]
 }
