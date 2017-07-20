@@ -1,0 +1,11 @@
+{
+  "id": "1500481494165",
+  "folders": ["file:///c:/Git/Lukas/ReactJS-LightroomCatalog-Viewer"],
+  "settings": {
+    "javascript.validate.enable": false,
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "prettier.parser": "flow",
+    "typescript.validate.enable": false
+  }
+}
