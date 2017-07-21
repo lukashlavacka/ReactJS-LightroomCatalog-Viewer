@@ -12,9 +12,9 @@
         "nprogress": "^0.2.0",
         "prop-types": "^15.5.10",
         "react": "^15.6.1",
-        "react-chartjs-2": "^2.5.1",
+        "react-chartjs-2": "^2.5.3",
         "react-checkbox-group": "^3.1.1",
-        "react-datepicker": "^0.48.0",
+        "react-datepicker": "^0.52.0",
         "react-dom": "^15.6.1",
         "react-draggable": "^2.2.6",
         "react-google-maps": "^7.2.0",
@@ -40,7 +40,5 @@
         "predeploy:file": "npm run build:file",
         "deploy:file": "gh-pages -d build-file -b static -s {lib/sql.js,static/**/*.js,static/**/*.css,static/media/*.*,favicon.ico,index.html}"
     },
-    "devDependencies": {
-        "flow-bin": "^0.50.0"
-    }
+    "devDependencies": {}
 }

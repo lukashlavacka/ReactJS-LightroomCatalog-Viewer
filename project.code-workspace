@@ -16,8 +16,7 @@
         "script": "start",
         "isBackground": false,
         "identifier": "start",
-        "path": "../package.json",
-        "problemMatcher": []
+        "path": "../package.json"
       },
       {
         "label": "build",
@@ -37,6 +36,12 @@
         "script": "run flow",
         "identifier": "flow",
         "path": "../package.json"
+      },
+      {
+        "type": "npm",
+        "script": "start",
+        "path": "c:\\Git\\Lukas\\ReactJS-LightroomCatalog-Viewer",
+        "problemMatcher": []
       }
     ]
   }

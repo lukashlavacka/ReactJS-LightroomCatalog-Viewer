@@ -67,12 +67,12 @@ export const NoDataWrapper = (props: {
 export class Radio extends PureComponent {
   props: {
     handleFieldChange: (
-      field: { field: String, name: String },
+      field: { field: string, name: string },
       value: string
     ) => void,
-    field: { field: String, name: String },
-    selectedField: String,
-    disabled: boolean
+    field: { field: string, name: string },
+    selectedField: string,
+    disabled?: boolean
   };
 
   handleFieldChange = (event: Event & { target: HTMLInputElement }) =>

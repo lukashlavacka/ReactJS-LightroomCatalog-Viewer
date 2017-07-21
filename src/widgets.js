@@ -1,5 +1,5 @@
-import React, { PureComponent, Component } from "react";
-import PropTypes from "prop-types";
+// @flow
+import React, { Component } from "react";
 import ReactGridLayoutWithoutProvider, {
   WidthProvider as widthProvider
 } from "react-grid-layout";
@@ -15,47 +15,41 @@ import { IWorkerWrapper } from "./common/worker-wrapper";
 import "react-grid-layout/css/styles.css";
 import "./widgets.css";
 
+type GridLayout = { x: number, y: number, w: number, h: number, minH: number };
+type Widget = {
+  key: string,
+  title: string,
+  filter: string | null,
+  disableLocal: boolean,
+  grid: GridLayout
+};
+
 const ReactGridLayout = widthProvider(ReactGridLayoutWithoutProvider);
-
-export class WindowDimensions extends PureComponent {
-  props: {
-    handleUpdateDimensions: ({ width: number, height: number }) => void
-  };
-
-  constructor(props) {
-    super(props);
-
-    this.handleUpdateDimensions();
-  }
-
-  componentDidMount() {
-    window.addEventListener("resize", this.handleUpdateDimensions);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.handleUpdateDimensions);
-  }
-
-  handleUpdateDimensions() {
-    this.props.handleUpdateDimensions({
-      width: document.body.clientWidth,
-      height: document.body.clientHeight
-    });
-  }
-
-  render() {
-    return <div />;
-  }
-}
 
 export default class WidgetLayout extends Component {
   props: {
-    getLocalStorage: () => object,
+    getLocalStorage: () => {
+      layout: Array<GridLayout>,
+      layouts: {},
+      prevLayout: {
+        [number]: GridLayout
+      }
+    },
     saveLocalStorage: (identifier: string, state: any) => void,
     handleFilterChange: (identifier: string, state: any) => void,
     worker: IWorkerWrapper,
     cols: number,
-    isLocalFile: boolean
+    isLocalFile: boolean,
+    filter: {}
+  };
+
+  state: {
+    layout: Array<GridLayout>,
+    layouts: {},
+    widgets: Array<Widget>,
+    prevLayout: {
+      [string]: GridLayout
+    }
   };
 
   static defaultProps = {
@@ -68,13 +62,16 @@ export default class WidgetLayout extends Component {
     minH: 2
   };
 
-  shouldComponentUpdate(nextProps: object, nextState: object) {
+  shouldComponentUpdate(
+    nextProps: typeof WidgetLayout.prototype.props,
+    nextState: typeof WidgetLayout.prototype.state
+  ): boolean {
     return (
       !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState)
     );
   }
 
-  constructor(props: object) {
+  constructor(props: typeof WidgetLayout.prototype.props) {
     super(props);
 
     const ls = this.props.getLocalStorage();
@@ -195,11 +192,11 @@ export default class WidgetLayout extends Component {
           grid: { x: 0, y: 25, w: 6, h: 6, minH: 2 }
         }
       ],
-      prevLayout: ls.prevLayout || {}
+      prevLayout: (ls.prevLayout: {}) || {}
     };
   }
 
-  onLayoutChange = (layout, layouts) => {
+  onLayoutChange = (layout: Array<GridLayout>, layouts: {}) => {
     this.setState({
       layout,
       layouts
@@ -208,8 +205,10 @@ export default class WidgetLayout extends Component {
     this.props.saveLocalStorage("layouts", layouts);
   };
 
-  getWidget = widget => {
-    const allWidgets = _.extend({}, FilterWidgets, {
+  getWidget = (widget: Widget) => {
+    const allWidgets: {
+      [string]: Class<React$Component<*, *, *>>
+    } = _.extend({}, FilterWidgets, {
       PhotoStats,
       ChartViewer,
       TableViewer,
@@ -241,12 +240,12 @@ export default class WidgetLayout extends Component {
     );
   };
 
-  handleMinifyWidget = widget => {
+  handleMinifyWidget = (widget: Widget) => {
     const layout = this.state.layout;
     const prevLayout = this.state.prevLayout;
 
-    const newLayout = _.cloneDeep(layout);
-    const newPrevLayout = _.cloneDeep(prevLayout);
+    const newLayout = (_.cloneDeep(layout): typeof layout);
+    const newPrevLayout = (_.cloneDeep(prevLayout): typeof prevLayout);
 
     const widgetLayoutIndex = _.findIndex(newLayout, { i: widget.key });
     const oldWidgetLayout = layout[widgetLayoutIndex];
@@ -262,7 +261,7 @@ export default class WidgetLayout extends Component {
       newPrevLayout[widget.key] = _.clone(oldWidgetLayout);
     } else {
       newWidgetLayout = prevLayout[widget.key] || {};
-      newPrevLayout[widget.key] = null;
+      delete newPrevLayout[widget.key];
     }
 
     newLayout.splice(widgetLayoutIndex, 1, newWidgetLayout);
@@ -313,9 +312,14 @@ export default class WidgetLayout extends Component {
   }
 }
 
-const WidgetWrapper = props => {
-  const handleMinifyWidget = e =>
-    props.handleMinifyWidget(props.widget, e.target.value);
+const WidgetWrapper = (props: {
+  minified: boolean,
+  children: ?React$Element<any>,
+  handleMinifyWidget: Widget => void,
+  title: string,
+  widget: Widget
+}) => {
+  const handleMinifyWidget = _ => props.handleMinifyWidget(props.widget);
   const body = props.minified
     ? null
     : <div className="card-block card-body-react-grid">
@@ -339,11 +343,4 @@ const WidgetWrapper = props => {
       {body}
     </div>
   );
-};
-WidgetWrapper.propTypes = {
-  minified: PropTypes.bool.isRequired,
-  children: PropTypes.node,
-  handleMinifyWidget: PropTypes.func.isRequired,
-  title: PropTypes.string.isRequired,
-  widget: PropTypes.object.isRequired
 };

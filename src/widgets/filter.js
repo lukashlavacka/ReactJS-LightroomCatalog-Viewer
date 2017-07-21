@@ -15,22 +15,22 @@ import "react-datepicker/dist/react-datepicker.css";
 import "./filter.css";
 
 class FilterFactory extends PureComponent {
-  static propTypes = {
-    handleFilterChange: PropTypes.func,
-    transformName: PropTypes.func,
-    worker: PropTypes.any,
-    type: PropTypes.string,
-    table: PropTypes.string,
-    options: PropTypes.array,
-    valueProp: PropTypes.string,
-    nameProp: PropTypes.string,
-    dataFilter: PropTypes.string
+  props: {
+    handleFilterChange: (type: string, value: ?Array<any>) => void,
+    transformName: (type: string, value: ?Array<any>) => string,
+    worker: IWorkerWrapper,
+    type: string,
+    table: string,
+    options: Array<{ value: number, name: string }>,
+    valueProp: string,
+    nameProp: string,
+    dataFilter: string
   };
 
   state = {
     loading: false,
     loaded: false,
-    options: [],
+    options: ([]: Array<{ value: number, name: string }>),
     selected: []
   };
 
@@ -47,39 +47,40 @@ class FilterFactory extends PureComponent {
     }
   }
 
-  getData(properties) {
+  getData(props: typeof FilterFactory.prototype.props): Promise<RawData> {
     this.setState({ loading: true });
     let s = squel
       .select()
-      .field(properties.valueProp || "id_local", "value")
-      .field(properties.nameProp || "value", "name")
-      .from(properties.table);
+      .field(props.valueProp || "id_local", "value")
+      .field(props.nameProp || "value", "name")
+      .from(props.table);
 
-    if (properties.dataFilter) {
-      s = s.where(properties.dataFilter);
+    if (props.dataFilter) {
+      s = s.where(props.dataFilter);
     }
 
     const query = s.toString();
 
-    return properties.worker.exec(query);
+    return props.worker.exec(query);
   }
 
-  transformData = (properties, rawData) => {
-    const dataset = (rawData && rawData[0]) || { values: [] };
-    return Promise.resolve(
-      dataset.values.map(t => ({ value: t[0], name: t[1] }))
-    );
+  transformData = (
+    properties: typeof FilterFactory.prototype.props,
+    rawData: RawData
+  ) => {
+    const dataset = (rawData && rawData[0] && rawData[0].values) || [];
+    return Promise.resolve(dataset.map(t => ({ value: t[0], name: t[1] })));
   };
 
-  handleChange = newSelected => {
+  handleChange = (newSelected: Array<string>): void => {
     this.setState({
       selected: newSelected
     });
     this.props.handleFilterChange(this.props.type, newSelected);
   };
 
-  transformName(name) {
-    if (_.isFunction(this.props.transformName)) {
+  transformName(name: string): string {
+    if (this.props.transformName) {
       return this.props.transformName(name);
     }
     return name;
@@ -166,16 +167,18 @@ class FilterRangeFactory extends PureComponent {
       this.getData(this.props)
         .then((rawData: RawData) => this.transformData(this.props, rawData))
         .then(data => {
-          const minMax = data;
-          this.setState({
-            loading: false,
-            dbMin: minMax.min,
-            dbMax: minMax.max,
-            dbMinVal: minMax.min,
-            dbMaxVal: minMax.max,
-            uiMin: this.transformFromDBValue(this.props, minMax.min, true),
-            uiMax: this.transformFromDBValue(this.props, minMax.max)
-          });
+          if (data && data.min && data.max) {
+            const minMax = data;
+            this.setState({
+              loading: false,
+              dbMin: minMax.min,
+              dbMax: minMax.max,
+              dbMinVal: minMax.min,
+              dbMaxVal: minMax.max,
+              uiMin: this.transformFromDBValue(this.props, minMax.min, true),
+              uiMax: this.transformFromDBValue(this.props, minMax.max)
+            });
+          }
         });
     }
   }
@@ -225,15 +228,15 @@ class FilterRangeFactory extends PureComponent {
   transformData = (
     props: typeof FilterRangeFactory.prototype.props,
     rawData: RawData
-  ): Promise<any> => {
+  ): Promise<{ min: number, max: number } | null> => {
     const values =
       rawData && rawData[0] && rawData[0].values && rawData[0].values[0];
 
-    let minMax = {};
+    let minMax = null;
     if (values) {
       minMax = {
-        min: values[0],
-        max: values[1]
+        min: parseFloat(values[0]),
+        max: parseFloat(values[1])
       };
     }
     return Promise.resolve(minMax);
@@ -256,32 +259,20 @@ class FilterRangeFactory extends PureComponent {
   };
 
   transformFromDBValue = (props, value, isMin): number => {
-    if (
-      props.transformFromDBValue &&
-      _.isFunction(props.transformFromDBValue)
-    ) {
+    if (props.transformFromDBValue) {
       return props.transformFromDBValue(this.props, value, isMin);
     }
-    if (
-      this.props.transformFromDBValue &&
-      _.isFunction(this.props.transformFromDBValue)
-    ) {
+    if (this.props.transformFromDBValue) {
       return this.props.transformFromDBValue(this.props, value, isMin);
     }
     return value;
   };
 
   transformFromUIValue = (props, value: number): number => {
-    if (
-      props.transformFromUIValue &&
-      _.isFunction(props.transformFromUIValue)
-    ) {
+    if (props.transformFromUIValue) {
       return props.transformFromUIValue(this.props, value);
     }
-    if (
-      this.props.transformFromUIValue &&
-      _.isFunction(this.props.transformFromUIValue)
-    ) {
+    if (this.props.transformFromUIValue) {
       return this.props.transformFromUIValue(this.props, value);
     }
     return parseFloat(value);
@@ -291,13 +282,10 @@ class FilterRangeFactory extends PureComponent {
     props: typeof FilterRangeFactory.prototype.props,
     value: number
   ): string => {
-    if (props.transformToUIName && _.isFunction(props.transformToUIName)) {
+    if (props.transformToUIName) {
       return props.transformToUIName(props, value);
     }
-    if (
-      this.props.transformToUIName &&
-      _.isFunction(this.props.transformToUIName)
-    ) {
+    if (this.props.transformToUIName) {
       return this.props.transformToUIName(props, value);
     }
     return value.toString();
@@ -447,9 +435,12 @@ export class FilterAperture extends PureComponent {
       Continuous: []
     }
   };
-
-  static propTypes = {
-    types: PropTypes.object
+  props: {
+    types: {
+      [type: string]: Array<number>
+    },
+    handleFilterChange: (type: string, value: ?Array<any>) => void,
+    worker: IWorkerWrapper
   };
 
   state = {
@@ -459,7 +450,7 @@ export class FilterAperture extends PureComponent {
   transformFromUIValue = (
     props: typeof FilterRangeFactory.prototype.props,
     value: number
-  ) => {
+  ): number => {
     if (this.state.type === "Continuous") {
       return value / 10;
     }
@@ -470,7 +461,7 @@ export class FilterAperture extends PureComponent {
   transformFromDBValue = (
     props: typeof FilterRangeFactory.prototype.props,
     value: number,
-    isFirst: boolean
+    isFirst?: boolean
   ) => {
     if (this.state.type === "Continuous") {
       return isFirst ? Math.floor(value * 10) : Math.ceil(value * 10);
@@ -552,9 +543,6 @@ FilterFlag.defaultProps = {
 
 export const FilterColor = (props: typeof FilterFactory.prototype.props) =>
   <FilterFactory type="color" {...props} />;
-FilterColor.propTypes = {
-  options: PropTypes.array
-};
 FilterColor.defaultProps = {
   options: [
     { value: "", name: "None" },
