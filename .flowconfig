@@ -1,6 +1,6 @@
 [ignore]
-.*/node_modules/*
 .*/build*
+.*/node_modules/sql.js/*
 
 [include]
 

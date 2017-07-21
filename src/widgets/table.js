@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import _ from "lodash";
 import { BootstrapRow, Radio } from "../common/shared";
 import * as Utilities from "../common/utilities";
-import type { IWorkerWrapper } from "../common/worker-wrapper";
 import DataWidget from "../common/dataWidget";
 import "./table.css";
 

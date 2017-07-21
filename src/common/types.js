@@ -6,7 +6,7 @@ type RawData = Array<{
 
 type SqlMessageEventData = {
   id: number,
-  results?: RawData
+  results: RawData
 };
 
 type SQLType = {

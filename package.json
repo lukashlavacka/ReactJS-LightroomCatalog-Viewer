@@ -39,5 +39,8 @@
         "serve": "serve -s build-local",
         "predeploy:file": "npm run build:file",
         "deploy:file": "gh-pages -d build-file -b static -s {lib/sql.js,static/**/*.js,static/**/*.css,static/media/*.*,favicon.ico,index.html}"
+    },
+    "devDependencies": {
+        "flow-bin": "^0.50.0"
     }
 }

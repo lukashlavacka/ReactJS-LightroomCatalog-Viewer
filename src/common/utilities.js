@@ -1,7 +1,14 @@
+// @flow
 import squel from "squel";
+import Moment from "moment";
 
-export function getFilterExpression(type, filter) {
-  let property;
+export function getFilterExpression(
+  type: string,
+  filter: Array<number | Moment>
+): squel.expression {
+  let expression = squel.expr();
+
+  let property: string;
   let isString = false;
   switch (type) {
     case "camera":
@@ -42,18 +49,15 @@ export function getFilterExpression(type, filter) {
       property = "exif.shutterSpeed";
       break;
     default:
-      break;
+      return expression;
   }
 
-  let expression = squel.expr();
-  const filterValues = filter || [];
-
-  if (!filterValues.length) {
+  if (!filter || !filter.length) {
     return expression;
   }
 
-  const minFilter = Math.min(filterValues[0], filterValues[1]);
-  const maxFilter = Math.max(filterValues[0], filterValues[1]);
+  const minFilter = Math.min(filter[0], filter[1]);
+  const maxFilter = Math.max(filter[0], filter[1]);
 
   switch (type) {
     case "camera":
@@ -61,13 +65,13 @@ export function getFilterExpression(type, filter) {
     case "flag":
     case "face":
     case "color":
-      for (let i = 0; i < filterValues.length; i++) {
-        if (filterValues[i] === null) {
+      for (let i = 0; i < filter.length; i++) {
+        if (filter[i] === null) {
           expression = expression.or(`${property} IS NULL`);
         } else if (isString === true) {
-          expression = expression.or(`${property} = "${filterValues[i]}"`);
+          expression = expression.or(`${property} = "${filter[i]}"`);
         } else {
-          expression = expression.or(`${property} = ${filterValues[i]}`);
+          expression = expression.or(`${property} = ${filter[i]}`);
         }
       }
       break;
@@ -75,7 +79,7 @@ export function getFilterExpression(type, filter) {
     case "aperture":
     case "iso":
     case "shutter":
-      if (filterValues[0] === filterValues[1]) {
+      if (filter[0] === filter[1]) {
         expression = expression.and(`${property} = ${minFilter}`);
       } else {
         expression = expression
@@ -84,24 +88,25 @@ export function getFilterExpression(type, filter) {
       }
       break;
     case "date":
+      const dateFilter: [Moment, Moment] = [filter[0], filter[1]];
       expression = expression
-        .and(`${property} >= "${filterValues[0].format("YYYY-MM-DD")}"`)
+        .and(`${property} >= "${dateFilter[0].format("YYYY-MM-DD")}"`)
         .and(
-          `${property} < "${filterValues[1]
+          `${property} < "${dateFilter[1]
             .clone()
             .add(1, "days")
             .format("YYYY-MM-DD")}"`
         );
       break;
     case "rating":
-      if (filterValues[0] === 0) {
+      if (filter[0] === 0) {
         expression = expression.and(`${property} IS NULL`);
-        if (filterValues[1] !== 0) {
+        if (filter[1] !== 0) {
           expression = expression
             .or(`${property} >= 0`)
             .and(`${property} <= ${maxFilter}`);
         }
-      } else if (filterValues[0] === filterValues[1]) {
+      } else if (filter[0] === filter[1]) {
         expression = expression.and(`${property} = ${minFilter}`);
       } else {
         expression = expression
@@ -110,9 +115,7 @@ export function getFilterExpression(type, filter) {
       }
       break;
     case "map":
-      expression = expression.and(
-        `${property} IN (${filterValues.join(", ")})`
-      );
+      expression = expression.and(`${property} IN (${filter.join(", ")})`);
       break;
     default:
       break;
@@ -121,7 +124,7 @@ export function getFilterExpression(type, filter) {
   return expression;
 }
 
-export function formatDbValue(key, val) {
+export function formatDbValue(key: String, val: number) {
   if (!val) return "n/a";
   switch (key) {
     case "shutter":

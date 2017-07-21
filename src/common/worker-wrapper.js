@@ -11,7 +11,7 @@ const SQL = (window.SQL: SQLType); // sql.js seems not to be working when loaded
 
 export interface IWorkerWrapper {
   open(buffer: Uint8Array): Promise<void>,
-  exec(query: string): Promise<?RawData>
+  exec(query: string): Promise<RawData>
 }
 
 export class SyncWorkerWrapper implements IWorkerWrapper {
@@ -32,7 +32,7 @@ export class AsyncWorkerWrapper implements IWorkerWrapper {
     [query_id: number]: {
       query: string,
       timestamp: Date,
-      resolve: (result?: RawData) => void
+      resolve: (result: RawData) => void
     }
   } = {};
   id = 0;
@@ -75,7 +75,7 @@ export class AsyncWorkerWrapper implements IWorkerWrapper {
 
   exec = (query: string) => {
     this.id = this.id + 1;
-    const promise = new Promise((resolve: (result?: RawData) => void) => {
+    const promise = new Promise((resolve: (result: RawData) => void) => {
       this.promises[this.id] = {
         resolve,
         query,

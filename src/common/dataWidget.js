@@ -18,7 +18,9 @@ export default class DataWidget extends PureComponent {
 
   componentDidMount() {
     this.getData(this.props)
-      .then(this.transformDataPromise.bind(this, this.props))
+      .then((rawData: RawData) =>
+        this.transformDataPromise(this.props, rawData)
+      )
       .then(data => {
         this.setState({
           data,
@@ -29,7 +31,9 @@ export default class DataWidget extends PureComponent {
 
   componentWillReceiveProps(nextProps: typeof DataWidget.prototype.props) {
     this.getData(nextProps)
-      .then(this.transformDataPromise.bind(this, nextProps))
+      .then((rawData: RawData) =>
+        this.transformDataPromise(this.props, rawData)
+      )
       .then(data => {
         this.setState({
           data,
@@ -60,7 +64,7 @@ export default class DataWidget extends PureComponent {
     properties: typeof DataWidget.prototype.props,
     rawData: RawData
   ): Promise<Array<any>> {
-    const dataset = (rawData && rawData.length && rawData[0].values) || [[]];
+    const dataset = (rawData && rawData.length && rawData[0].values) || [];
     return Promise.resolve(
       this.transformData(properties, rawData, dataset) || []
     );

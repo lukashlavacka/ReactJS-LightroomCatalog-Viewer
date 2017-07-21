@@ -75,7 +75,7 @@ class Chart extends DataWidget {
   componentWillReceiveProps(nextProps) {
     const noRedraw = this.props.field.field === nextProps.field.field;
     this.getData(nextProps)
-      .then(this.transformDataPromise.bind(this, nextProps))
+      .then(rawData => this.transformDataPromise(nextProps, rawData))
       .then(data => {
         const oldValues =
           this.state.data &&

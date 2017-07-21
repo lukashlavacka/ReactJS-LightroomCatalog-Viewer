@@ -1,3 +1,4 @@
+// @flow
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import { Checkbox, CheckboxGroup } from "react-checkbox-group";
@@ -8,6 +9,7 @@ import squel from "squel";
 import _ from "lodash";
 import { LoadingWrapper } from "../common/shared";
 import type { IWorkerWrapper } from "../common/worker-wrapper";
+import type { RawData } from "../common/types";
 
 import "react-datepicker/dist/react-datepicker.css";
 import "./filter.css";
@@ -35,7 +37,7 @@ class FilterFactory extends PureComponent {
   componentDidMount() {
     if (this.props.table) {
       this.getData(this.props)
-        .then(this.transformData.bind(this, this.props))
+        .then((rawData: RawData) => this.transformData(this.props, rawData))
         .then(data => {
           this.setState({
             options: data,
@@ -109,41 +111,60 @@ class FilterFactory extends PureComponent {
 }
 
 class FilterRangeFactory extends PureComponent {
-  static propTypes = {
-    field: PropTypes.string,
-    type: PropTypes.string,
-    handleFilterChange: PropTypes.func,
-    transformFromDBValue: PropTypes.func,
-    transformToUIName: PropTypes.func,
-    transformFromUIValue: PropTypes.func,
-    invert: PropTypes.bool,
-    minMax: PropTypes.object,
-    aditionalType: PropTypes.string
+  props: {
+    field: string,
+    type: string,
+    handleFilterChange: (type: string, value: ?Array<any>) => void,
+    transformFromDBValue?: (
+      props: typeof FilterRangeFactory.prototype.props,
+      value: number,
+      isMin?: boolean
+    ) => number,
+    transformFromUIValue?: (
+      props: typeof FilterRangeFactory.prototype.props,
+      value: number
+    ) => number,
+    transformToUIName?: (
+      props: typeof FilterRangeFactory.prototype.props,
+      value: number
+    ) => string,
+    invert?: boolean,
+    minMax?: { min: number, max: number },
+    aditionalType?: string,
+    worker: IWorkerWrapper
   };
 
-  constructor(props) {
+  constructor(props: typeof FilterRangeFactory.prototype.props) {
     super(props);
 
-    if (props.minMax) {
+    const minMax = props.minMax;
+    if (minMax) {
       this.state = {
-        dbMin: props.minMax.min,
-        dbMax: props.minMax.max,
-        dbMinVal: props.minMax.min,
-        dbMaxVal: props.minMax.max,
-        uiMin: this.transformFromDBValue(props, props.minMax.min, true),
-        uiMax: this.transformFromDBValue(props, props.minMax.max)
+        loading: false,
+        dbMin: minMax.min,
+        dbMax: minMax.max,
+        dbMinVal: minMax.min,
+        dbMaxVal: minMax.max,
+        uiMin: this.transformFromDBValue(props, minMax.min, true),
+        uiMax: this.transformFromDBValue(props, minMax.max)
       };
     }
   }
 
   state = {
-    loading: false
+    loading: true,
+    dbMin: 0,
+    dbMax: 1,
+    dbMinVal: 0,
+    dbMaxVal: 1,
+    uiMin: 0,
+    uiMax: 1
   };
 
   componentDidMount() {
     if (this.props.field) {
       this.getData(this.props)
-        .then(this.transformData.bind(this, this.props))
+        .then((rawData: RawData) => this.transformData(this.props, rawData))
         .then(data => {
           const minMax = data;
           this.setState({
@@ -159,20 +180,22 @@ class FilterRangeFactory extends PureComponent {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(
+    nextProps: typeof FilterRangeFactory.prototype.props
+  ) {
     if (this.props.aditionalType !== nextProps.aditionalType) {
       const uiMin = this.transformFromDBValue(
         nextProps,
-        Math.max(this.state.dbMinVal, this.state.dbMin),
+        Math.min(this.state.dbMinVal, this.state.dbMin),
         true
       );
       const uiMax = this.transformFromDBValue(
         nextProps,
-        Math.min(this.state.dbMaxVal, this.state.dbMax)
+        Math.max(this.state.dbMaxVal, this.state.dbMax)
       );
 
-      const dbMinVal = this.transformFromUIValue(nextProps, uiMin);
-      const dbMaxVal = this.transformFromUIValue(nextProps, uiMax);
+      const dbMinVal = Math.max(this.state.dbMinVal, this.state.dbMin);
+      const dbMaxVal = Math.min(this.state.dbMaxVal, this.state.dbMax);
 
       this.setState({
         uiMin,
@@ -184,7 +207,9 @@ class FilterRangeFactory extends PureComponent {
     }
   }
 
-  getData = props => {
+  getData = (
+    props: typeof FilterRangeFactory.prototype.props
+  ): Promise<RawData> => {
     this.setState({ loading: true });
     const s = squel
       .select()
@@ -197,7 +222,10 @@ class FilterRangeFactory extends PureComponent {
     return props.worker.exec(query);
   };
 
-  transformData = (props, rawData) => {
+  transformData = (
+    props: typeof FilterRangeFactory.prototype.props,
+    rawData: RawData
+  ): Promise<any> => {
     const values =
       rawData && rawData[0] && rawData[0].values && rawData[0].values[0];
 
@@ -211,7 +239,7 @@ class FilterRangeFactory extends PureComponent {
     return Promise.resolve(minMax);
   };
 
-  handleChange = value => {
+  handleChange = (value: Array<number>) => {
     const dbVal = value.map(v => this.transformFromUIValue(this.props, v));
     this.setState({
       dbMinVal: dbVal[0],
@@ -221,40 +249,58 @@ class FilterRangeFactory extends PureComponent {
     });
 
     if (dbVal[0] <= this.state.dbMin && dbVal[1] >= this.state.dbMax) {
-      this.props.handleFilterChange(this.props.type);
+      this.props.handleFilterChange(this.props.type, null);
     } else {
       this.props.handleFilterChange(this.props.type, dbVal);
     }
   };
 
-  transformFromDBValue = (props, value, isMin) => {
-    if (_.isFunction(props.transformFromDBValue)) {
+  transformFromDBValue = (props, value, isMin): number => {
+    if (
+      props.transformFromDBValue &&
+      _.isFunction(props.transformFromDBValue)
+    ) {
       return props.transformFromDBValue(this.props, value, isMin);
     }
-    if (_.isFunction(this.props.transformFromDBValue)) {
+    if (
+      this.props.transformFromDBValue &&
+      _.isFunction(this.props.transformFromDBValue)
+    ) {
       return this.props.transformFromDBValue(this.props, value, isMin);
     }
     return value;
   };
 
-  transformFromUIValue = (props, value) => {
-    if (_.isFunction(props.transformFromUIValue)) {
+  transformFromUIValue = (props, value: number): number => {
+    if (
+      props.transformFromUIValue &&
+      _.isFunction(props.transformFromUIValue)
+    ) {
       return props.transformFromUIValue(this.props, value);
     }
-    if (_.isFunction(this.props.transformFromUIValue)) {
+    if (
+      this.props.transformFromUIValue &&
+      _.isFunction(this.props.transformFromUIValue)
+    ) {
       return this.props.transformFromUIValue(this.props, value);
     }
-    return value;
+    return parseFloat(value);
   };
 
-  transformToUIName = (props, value) => {
-    if (_.isFunction(props.transformToUIName)) {
+  transformToUIName = (
+    props: typeof FilterRangeFactory.prototype.props,
+    value: number
+  ): string => {
+    if (props.transformToUIName && _.isFunction(props.transformToUIName)) {
       return props.transformToUIName(props, value);
     }
-    if (_.isFunction(this.props.transformFromUIValue)) {
-      return this.props.transformFromUIValue(props, value);
+    if (
+      this.props.transformToUIName &&
+      _.isFunction(this.props.transformToUIName)
+    ) {
+      return this.props.transformToUIName(props, value);
     }
-    return value;
+    return value.toString();
   };
 
   render() {
@@ -294,34 +340,44 @@ class FilterRangeFactory extends PureComponent {
   }
 }
 
-export const FilterCamera = props =>
+export const FilterCamera = (props: typeof FilterFactory.prototype.props) =>
   <FilterFactory type="camera" table="AgInternedExifCameraModel" {...props} />;
 
-export const FilterLens = props =>
+export const FilterLens = (props: typeof FilterFactory.prototype.props) =>
   <FilterFactory type="lens" table="AgInternedExifLens" {...props} />;
 
-export const FilterFocalLength = props =>
+export const FilterFocalLength = (
+  props: typeof FilterRangeFactory.prototype.props
+) =>
   <FilterRangeFactory
     type="focalLength"
     field="focalLength"
     transformFromDBValue={FilterFocalLength.transformFromDBValue}
     {...props}
   />;
-FilterFocalLength.transformFromDBValue = (props, value, isFirst) =>
-  isFirst ? Math.floor(value) : Math.ceil(value);
+FilterFocalLength.transformFromDBValue = (
+  props: typeof FilterRangeFactory.prototype.props,
+  value: number,
+  isFirst?: boolean
+): number => (isFirst ? Math.floor(value) : Math.ceil(value));
 
-export const FilterISORating = props =>
+export const FilterISORating = (
+  props: typeof FilterRangeFactory.prototype.props
+) =>
   <FilterRangeFactory
     type="iso"
     field="isoSpeedRating"
     transformFromDBValue={FilterISORating.transformFromDBValue}
     transformFromUIValue={FilterISORating.transformFromUIValue}
+    transformToUIName={FilterISORating.transformToUIName}
     {...props}
   />;
 FilterISORating.transformFromUIValue = (props, value) =>
   Math.pow(2, value) * 100;
 FilterISORating.transformFromDBValue = (props, value) =>
   Math.floor(Math.log(value / 100) / Math.log(2));
+FilterISORating.transformToUIName = (props, value) =>
+  (Math.pow(2, value) * 100).toString();
 
 export class FilterAperture extends PureComponent {
   static defaultProps = {
@@ -400,7 +456,10 @@ export class FilterAperture extends PureComponent {
     type: "Continuous"
   };
 
-  transformFromUIValue = (props, value) => {
+  transformFromUIValue = (
+    props: typeof FilterRangeFactory.prototype.props,
+    value: number
+  ) => {
     if (this.state.type === "Continuous") {
       return value / 10;
     }
@@ -408,7 +467,11 @@ export class FilterAperture extends PureComponent {
     return this.props.types[this.state.type][value];
   };
 
-  transformFromDBValue = (props, value, isFirst) => {
+  transformFromDBValue = (
+    props: typeof FilterRangeFactory.prototype.props,
+    value: number,
+    isFirst: boolean
+  ) => {
     if (this.state.type === "Continuous") {
       return isFirst ? Math.floor(value * 10) : Math.ceil(value * 10);
     }
@@ -419,7 +482,7 @@ export class FilterAperture extends PureComponent {
     );
   };
 
-  handleChange = event => {
+  handleChange = (event: Event & { target: HTMLInputElement }) => {
     this.setState({
       type: event.target.value
     });
@@ -456,13 +519,15 @@ export class FilterAperture extends PureComponent {
   }
 }
 
-export const FilterShutter = props =>
+export const FilterShutter = (
+  props: typeof FilterRangeFactory.prototype.props
+) =>
   <FilterRangeFactory
     type="shutter"
     field="shutterSpeed"
     transformToUIName={FilterShutter.transformToUIName}
     transformFromDBValue={FilterShutter.transformFromDBValue}
-    invert
+    invert={true}
     {...props}
   />;
 FilterShutter.transformFromDBValue = (props, value, isFirst) =>
@@ -472,7 +537,8 @@ FilterShutter.transformToUIName = (props, value) =>
     ? `1/${Math.round(Math.pow(2, value))}s`
     : `${Math.round(10 / Math.pow(2, value)) / 10}s`;
 
-export const FilterFlag = props => <FilterFactory type="flag" {...props} />;
+export const FilterFlag = (props: typeof FilterFactory.prototype.props) =>
+  <FilterFactory type="flag" {...props} />;
 FilterFlag.propTypes = {
   options: PropTypes.array
 };
@@ -484,7 +550,8 @@ FilterFlag.defaultProps = {
   ]
 };
 
-export const FilterColor = props => <FilterFactory type="color" {...props} />;
+export const FilterColor = (props: typeof FilterFactory.prototype.props) =>
+  <FilterFactory type="color" {...props} />;
 FilterColor.propTypes = {
   options: PropTypes.array
 };
@@ -499,16 +566,12 @@ FilterColor.defaultProps = {
   ]
 };
 
-export const FilterRating = props =>
+export const FilterRating = (props: typeof FilterRangeFactory.defaultProps) =>
   <FilterRangeFactory
     type="rating"
     transformToUIName={FilterRating.transformToUIName}
     {...props}
   />;
-FilterRating.propTypes = {
-  options: PropTypes.array,
-  minMax: PropTypes.object
-};
 FilterRating.defaultProps = {
   options: [
     { value: 0, name: "unrated" },
@@ -526,7 +589,7 @@ FilterRating.defaultProps = {
 FilterRating.transformToUIName = (props, value) =>
   _.find(props.options, { value }).name;
 
-export const FilterFace = props =>
+export const FilterFace = (props: typeof FilterFactory.prototype.props) =>
   <FilterFactory
     type="face"
     table="AgLibraryKeyword"
@@ -536,8 +599,9 @@ export const FilterFace = props =>
   />;
 
 export class FilterDate extends PureComponent {
-  static propTypes = {
-    handleFilterChange: PropTypes.func.isRequired
+  props: {
+    handleFilterChange: (type: string, value: ?Array<any>) => void,
+    worker: IWorkerWrapper
   };
 
   state = {
@@ -550,7 +614,7 @@ export class FilterDate extends PureComponent {
 
   componentDidMount() {
     this.getData(this.props)
-      .then(this.transformData.bind(this, this.props))
+      .then((rawData: RawData) => this.transformData(this.props, rawData))
       .then(data => {
         let momentMin = moment(data.min);
         let momentMax = moment(data.max);
@@ -573,7 +637,7 @@ export class FilterDate extends PureComponent {
       });
   }
 
-  getData(properties) {
+  getData(properties: typeof FilterDate.prototype.props): Promise<RawData> {
     this.setState({ loading: true });
     const s = squel
       .select()
@@ -585,7 +649,10 @@ export class FilterDate extends PureComponent {
     return properties.worker.exec(query);
   }
 
-  transformData = (properties, rawData) => {
+  transformData = (
+    properties: typeof FilterDate.prototype.props,
+    rawData: RawData
+  ) => {
     const values =
       rawData && rawData[0] && rawData[0].values && rawData[0].values[0];
 
@@ -599,12 +666,12 @@ export class FilterDate extends PureComponent {
     return Promise.resolve(minMax);
   };
 
-  handleStartChange = startDate => {
+  handleStartChange = (startDate: moment) => {
     this.setState({ startDate });
     this.props.handleFilterChange("date", [startDate, this.state.endDate]);
   };
 
-  handleEndChange = endDate => {
+  handleEndChange = (endDate: moment) => {
     this.setState({ endDate });
     this.props.handleFilterChange("date", [this.state.startDate, endDate]);
   };

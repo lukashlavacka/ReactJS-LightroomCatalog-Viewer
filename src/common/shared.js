@@ -1,10 +1,17 @@
+// @flow
 import React, { PureComponent } from "react";
-import PropTypes from "prop-types";
 import _ from "lodash";
 
 import "./shared.css";
 
-export const BootstrapRow = props => {
+export const BootstrapRow = (props: {
+  width: number,
+  xs: number,
+  sm: number,
+  md: number,
+  lg: number,
+  children: ?React$Element<any>
+}): ?React$Element<any> => {
   const width = props.width || 12;
   const widths = {
     xs: props.xs || width,
@@ -37,44 +44,38 @@ export const BootstrapRow = props => {
     </div>
   );
 };
-BootstrapRow.propTypes = {
-  width: PropTypes.number,
-  xs: PropTypes.number,
-  sm: PropTypes.number,
-  md: PropTypes.number,
-  lg: PropTypes.number,
-  children: PropTypes.node
-};
 
-export const LoadingWrapper = props =>
+export const LoadingWrapper = (props: {
+  loading: boolean
+}): ?React$Element<any> =>
   <div
     className={`loading-wrapper ${props.loading === true ? " loading" : ""}`}
   >
     <NoDataWrapper {...props} />
   </div>;
-LoadingWrapper.propTypes = {
-  loading: PropTypes.bool
-};
 
-export const NoDataWrapper = props =>
+export const NoDataWrapper = (props: {
+  noData?: boolean,
+  children?: ?React$Element<any>
+}): ?React$Element<any> =>
   props.noData === true && props.loading === false
     ? <em>No Data</em>
     : <div style={{ height: "100%" }}>
         {props.children}
       </div>;
-NoDataWrapper.propTypes = {
-  noData: PropTypes.bool,
-  children: PropTypes.node
-};
 
 export class Radio extends PureComponent {
-  static propTypes = {
-    handleFieldChange: PropTypes.func.isRequired,
-    field: PropTypes.object.isRequired,
-    selectedField: PropTypes.string
+  props: {
+    handleFieldChange: (
+      field: { field: String, name: String },
+      value: string
+    ) => void,
+    field: { field: String, name: String },
+    selectedField: String,
+    disabled: boolean
   };
 
-  handleFieldChange = event =>
+  handleFieldChange = (event: Event & { target: HTMLInputElement }) =>
     this.props.handleFieldChange(this.props.field, event.target.value);
 
   render() {
