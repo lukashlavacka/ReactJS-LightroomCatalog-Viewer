@@ -586,6 +586,15 @@ export const FilterFace = (props: typeof FilterFactory.prototype.props) =>
     {...props}
   />;
 
+export const FilterTag = (props: typeof FilterFactory.prototype.props) =>
+  <FilterFactory
+    type="tag"
+    table="AgLibraryKeyword"
+    dataFilter="name IS NOT NULL AND keywordType IS NULL"
+    nameProp="Name"
+    {...props}
+  />;
+
 export class FilterDate extends PureComponent {
   props: {
     handleFilterChange: (type: string, value: ?Array<any>) => void,

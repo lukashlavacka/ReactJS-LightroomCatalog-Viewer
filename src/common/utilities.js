@@ -39,6 +39,9 @@ export function getFilterExpression(
     case "face":
       property = "keywordImage.tag";
       break;
+    case "tag":
+      property = "keywordImage.tag";
+      break;
     case "map":
       property = "images.id_local";
       break;
@@ -64,6 +67,7 @@ export function getFilterExpression(
     case "lens":
     case "flag":
     case "face":
+    case "tag":
     case "color":
       for (let i = 0; i < filter.length; i++) {
         if (filter[i] === null) {
@@ -124,7 +128,7 @@ export function getFilterExpression(
   return expression;
 }
 
-export function formatDbValue(key: String, val: number) {
+export function formatDbValue(key: string, val: number) {
   if (!val) return "n/a";
   switch (key) {
     case "shutter":
@@ -176,7 +180,7 @@ export function dbSquelFrom() {
     .left_join(
       "AgLibraryKeyword",
       "tag",
-      "keywordImage.tag = tag.id_local AND (face.keywordType IS NULL)"
+      "keywordImage.tag = tag.id_local AND tag.keywordType IS NULL AND tag.name IS NOT NULL"
     );
 }
 

@@ -84,28 +84,28 @@ export default class WidgetLayout extends Component {
           title: "Camera",
           filter: "camera",
           disableLocal: false,
-          grid: { x: 0, y: 1, w: 3, h: 2, minH: 2 }
+          grid: { x: 0, y: 0, w: 3, h: 2, minH: 2 }
         },
         {
           key: "FilterLens",
           title: "Lens",
           filter: "lens",
           disableLocal: false,
-          grid: { x: 6, y: 1, w: 3, h: 2, minH: 2 }
+          grid: { x: 6, y: 0, w: 3, h: 2, minH: 2 }
         },
         {
           key: "FilterFlag",
           title: "Flag",
           filter: "flag",
           disableLocal: false,
-          grid: { x: 0, y: 3, w: 3, h: 2, minH: 2 }
+          grid: { x: 0, y: 2, w: 3, h: 2, minH: 2 }
         },
         {
           key: "FilterFace",
           title: "Face",
           filter: "face",
           disableLocal: false,
-          grid: { x: 6, y: 4, w: 3, h: 2, minH: 2 }
+          grid: { x: 6, y: 2, w: 3, h: 2, minH: 2 }
         },
         {
           key: "FilterColor",
@@ -115,9 +115,9 @@ export default class WidgetLayout extends Component {
           grid: { x: 0, y: 4, w: 3, h: 2, minH: 2 }
         },
         {
-          key: "FilterFocalLength",
-          title: "Focal Length",
-          filter: "focalLength",
+          key: "FilterTag",
+          title: "Keyword",
+          filter: "tag",
           disableLocal: false,
           grid: { x: 6, y: 4, w: 3, h: 2, minH: 2 }
         },
@@ -126,70 +126,77 @@ export default class WidgetLayout extends Component {
           title: "ISO",
           filter: "iso",
           disableLocal: false,
-          grid: { x: 0, y: 7, w: 3, h: 2, minH: 2 }
+          grid: { x: 0, y: 6, w: 3, h: 2, minH: 2 }
+        },
+        {
+          key: "FilterFocalLength",
+          title: "Focal Length",
+          filter: "focalLength",
+          disableLocal: false,
+          grid: { x: 6, y: 6, w: 3, h: 2, minH: 2 }
         },
         {
           key: "FilterAperture",
           title: "Aperture",
           filter: "aperture",
           disableLocal: false,
-          grid: { x: 6, y: 7, w: 3, h: 2, minH: 2 }
+          grid: { x: 6, y: 8, w: 3, h: 2, minH: 2 }
         },
         {
           key: "FilterRating",
           title: "Rating",
           filter: "rating",
           disableLocal: false,
-          grid: { x: 6, y: 9, w: 3, h: 2, minH: 2 }
+          grid: { x: 6, y: 10, w: 3, h: 2, minH: 2 }
         },
         {
           key: "ChartViewer",
           title: "Chart",
           filter: null,
           disableLocal: false,
-          grid: { x: 0, y: 9, w: 3, h: 6, minH: 2 }
+          grid: { x: 0, y: 8, w: 3, h: 8, minH: 2 }
         },
         {
           key: "FilterShutter",
           title: "Shutter Speed",
           filter: "shuter",
           disableLocal: false,
-          grid: { x: 6, y: 9, w: 3, h: 2, minH: 2 }
+          grid: { x: 6, y: 10, w: 3, h: 2, minH: 2 }
         },
         {
           key: "FilterDate",
           title: "Date",
           filter: "date",
           disableLocal: false,
-          grid: { x: 6, y: 11, w: 3, h: 2, minH: 2 }
+          grid: { x: 6, y: 12, w: 3, h: 2, minH: 2 }
         },
         {
           key: "PhotoStats",
           title: "Most Popular",
           filter: null,
           disableLocal: false,
-          grid: { x: 0, y: 13, w: 6, h: 3, minH: 2 }
+          grid: { x: 0, y: 14, w: 6, h: 3, minH: 2 }
         },
         {
           key: "TableViewer",
           title: "Table",
           filter: null,
           disableLocal: false,
-          grid: { x: 0, y: 16, w: 6, h: 6, minH: 2 }
+          grid: { x: 0, y: 17, w: 6, h: 6, minH: 2 }
         },
         {
           key: "Recommendation",
           title: "Recommendations",
           filter: null,
           disableLocal: false,
-          grid: { x: 0, y: 22, w: 6, h: 3, minH: 2 }
+          grid: { x: 0, y: 23, w: 6, h: 3, minH: 2 }
         },
         {
           key: "MapViewer",
           title: "Map",
           filter: null,
           disableLocal: true,
-          grid: { x: 0, y: 25, w: 6, h: 6, minH: 2 }
+          grid: { x: 0, y: 26, w: 6, h: 6, minH: 2 }
         }
       ],
       prevLayout: (ls.prevLayout: {}) || {}
