@@ -190,12 +190,12 @@ export default class App extends PureComponent {
     }
   }
 
-  handleFileChange = file => {
+  onFileChange = file => {
     this.setState({
       dbReady: false
     });
     this.handleProgress("start");
-    this.handleStatusChange("Loading...");
+    this.onStatusChange("Loading...");
     const now = new Date();
     const sqlReader = new FileReader();
     sqlReader.onload = () => {
@@ -207,8 +207,8 @@ export default class App extends PureComponent {
     sqlReader.readAsArrayBuffer(file);
   };
 
-  handleLoadDefaultFile = () => {
-    this.handleStatusChange("Requesting catalog");
+  onLoadDefaultFile = () => {
+    this.onStatusChange("Requesting catalog");
     this.handleProgress("start");
     const now = new Date();
     const xhr = new XMLHttpRequest();
@@ -228,7 +228,7 @@ export default class App extends PureComponent {
     const Uints = new Uint8Array(data);
     this.state.worker.open(Uints).then(() => {
       this.handleProgress("end");
-      this.handleStatusChange(
+      this.onStatusChange(
         `Loaded in ${new Date() - now} miliseconds.`,
         "success"
       );
@@ -238,7 +238,7 @@ export default class App extends PureComponent {
     });
   }
 
-  handleStatusChange = status => {
+  onStatusChange = status => {
     window.console.log(status);
     return;
   };
@@ -296,9 +296,9 @@ export default class App extends PureComponent {
             Drop anywhere on the page a Lightroom catalog file or select a file
           </p>
           <FileInput
-            handleFileChange={this.handleFileChange}
-            handleStatusChange={this.handleStatusChange}
-            handleLoadDefaultFile={this.handleLoadDefaultFile}
+            handleFileChange={this.onFileChange}
+            handleStatusChange={this.onStatusChange}
+            handleLoadDefaultFile={this.onLoadDefaultFile}
             isLocalFile={this.props.isLocalFile}
             accept=".lrcat"
           />
@@ -307,8 +307,8 @@ export default class App extends PureComponent {
     }
     return (
       <FileDropWrapper
-        handleFileChange={this.handleFileChange}
-        handleStatusChange={this.handleStatusChange}
+        handleFileChange={this.onFileChange}
+        handleStatusChange={this.onStatusChange}
       >
         <div className="container">
           <div className="page-header">
