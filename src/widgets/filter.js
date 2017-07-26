@@ -24,7 +24,8 @@ class FilterFactory extends PureComponent {
     options: Array<{ value: number, name: string }>,
     valueProp: string,
     nameProp: string,
-    dataFilter: string
+    dataFilter: string,
+    disabled: boolean
   };
 
   state = {
@@ -44,6 +45,19 @@ class FilterFactory extends PureComponent {
             loading: false
           });
         });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.disabled !== prevProps.disabled) {
+      if (this.props.disabled) {
+        this.props.handleFilterChange(this.props.type, undefined);
+      } else {
+        const newSelectedFilter = this.state.selected.length
+          ? this.state.selected
+          : undefined;
+        this.props.handleFilterChange(this.props.type, newSelectedFilter);
+      }
     }
   }
 
@@ -73,10 +87,11 @@ class FilterFactory extends PureComponent {
   };
 
   handleChange = (newSelected: Array<string>): void => {
+    const newSelectedFilter = newSelected.length ? newSelected : undefined;
     this.setState({
       selected: newSelected
     });
-    this.props.handleFilterChange(this.props.type, newSelected);
+    this.props.handleFilterChange(this.props.type, newSelectedFilter);
   };
 
   transformName(name: string): string {
@@ -88,7 +103,10 @@ class FilterFactory extends PureComponent {
 
   render() {
     return (
-      <LoadingWrapper loading={this.state.loading}>
+      <LoadingWrapper
+        loading={this.state.loading}
+        disabled={this.props.disabled}
+      >
         <form>
           <CheckboxGroup
             name={this.props.type}
@@ -132,7 +150,8 @@ class FilterRangeFactory extends PureComponent {
     invert?: boolean,
     minMax?: { min: number, max: number },
     aditionalType?: string,
-    worker: IWorkerWrapper
+    worker: IWorkerWrapper,
+    disabled: boolean
   };
 
   constructor(props: typeof FilterRangeFactory.prototype.props) {
@@ -206,7 +225,18 @@ class FilterRangeFactory extends PureComponent {
         dbMinVal,
         dbMaxVal
       });
+
       this.props.handleFilterChange(nextProps.type, [dbMinVal, dbMaxVal]);
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.disabled !== prevProps.disabled) {
+      if (this.props.disabled) {
+        this.props.handleFilterChange(this.props.type, undefined);
+      } else {
+        this.handleChange([this.state.uiMin, this.state.uiMax]);
+      }
     }
   }
 
@@ -244,6 +274,7 @@ class FilterRangeFactory extends PureComponent {
 
   handleChange = (value: Array<number>) => {
     const dbVal = value.map(v => this.transformFromUIValue(this.props, v));
+    const newSelectedFilter = dbVal.length ? dbVal : undefined;
     this.setState({
       dbMinVal: dbVal[0],
       dbMaxVal: dbVal[1],
@@ -252,9 +283,9 @@ class FilterRangeFactory extends PureComponent {
     });
 
     if (dbVal[0] <= this.state.dbMin && dbVal[1] >= this.state.dbMax) {
-      this.props.handleFilterChange(this.props.type, null);
+      this.props.handleFilterChange(this.props.type, undefined);
     } else {
-      this.props.handleFilterChange(this.props.type, dbVal);
+      this.props.handleFilterChange(this.props.type, newSelectedFilter);
     }
   };
 
@@ -293,7 +324,7 @@ class FilterRangeFactory extends PureComponent {
 
   render() {
     if (typeof this.state.dbMin === "undefined" || this.state.loading) {
-      return <LoadingWrapper loading />;
+      return <LoadingWrapper loading disabled={this.props.disabled} />;
     }
     if (typeof this.state.dbMin === "undefined") {
       return null;
@@ -306,7 +337,10 @@ class FilterRangeFactory extends PureComponent {
       );
     }
     return (
-      <LoadingWrapper loading={this.state.loading}>
+      <LoadingWrapper
+        loading={this.state.loading}
+        disabled={this.props.disabled}
+      >
         <ReactSlider
           value={[this.state.uiMin, this.state.uiMax]}
           min={this.transformFromDBValue(this.props, this.state.dbMin, true)}
@@ -440,7 +474,8 @@ export class FilterAperture extends PureComponent {
       [type: string]: Array<number>
     },
     handleFilterChange: (type: string, value: ?Array<any>) => void,
-    worker: IWorkerWrapper
+    worker: IWorkerWrapper,
+    disabled: boolean
   };
 
   state = {
@@ -473,6 +508,16 @@ export class FilterAperture extends PureComponent {
     );
   };
 
+  transformToUIName = (
+    props: typeof FilterRangeFactory.prototype.props,
+    value: number
+  ) => {
+    if (this.state.type === "Continuous") {
+      return `f/${value / 10}`;
+    }
+    return `f/${this.props.types[this.state.type][value]}`;
+  };
+
   handleChange = (event: Event & { target: HTMLInputElement }) => {
     this.setState({
       type: event.target.value
@@ -487,6 +532,7 @@ export class FilterAperture extends PureComponent {
           field="aperture"
           transformFromDBValue={this.transformFromDBValue}
           transformFromUIValue={this.transformFromUIValue}
+          transformToUIName={this.transformToUIName}
           aditionalType={this.state.type}
           {...this.props}
         />
@@ -598,7 +644,8 @@ export const FilterTag = (props: typeof FilterFactory.prototype.props) =>
 export class FilterDate extends PureComponent {
   props: {
     handleFilterChange: (type: string, value: ?Array<any>) => void,
-    worker: IWorkerWrapper
+    worker: IWorkerWrapper,
+    disabled: boolean
   };
 
   state = {
@@ -680,7 +727,10 @@ export class FilterDate extends PureComponent {
     };
 
     return (
-      <LoadingWrapper loading={this.state.loading}>
+      <LoadingWrapper
+        loading={this.state.loading}
+        disabled={this.props.disabled}
+      >
         <div style={style}>
           <span>From</span>
           <DatePicker

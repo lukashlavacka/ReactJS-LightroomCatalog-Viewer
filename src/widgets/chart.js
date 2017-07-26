@@ -26,13 +26,7 @@ export default class ChartViewer extends PureComponent {
   render() {
     let chart;
     if (this.state.field) {
-      chart = (
-        <Chart
-          worker={this.props.worker}
-          filter={this.props.filter}
-          field={this.state.field}
-        />
-      );
+      chart = <Chart field={this.state.field} {...this.props} />;
     }
     return (
       <div>
@@ -73,6 +67,12 @@ class Chart extends DataWidget {
   };
 
   componentWillReceiveProps(nextProps) {
+    if (
+      nextProps.disabled ||
+      !this.shouldComponentUpdate(nextProps, this.state)
+    )
+      return;
+
     const noRedraw = this.props.field.field === nextProps.field.field;
     this.getData(nextProps)
       .then(rawData => this.transformDataPromise(nextProps, rawData))

@@ -11,6 +11,7 @@ import TableViewer from "./widgets/table";
 import MapViewer from "./widgets/map";
 import Recommendation from "./widgets/recommendation";
 import { IWorkerWrapper } from "./common/worker-wrapper";
+import { DisabledWrapper } from "./common/shared";
 
 import "react-grid-layout/css/styles.css";
 import "./widgets.css";
@@ -21,7 +22,8 @@ type Widget = {
   title: string,
   filter: string | null,
   disableLocal: boolean,
-  grid: GridLayout
+  grid: GridLayout,
+  widgetClass: Class<React$Component<*, *, *>>
 };
 
 const ReactGridLayout = widthProvider(ReactGridLayoutWithoutProvider);
@@ -33,6 +35,9 @@ export default class WidgetLayout extends Component {
       layouts: {},
       prevLayout: {
         [number]: GridLayout
+      },
+      disabledWidgets: {
+        [widgetId: string]: boolean
       }
     },
     saveLocalStorage: (identifier: string, state: any) => void,
@@ -40,15 +45,18 @@ export default class WidgetLayout extends Component {
     worker: IWorkerWrapper,
     cols: number,
     isLocalFile: boolean,
+    widgets: Array<Widget>,
     filter: {}
   };
 
   state: {
     layout: Array<GridLayout>,
     layouts: {},
-    widgets: Array<Widget>,
     prevLayout: {
       [string]: GridLayout
+    },
+    disabledWidgets: {
+      [widgetId: string]: boolean
     }
   };
 
@@ -59,7 +67,145 @@ export default class WidgetLayout extends Component {
     rowHeight: 60,
     draggableHandle:
       ".react-grid-item-drag-handle, .react-grid-item-drag-handle h4",
-    minH: 2
+    minH: 2,
+    widgets: [
+      {
+        key: "FilterCamera",
+        title: "Camera",
+        filter: "camera",
+        disableLocal: false,
+        grid: { x: 0, y: 0, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterCamera
+      },
+      {
+        key: "FilterLens",
+        title: "Lens",
+        filter: "lens",
+        disableLocal: false,
+        grid: { x: 6, y: 0, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterLens
+      },
+      {
+        key: "FilterFlag",
+        title: "Flag",
+        filter: "flag",
+        disableLocal: false,
+        grid: { x: 0, y: 2, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterFlag
+      },
+      {
+        key: "FilterFace",
+        title: "Face",
+        filter: "face",
+        disableLocal: false,
+        grid: { x: 6, y: 2, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterFace
+      },
+      {
+        key: "FilterColor",
+        title: "Color",
+        filter: "color",
+        disableLocal: false,
+        grid: { x: 0, y: 4, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterColor
+      },
+      {
+        key: "FilterTag",
+        title: "Keyword",
+        filter: "tag",
+        disableLocal: false,
+        grid: { x: 6, y: 4, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterTag
+      },
+      {
+        key: "FilterISORating",
+        title: "ISO",
+        filter: "iso",
+        disableLocal: false,
+        grid: { x: 0, y: 6, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterISORating
+      },
+      {
+        key: "FilterFocalLength",
+        title: "Focal Length",
+        filter: "focalLength",
+        disableLocal: false,
+        grid: { x: 6, y: 6, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterFocalLength
+      },
+      {
+        key: "FilterAperture",
+        title: "Aperture",
+        filter: "aperture",
+        disableLocal: false,
+        grid: { x: 6, y: 8, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterAperture
+      },
+      {
+        key: "FilterRating",
+        title: "Rating",
+        filter: "rating",
+        disableLocal: false,
+        grid: { x: 6, y: 10, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterRating
+      },
+      {
+        key: "ChartViewer",
+        title: "Chart",
+        filter: null,
+        disableLocal: false,
+        grid: { x: 0, y: 8, w: 3, h: 8, minH: 2 },
+        widgetClass: ChartViewer
+      },
+      {
+        key: "FilterShutter",
+        title: "Shutter Speed",
+        filter: "shuter",
+        disableLocal: false,
+        grid: { x: 6, y: 10, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterShutter
+      },
+      {
+        key: "FilterDate",
+        title: "Date",
+        filter: "date",
+        disableLocal: false,
+        grid: { x: 6, y: 12, w: 3, h: 2, minH: 2 },
+        widgetClass: FilterWidgets.FilterDate
+      },
+      {
+        key: "PhotoStats",
+        title: "Most Popular",
+        filter: null,
+        disableLocal: false,
+        grid: { x: 0, y: 14, w: 6, h: 3, minH: 2 },
+        widgetClass: PhotoStats
+      },
+      {
+        key: "TableViewer",
+        title: "Table",
+        filter: null,
+        disableLocal: false,
+        grid: { x: 0, y: 17, w: 6, h: 6, minH: 2 },
+        widgetClass: TableViewer
+      },
+      {
+        key: "Recommendation",
+        title: "Recommendations",
+        filter: null,
+        disableLocal: false,
+        grid: { x: 0, y: 23, w: 6, h: 3, minH: 2 },
+        widgetClass: Recommendation
+      },
+      {
+        key: "MapViewer",
+        title: "Map",
+        filter: null,
+        disableLocal: true,
+        grid: { x: 0, y: 26, w: 6, h: 6, minH: 2 },
+        widgetClass: MapViewer
+      }
+    ]
   };
 
   shouldComponentUpdate(
@@ -78,128 +224,8 @@ export default class WidgetLayout extends Component {
     this.state = {
       layout: ls.layout || [],
       layouts: ls.layouts || {},
-      widgets: [
-        {
-          key: "FilterCamera",
-          title: "Camera",
-          filter: "camera",
-          disableLocal: false,
-          grid: { x: 0, y: 0, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "FilterLens",
-          title: "Lens",
-          filter: "lens",
-          disableLocal: false,
-          grid: { x: 6, y: 0, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "FilterFlag",
-          title: "Flag",
-          filter: "flag",
-          disableLocal: false,
-          grid: { x: 0, y: 2, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "FilterFace",
-          title: "Face",
-          filter: "face",
-          disableLocal: false,
-          grid: { x: 6, y: 2, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "FilterColor",
-          title: "Color",
-          filter: "color",
-          disableLocal: false,
-          grid: { x: 0, y: 4, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "FilterTag",
-          title: "Keyword",
-          filter: "tag",
-          disableLocal: false,
-          grid: { x: 6, y: 4, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "FilterISORating",
-          title: "ISO",
-          filter: "iso",
-          disableLocal: false,
-          grid: { x: 0, y: 6, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "FilterFocalLength",
-          title: "Focal Length",
-          filter: "focalLength",
-          disableLocal: false,
-          grid: { x: 6, y: 6, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "FilterAperture",
-          title: "Aperture",
-          filter: "aperture",
-          disableLocal: false,
-          grid: { x: 6, y: 8, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "FilterRating",
-          title: "Rating",
-          filter: "rating",
-          disableLocal: false,
-          grid: { x: 6, y: 10, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "ChartViewer",
-          title: "Chart",
-          filter: null,
-          disableLocal: false,
-          grid: { x: 0, y: 8, w: 3, h: 8, minH: 2 }
-        },
-        {
-          key: "FilterShutter",
-          title: "Shutter Speed",
-          filter: "shuter",
-          disableLocal: false,
-          grid: { x: 6, y: 10, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "FilterDate",
-          title: "Date",
-          filter: "date",
-          disableLocal: false,
-          grid: { x: 6, y: 12, w: 3, h: 2, minH: 2 }
-        },
-        {
-          key: "PhotoStats",
-          title: "Most Popular",
-          filter: null,
-          disableLocal: false,
-          grid: { x: 0, y: 14, w: 6, h: 3, minH: 2 }
-        },
-        {
-          key: "TableViewer",
-          title: "Table",
-          filter: null,
-          disableLocal: false,
-          grid: { x: 0, y: 17, w: 6, h: 6, minH: 2 }
-        },
-        {
-          key: "Recommendation",
-          title: "Recommendations",
-          filter: null,
-          disableLocal: false,
-          grid: { x: 0, y: 23, w: 6, h: 3, minH: 2 }
-        },
-        {
-          key: "MapViewer",
-          title: "Map",
-          filter: null,
-          disableLocal: true,
-          grid: { x: 0, y: 26, w: 6, h: 6, minH: 2 }
-        }
-      ],
-      prevLayout: (ls.prevLayout: {}) || {}
+      prevLayout: (ls.prevLayout: {}) || {},
+      disabledWidgets: ls.disabledWidgets || {}
     };
   }
 
@@ -213,24 +239,27 @@ export default class WidgetLayout extends Component {
   };
 
   getWidget = (widget: Widget) => {
-    const allWidgets: {
-      [string]: Class<React$Component<*, *, *>>
-    } = _.extend({}, FilterWidgets, {
-      PhotoStats,
-      ChartViewer,
-      TableViewer,
-      MapViewer,
-      Recommendation
-    });
+    const widgetClass = widget.widgetClass;
+    const disabled = !!this.state.disabledWidgets[widget.key];
 
     // if widget is filter we don't need to pass filter
-    let widgetElement;
+    let widgetProps;
     if (widget.filter) {
-      const { filter, ...passProps } = this.props;
-      widgetElement = React.createElement(allWidgets[widget.key], passProps);
+      widgetProps = {
+        handleFilterChange: this.props.handleFilterChange,
+        disabled: disabled,
+        worker: this.props.worker
+      };
     } else {
-      widgetElement = React.createElement(allWidgets[widget.key], this.props);
+      widgetProps = {
+        handleFilterChange: this.props.handleFilterChange,
+        disabled: disabled,
+        worker: this.props.worker,
+        filter: this.props.filter
+      };
     }
+    const widgetElement = React.createElement(widgetClass, widgetProps);
+
     const minified =
       (_.find(this.state.layout, { i: widget.key }) || {}).h === 1;
     return (
@@ -240,11 +269,20 @@ export default class WidgetLayout extends Component {
           minified={minified}
           widget={widget}
           handleMinifyWidget={this.handleMinifyWidget}
+          disabled={disabled}
+          handleDisableWidget={this.handleDisableWidget}
         >
           {widgetElement}
         </WidgetWrapper>
       </div>
     );
+  };
+
+  handleDisableWidget = (widget: Widget) => {
+    const disabledWidgets = Object.assign({}, this.state.disabledWidgets);
+    const nextDisabled = !disabledWidgets[widget.key];
+    disabledWidgets[widget.key] = nextDisabled;
+    this.setState({ disabledWidgets });
   };
 
   handleMinifyWidget = (widget: Widget) => {
@@ -310,7 +348,7 @@ export default class WidgetLayout extends Component {
           onDragStop={this.triggerResize}
           {...this.props}
         >
-          {this.state.widgets
+          {this.props.widgets
             .filter(w => !this.props.isLocalFile || !w.disableLocal)
             .map(this.getWidget)}
         </ReactGridLayout>
@@ -323,10 +361,13 @@ const WidgetWrapper = (props: {
   minified: boolean,
   children: ?React$Element<any>,
   handleMinifyWidget: Widget => void,
+  handleDisableWidget: Widget => void,
   title: string,
-  widget: Widget
+  widget: Widget,
+  disabled: boolean
 }) => {
   const handleMinifyWidget = _ => props.handleMinifyWidget(props.widget);
+  const handleDisableWidget = _ => props.handleDisableWidget(props.widget);
   const body = props.minified
     ? null
     : <div className="card-block card-body-react-grid">
@@ -341,13 +382,24 @@ const WidgetWrapper = (props: {
           className="btn btn-link btn-lg float-right card-btn-minify"
           onClick={handleMinifyWidget}
         >
-          <i className={`fa fa-lg fa-${glyphiconClass}`} aria-hidden="true" />
+          <i className={`fa fa-${glyphiconClass}`} aria-hidden="true" />
         </button>
+        <label className="custom-control custom-checkbox float-right">
+          <input
+            type="checkbox"
+            className="custom-control-input"
+            checked={!props.disabled}
+            onChange={handleDisableWidget}
+          />
+          <span className="custom-control-indicator" />
+        </label>
         <h4>
           {props.title}
         </h4>
       </div>
-      {body}
+      <DisabledWrapper disabled={props.disabled}>
+        {body}
+      </DisabledWrapper>
     </div>
   );
 };

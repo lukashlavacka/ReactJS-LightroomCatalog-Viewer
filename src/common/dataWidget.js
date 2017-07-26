@@ -1,14 +1,16 @@
 // @flow
-import React, { PureComponent } from "react";
+import React, { Component } from "react";
+import _ from "lodash";
 import { LoadingWrapper } from "./shared";
 import { IWorkerWrapper } from "./worker-wrapper";
 
 import type { RawData } from "./types";
 
-export default class DataWidget extends PureComponent {
+export default class DataWidget extends Component {
   props: {
     worker: IWorkerWrapper,
-    filter: Object
+    filter: Object,
+    disabled: boolean
   };
 
   state = {
@@ -17,6 +19,7 @@ export default class DataWidget extends PureComponent {
   };
 
   componentDidMount() {
+    if (this.props.disabled) return;
     this.getData(this.props)
       .then((rawData: RawData) =>
         this.transformDataPromise(this.props, rawData)
@@ -30,6 +33,11 @@ export default class DataWidget extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps: typeof DataWidget.prototype.props) {
+    if (
+      nextProps.disabled ||
+      !this.shouldComponentUpdate(nextProps, this.state)
+    )
+      return;
     this.getData(nextProps)
       .then((rawData: RawData) =>
         this.transformDataPromise(this.props, rawData)
@@ -40,6 +48,15 @@ export default class DataWidget extends PureComponent {
           loading: false
         });
       });
+  }
+
+  shouldComponentUpdate(
+    nextProps: typeof DataWidget.prototype.props,
+    nextState: typeof DataWidget.prototype.state
+  ): boolean {
+    return (
+      !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState)
+    );
   }
 
   getData(properties: typeof DataWidget.prototype.props): Promise<any> {
@@ -75,6 +92,7 @@ export default class DataWidget extends PureComponent {
       <LoadingWrapper
         loading={this.state.loading}
         noData={!this.state.data.length}
+        disabled={this.props.disabled}
       >
         {content}
       </LoadingWrapper>

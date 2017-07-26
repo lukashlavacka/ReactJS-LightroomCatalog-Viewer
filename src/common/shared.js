@@ -45,12 +45,21 @@ export const BootstrapRow = (props: {
   );
 };
 
+export const DisabledWrapper = (props: {
+  disabled: boolean,
+  children?: ?React$Element<any>
+}): ?React$Element<any> =>
+  <div
+    className={`disabled-wrapper ${props.disabled === true ? "disabled" : ""}`}
+  >
+    <div className="disabled-wrapper-overlay" />
+    {props.children}
+  </div>;
+
 export const LoadingWrapper = (props: {
   loading: boolean
 }): ?React$Element<any> =>
-  <div
-    className={`loading-wrapper ${props.loading === true ? " loading" : ""}`}
-  >
+  <div className={`loading-wrapper ${props.loading === true ? "loading" : ""}`}>
     <NoDataWrapper {...props} />
   </div>;
 

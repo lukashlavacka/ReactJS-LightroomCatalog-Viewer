@@ -30,10 +30,9 @@ export default class TableViewer extends PureComponent {
     if (this.state.xField && this.state.yField) {
       table = (
         <Table
-          worker={this.props.worker}
-          filter={this.props.filter}
           xField={this.state.xField}
           yField={this.state.yField}
+          {...this.props}
         />
       );
     }
