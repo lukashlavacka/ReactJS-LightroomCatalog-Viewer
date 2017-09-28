@@ -29,6 +29,16 @@
             "script": "run flow",
             "identifier": "flow",
             "path": "../package.json"
+        },
+        {
+            "type": "npm",
+            "script": "build",
+            "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "start",
+            "problemMatcher": []
         }
     ]
 }

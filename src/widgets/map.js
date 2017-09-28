@@ -1,13 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 import {
+  withScriptjs,
   withGoogleMap,
   GoogleMap,
   Marker,
   OverlayView
 } from "react-google-maps";
-import withScriptjs from "react-google-maps/lib/async/withScriptjs";
-import MarkerClusterer from "react-google-maps/lib/addons/MarkerClusterer";
+import MarkerClusterer from "react-google-maps/lib/components/addons/MarkerClusterer";
 import _ from "lodash";
 import * as Utilities from "../common/utilities";
 import DataWidget from "../common/dataWidget";
