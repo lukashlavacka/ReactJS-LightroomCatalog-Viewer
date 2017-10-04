@@ -64,13 +64,19 @@
   "build": {
     "appId": "com.LukasHlavacka.LightroomCatalogViewer",
     "directories": {
-      "output": "build-electron",
-      "buildResources": "public"
+      "output": "build-electron"
     },
+    "asar": true,
+    "files": [
+      {
+        "from": "./build",
+        "to": "./"
+      }
+    ],
     "win": {
       "target": "NSIS",
       "icon": "build/favicon-512.ico"
     }
   },
-  "main": "src/electron-starter.js"
+  "main": "electron-starter.js"
 }

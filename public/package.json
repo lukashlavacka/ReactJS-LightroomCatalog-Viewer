@@ -1,0 +1,13 @@
+{
+  "name": "reactjs-lightroom_catalog-viewer",
+  "description":
+    "Viewer for Adobe Lightroom catalog file with various filters and data analytics",
+  "version": "0.2.0",
+  "private": true,
+  "author": {
+    "name": "Lukas Hlavacka",
+    "email": "lukas.hlavacka@gmail.com",
+    "url": "hlavacka.ca"
+  },
+  "main": "electron-starter.js"
+}
