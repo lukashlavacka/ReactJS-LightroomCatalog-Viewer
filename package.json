@@ -4,7 +4,7 @@
   "private": true,
   "homepage": "https://lukashlavacka.github.io/ReactJS-LightroomCatalog-Viewer",
   "dependencies": {
-    "bootstrap": "^4.0.0-beta",
+    "bootstrap-css-only": "^4.0.0-beta",
     "chart.js": "^2.7.0",
     "create-react-class": "^15.6.2",
     "font-awesome": "^4.7.0",
