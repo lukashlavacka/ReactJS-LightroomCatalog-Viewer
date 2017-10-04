@@ -9,6 +9,8 @@
 # production
 /build
 
+/build-electron/win-unpacked
+
 # misc
 .DS_Store
 .env.local

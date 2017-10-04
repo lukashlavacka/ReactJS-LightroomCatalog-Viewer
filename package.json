@@ -1,7 +1,14 @@
 {
   "name": "reactjs-lightroom_catalog-viewer",
+  "description":
+    "Viewer for Adobe Lightroom catalog file with various filters and data analytics",
   "version": "0.2.0",
   "private": true,
+  "author": {
+    "name": "Lukas Hlavacka",
+    "email": "lukas.hlavacka@gmail.com",
+    "url": "hlavacka.ca"
+  },
   "homepage": "https://lukashlavacka.github.io/ReactJS-LightroomCatalog-Viewer",
   "dependencies": {
     "bootstrap": "^4.0.0-beta",
@@ -27,10 +34,18 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build:file": "set PUBLIC_URL=.&& set REACT_APP_FILE=1 && set REACT_APP_SQL=sql&& react-scripts build && rm -fr build-file && mv build build-file",
-    "build:local": "set PUBLIC_URL=.&& react-scripts build && rm -fr build-local && mv build build-local",
-    "build:chrome": "set PUBLIC_URL=.&& set REACT_APP_CHROME=1&& react-scripts build && rm -fr build-chrome && mv build build-chrome",
-    "build:all": "npm run build:file && npm run build:local && npm run build:chrome && npm run build",
+    "build:file":
+      "set PUBLIC_URL=.&& set REACT_APP_FILE=1 && set REACT_APP_SQL=sql&& npm run build && rm -fr build-file && mv build build-file",
+    "build:local":
+      "set PUBLIC_URL=.&& npm run build && rm -fr build-local && mv build build-local",
+    "build:chrome":
+      "set PUBLIC_URL=.&& set REACT_APP_CHROME=1&& npm run build && rm -fr build-chrome && mv build build-chrome",
+    "build:electron-pack":
+      "set PUBLIC_URL=.&& set REACT_APP_FILE=1 && set REACT_APP_SQL=sql&& npm run build && build --dir",
+    "build:electron":
+      "set PUBLIC_URL=.&& set REACT_APP_FILE=1 && set REACT_APP_SQL=sql&& npm run build && build",
+    "build:all":
+      "npm run build:file && npm run build:local && npm run build:chrome && npm run build:electron && npm run build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
@@ -39,6 +54,23 @@
     "preserve": "npm run build:local",
     "serve": "serve -s build-local",
     "predeploy:file": "npm run build:file",
-    "deploy:file": "gh-pages -d build-file -b static -s {lib/sql.js,static/**/*.js,static/**/*.css,static/media/*.*,favicon.ico,index.html}"
-  }
+    "deploy:file":
+      "gh-pages -d build-file -b static -s {lib/sql.js,static/**/*.js,static/**/*.css,static/media/*.*,favicon.ico,index.html}"
+  },
+  "devDependencies": {
+    "electron": "^1.7.8",
+    "electron-builder": "^19.34.1"
+  },
+  "build": {
+    "appId": "com.LukasHlavacka.LightroomCatalogViewer",
+    "directories": {
+      "output": "build-electron",
+      "buildResources": "public"
+    },
+    "win": {
+      "target": "NSIS",
+      "icon": "build/favicon-512.ico"
+    }
+  },
+  "main": "src/electron-starter.js"
 }

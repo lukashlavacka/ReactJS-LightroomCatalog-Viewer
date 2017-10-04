@@ -3,7 +3,7 @@
   "name": "React Lightroom Catalog Viewer",
   "icons": {
     "16": "favicon.ico",
-    "64": "favicon.png"
+    "64": "favicon-64.png"
   },
   "version": "0.2",
   "manifest_version": 2,
