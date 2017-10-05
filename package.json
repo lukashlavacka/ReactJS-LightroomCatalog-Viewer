@@ -61,6 +61,9 @@
     "electron": "^1.7.8",
     "electron-builder": "^19.34.1"
   },
+  "optionalDependencies": {
+    "7zip-bin-mac": "^1.0.1"
+  },
   "build": {
     "appId": "com.LukasHlavacka.LightroomCatalogViewer",
     "directories": {
@@ -75,7 +78,12 @@
     ],
     "win": {
       "target": "NSIS",
-      "icon": "build/favicon-512.ico"
+      "icon": "favicon-512.ico"
+    },
+    "mac": {
+      "target": "default",
+      "category": "public.app-category.photography",
+      "icon": "favicon-512.icns"
     }
   },
   "main": "electron-starter.js"
